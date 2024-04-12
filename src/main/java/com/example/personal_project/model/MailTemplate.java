@@ -1,2 +1,5 @@
-package com.example.personal_project.model;public class MailTemplate {
+package com.example.personal_project.model;
+
+
+public class MailTemplate{
 }
