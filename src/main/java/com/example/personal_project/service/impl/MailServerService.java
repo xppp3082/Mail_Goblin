@@ -87,7 +87,8 @@ public class MailServerService {
                 final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
                 final MimeMessageHelper email;
                 email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                email.setTo("xppp3081@gmail.com");
+//                email.setTo("xppp3081@gmail.com");
+                email.setTo(audience.getEmail());
                 email.setSubject(emailCampaign.getCampaign().getSubject());
                 email.setFrom(new InternetAddress(mailFrom, mailFromName));
 

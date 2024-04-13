@@ -26,12 +26,6 @@ public class MailSendController {
         this.campaignService = campaignService;
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<?> testEndPoint(@RequestBody EmailCampaign emailCampaign){
-        log.info(DeliveryStatus.OPEN.name());
-        return new ResponseEntity<>(emailCampaign, HttpStatus.OK);
-    }
-
     @PostMapping("/campaign")
     public ResponseEntity<?> sendCampaign(@RequestBody Campaign campaign) throws MessagingException, UnsupportedEncodingException {
         campaignService.sendCampaign(campaign);

@@ -12,5 +12,7 @@ public interface AudienceService {
     void updateMailOpen(String audienceUUID);
     void updateMailClick(String audienceUUID,String companyUUID);
     void updateMailClick(String audienceUUID);
+    void updateMailCount(String audienceUUID);
+    Audience findAudienceByEmail(String email);
     List<Audience>getAllAudienceByCampaign(Campaign campaign);
 }

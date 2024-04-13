@@ -26,5 +26,6 @@ public class Audience {
     private Timestamp createTime;
     @JsonProperty("company_id")
     private Long companyId;
+    @Nullable
     private String tagName;
 }

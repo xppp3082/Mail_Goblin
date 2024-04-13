@@ -49,6 +49,16 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
+    public void updateMailCount(String audienceUUID) {
+        audienceRepo.updateUserMailCount(audienceUUID);
+    }
+
+    @Override
+    public Audience findAudienceByEmail(String email) {
+        return audienceRepo.finAudienceByEmail(email);
+    }
+
+    @Override
     public List<Audience> getAllAudienceByCampaign(Campaign campaign) {
         return audienceRepo.getAllAudienceByCampaign(campaign);
     }

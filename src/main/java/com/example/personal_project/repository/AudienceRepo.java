@@ -92,6 +92,7 @@ public class AudienceRepo {
         }
     }
 
+
     public void updateUserMailClick(String audienceUUID){
         String updateQuery = """
                 update audience set clickcount = clickcount +1 
@@ -101,6 +102,18 @@ public class AudienceRepo {
             jdbcTemplate.update(updateQuery,audienceUUID);
         }catch (Exception e){
             log.error("update user click count failed : "+e.getMessage());
+        }
+    }
+
+    public void updateUserMailCount(String audienceUUID){
+        String updateQuery = """
+                update audience set mailcount = mailcount +1 
+                where audience_uuid = ? ;
+                """;
+        try {
+            jdbcTemplate.update(updateQuery,audienceUUID);
+        }catch (Exception e){
+            log.error("update user mail count failed : "+e.getMessage());
         }
     }
 
@@ -120,6 +133,31 @@ public class AudienceRepo {
         return audiences;
     }
 
+    public Audience finAudienceByEmail(String email){
+        String sql = "SELECT * FROM audience WHERE email = ?";
+//        String sql = "SELECT id, name, email, birthday, audience_uuid, mailcount, opencount, clickcount, create_time FROM audience WHERE email = ?";
+        RowMapper<Audience>mapper = orginAudienceRowMapper();
+        return jdbcTemplate.queryForObject(sql,mapper,email);
+    }
+
+    public RowMapper<Audience> orginAudienceRowMapper(){
+        return new RowMapper<Audience>() {
+            @Override
+            public Audience mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Audience audience =new Audience();
+                audience.setId(rs.getLong("id"));
+                audience.setName(rs.getString("name"));
+                audience.setEmail(rs.getString("email"));
+                audience.setBirthday(rs.getString("birthday"));
+                audience.setAudienceUUID(rs.getString("audience_uuid"));
+                audience.setMailCount(rs.getInt("mailcount"));
+                audience.setOpenCount(rs.getInt("opencount"));
+                audience.setClickCount(rs.getInt("clickcount"));
+                audience.setCreateTime(rs.getTimestamp("create_time"));
+                return audience;
+            }
+        };
+    }
 
     public RowMapper<Audience> getAudienceRowMapper(){
         return new RowMapper<Audience>() {
