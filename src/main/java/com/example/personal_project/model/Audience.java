@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,4 +29,7 @@ public class Audience {
     private Long companyId;
     @Nullable
     private String tagName;
+    @Nullable
+    @JsonProperty("tags")
+    private List<Tag>tagList;
 }

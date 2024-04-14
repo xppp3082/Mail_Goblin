@@ -15,4 +15,7 @@ public interface AudienceService {
     void updateMailCount(String audienceUUID);
     Audience findAudienceByEmail(String email);
     List<Audience>getAllAudienceByCampaign(Campaign campaign);
+    Audience insertNewAudience(Audience audience);
+    void insertBatchTagAudience(Audience audience);
+    void deleteAudience(Audience audience);
 }

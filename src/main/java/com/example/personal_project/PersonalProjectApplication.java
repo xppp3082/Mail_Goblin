@@ -11,7 +11,8 @@ import java.util.Date;
 
 @Slf4j
 @EnableScheduling
-@SpringBootApplication(exclude = { ThymeleafAutoConfiguration.class })
+@SpringBootApplication
+//@SpringBootApplication(exclude = { ThymeleafAutoConfiguration.class })
 public class PersonalProjectApplication {
 
 	public static void main(String[] args) {
