@@ -3,21 +3,38 @@ package com.example.personal_project.service.impl;
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.EmailCampaign;
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.status.DeliveryStatus;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.annotations.info.License;
 import jakarta.mail.MessagingException;
+import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+
 
 @Service
 @Slf4j
@@ -65,7 +82,7 @@ public class MailServerService {
 
             ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
             email.addInline("springLogo", clr, PNG_MIME);
-            mailSender.send(mimeMessage);
+//            mailSender.send(mimeMessage);
             return "User created successfully";
         } catch (Exception e) {
             return "User created failed";
@@ -77,7 +94,6 @@ public class MailServerService {
         try {
             for(Audience audience: emailCampaign.getAudiences()){
                 String confirmationUrl = "https://traviss.beauty/index.html?category=all";
-//                String openTrackUrl = String.format("\"http://3.24.104.209/api/1.0/track/open?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244\"");
                 String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
                 String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all",audience.getAudienceUUID());
                 log.info(openTrackUrl);
@@ -111,4 +127,61 @@ public class MailServerService {
             return "User created failed";
         }
     }
+
+    public List<Mail> sendBatchMails2(EmailCampaign emailCampaign)
+            throws MessagingException, UnsupportedEncodingException {
+        List<Mail> mails = new ArrayList<>();
+        try {
+            for(Audience audience: emailCampaign.getAudiences()){
+                String confirmationUrl = "https://traviss.beauty/index.html?category=all";
+                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
+                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all",audience.getAudienceUUID());
+                log.info(openTrackUrl);
+                log.info(clickTrackUrl);
+                String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
+                String mailFromName = environment.getProperty("mail.from.name", "Identity");
+                final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+                final MimeMessageHelper email;
+                email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+//                email.setTo("xppp3081@gmail.com");
+                email.setTo(audience.getEmail());
+                email.setSubject(emailCampaign.getCampaign().getSubject());
+                email.setFrom(new InternetAddress(mailFrom, mailFromName));
+
+                final Context ctx = new Context(LocaleContextHolder.getLocale());
+                ctx.setVariable("email", audience.getEmail());
+                ctx.setVariable("name",audience.getName());
+                ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
+                ctx.setVariable("url", confirmationUrl);
+                ctx.setVariable("url2",clickTrackUrl);
+                ctx.setVariable("endpoint",openTrackUrl);
+                final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
+                email.setText(htmlContent, true);
+
+                ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
+                email.addInline("springLogo", clr, PNG_MIME);
+
+                Mail mail = new Mail();
+                mail.setCompanyID(emailCampaign.getCampaign().getId());
+                mail.setRecipientMail(audience.getEmail());
+                mail.setSubject(emailCampaign.getCampaign().getSubject());
+                mail.setSendDate(LocalDate.now());
+                mail.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+                mail.setCheckTimes(0);
+                try{
+                    mailSender.send(mimeMessage);
+                    mail.setStatus(DeliveryStatus.RECEIVE.name());
+                    mails.add(mail);
+                }catch (MailSendException e){
+                    log.warn("Error on sending email to :" + audience.getEmail());
+                    mail.setStatus(DeliveryStatus.PENDING.name());
+                    mails.add(mail);
+                }
+            }
+            return mails;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

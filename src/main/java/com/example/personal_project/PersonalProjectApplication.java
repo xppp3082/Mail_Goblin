@@ -1,5 +1,7 @@
 package com.example.personal_project;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +15,14 @@ import java.util.Date;
 @EnableScheduling
 @SpringBootApplication
 //@SpringBootApplication(exclude = { ThymeleafAutoConfiguration.class })
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Batch#23 Personal Project: Mail Goblin",
+				version = "1.0.0",
+				description = "This api document is for Appworks Batch#23 personal project of Travis.",
+				termsOfService = "runcodenow"
+		)
+)
 public class PersonalProjectApplication {
 
 	public static void main(String[] args) {
