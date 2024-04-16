@@ -69,7 +69,7 @@ public class CampaignServiceImpl implements CampaignService {
     //根據Campaign的時稱安排進行自動排程寄送
     //目前每天早上八點檢查一次所有的Campaign
     //EC2時區和台灣時區不同
-    @Scheduled(cron = "0 0 8 * * ?")
+//    @Scheduled(cron = "0 0 8 * * ?")
     public void sendScheduledCampaign(){
         //取得DB中所有的Campaign
         log.info("Scheduled campaigns start!!");
@@ -82,18 +82,6 @@ public class CampaignServiceImpl implements CampaignService {
                 log.info("今天有Campaign要發送喔!! " + campaign.toString());
                 List<Audience> audiences = audienceService.getAllAudienceByCampaign(campaign);
                 EmailCampaign emailCampaign = new EmailCampaign(campaign,audiences);
-//                List<Mail>mails = new ArrayList<>();
-//                for(Audience audience: emailCampaign.getAudiences()){
-//                    Mail mail = new Mail();
-//                    mail.setCompanyID(campaign.getId());
-//                    mail.setRecipientMail(audience.getEmail());
-//                    mail.setSubject(emailCampaign.getCampaign().getSubject());
-//                    mail.setStatus(DeliveryStatus.PENDING.name());
-//                    mail.setSendDate(LocalDate.now());
-//                    mail.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
-//                    mail.setCheckTimes(0);
-//                    mails.add(mail);
-//                }
                 try{
                     List<Mail> mails =  mailServerService.sendBatchMails2(emailCampaign);
                     mailService.insertBatch(mails);

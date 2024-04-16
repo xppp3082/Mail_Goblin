@@ -78,18 +78,27 @@
 			<version>2.0.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sqs</artifactId>
+			<version>1.12.632</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-aws-messaging -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-aws-messaging</artifactId>
+			<version>2.2.6.RELEASE</version>
+		</dependency>
+
+
+		<!--		================below dependency is currently not using-->
+
 <!--		springboot amqp for queue-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
-
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/com.konghq/unirest-java &ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>com.konghq</groupId>-->
-<!--			<artifactId>unirest-java</artifactId>-->
-<!--			<version>3.14.5</version>-->
-<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/com.konghq/unirest-java-core -->
 		<dependency>
