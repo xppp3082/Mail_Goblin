@@ -109,7 +109,6 @@ public class MailConsumer {
 //                String id = jsonNode.get("id").asText();
                     // Check if the necessary keys exist before extracting their values
                     if (jsonNode.has("id")) {
-                        // Convert JSON message to Campaign object
                         //String id = jsonNode.get("id").asText();
                         //log.info("ID: {}", id);
                         Campaign campaign = objectMapper.treeToValue(jsonNode, Campaign.class);

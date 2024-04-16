@@ -42,19 +42,14 @@ public class PersonalProjectApplication {
 		log.info(currentDate.toString());
 		LocalDate currentDateLocal = LocalDate.now();
 		log.info(currentDateLocal.toString());
-		PersonalProjectApplication app = context.getBean(PersonalProjectApplication.class);
-		app.mailConsumer.consumeCampaignLongPoll();
+//		PersonalProjectApplication app = context.getBean(PersonalProjectApplication.class);
+//		app.mailConsumer.consumeCampaignLongPoll();
 	}
 	@Bean
 	public ApplicationRunner runner(MailPublisher publisher) {
 		return args -> {
 			Thread.sleep(3000);
-//			for (int i = 0; i < 10; i++) {
-//				publisher.publishMessage(String.valueOf(i));
-//			}
 			publisher.publishCampaign();
 		};
 	}
-
-
 }
