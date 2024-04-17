@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>行銷設定</title>
+</head>
+<body>
+<h1>行銷設定</h1>
+<!--<form th:action="@{/marketing/configure}" method="post">-->
+<form th:action="@{/marketing/saveTemplate}" th:object="${mailTemplate}" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="marketingSubject">主題:</label>
+        <input type="text" id="marketingSubject" name="subject" th:field="*{subject}" th:required="required">
+    </div>
+    <br><br>
+    <div>
+        <label for="marketingContent">行銷內容:</label>
+        <textarea type="text" id="marketingContent" name="content" th:field="*{content}" th:required="required" th:rows="4"></textarea>
+    </div>
+    <br><br>
+    <div>
+        <label for="marketingUrl">行銷網址:</label>
+        <input type="text" id="marketingUrl" name="url" th:field="*{url}" th:required="required">
+    </div>
+    <br><br>
+    <div>
+        <p>上傳圖片</p>
+        <input type="file" value="上傳照片" name="file" th:required="false"><br><br>
+        <button type="submit">更新Email</button>
+    </div>
+</form>
+</body>
+</html>

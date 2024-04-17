@@ -31,7 +31,7 @@ public class MailPublisher {
         this.campaignService = campaignService;
     }
 
-//    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 0 8 * * ?")
     public void publishCampaign(){
         try {
             GetQueueUrlResult queueUrlResult = amazonSQSClient.getQueueUrl(queueName);

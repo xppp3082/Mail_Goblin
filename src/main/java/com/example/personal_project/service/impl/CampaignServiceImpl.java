@@ -1,13 +1,12 @@
 package com.example.personal_project.service.impl;
 
-import com.example.personal_project.model.Audience;
-import com.example.personal_project.model.Campaign;
-import com.example.personal_project.model.EmailCampaign;
-import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.*;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.repository.CampaignRepo;
+import com.example.personal_project.repository.MailTemplateRepo;
 import com.example.personal_project.service.CampaignService;
 import com.example.personal_project.service.MailService;
+import com.example.personal_project.service.MailTemplateService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,13 +26,15 @@ import java.util.List;
 public class CampaignServiceImpl implements CampaignService {
     private final MailServerService mailServerService;
     private final MailServiceImpl mailService;
+    private final MailTemplateService mailTemplateService;
     private final AudienceServiceImpl audienceService;
     private final CampaignRepo campaignRepo;
 
     private final MailGunService mailGunService;
-    public CampaignServiceImpl(MailServerService mailServerService, MailServiceImpl mailService, AudienceServiceImpl audienceService, CampaignRepo campaignRepo, MailGunService mailGunService) {
+    public CampaignServiceImpl(MailServerService mailServerService, MailServiceImpl mailService, MailTemplateService mailTemplateService, AudienceServiceImpl audienceService, CampaignRepo campaignRepo, MailGunService mailGunService) {
         this.mailServerService = mailServerService;
         this.mailService = mailService;
+        this.mailTemplateService = mailTemplateService;
         this.audienceService = audienceService;
         this.campaignRepo = campaignRepo;
         this.mailGunService = mailGunService;
@@ -56,7 +57,8 @@ public class CampaignServiceImpl implements CampaignService {
 
     public void sendCampaign(Campaign campaign) throws MessagingException, UnsupportedEncodingException {
         List<Audience> audiences = audienceService.getAllAudienceByCampaign(campaign);
-        EmailCampaign emailCampaign = new EmailCampaign(campaign,audiences);
+        MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
+        EmailCampaign emailCampaign = new EmailCampaign(campaign,mailTemplate,audiences);
         try{
             List<Mail> mails =  mailServerService.sendBatchMails2(emailCampaign);
             mailService.insertBatch(mails);
@@ -81,7 +83,8 @@ public class CampaignServiceImpl implements CampaignService {
             if(campaign.getSendDate().equals(targetDate)){
                 log.info("今天有Campaign要發送喔!! " + campaign.toString());
                 List<Audience> audiences = audienceService.getAllAudienceByCampaign(campaign);
-                EmailCampaign emailCampaign = new EmailCampaign(campaign,audiences);
+                MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
+                EmailCampaign emailCampaign = new EmailCampaign(campaign,mailTemplate,audiences);
                 try{
                     List<Mail> mails =  mailServerService.sendBatchMails2(emailCampaign);
                     mailService.insertBatch(mails);

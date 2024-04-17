@@ -3,6 +3,7 @@ package com.example.personal_project.service.impl;
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.EmailCampaign;
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.info.License;
@@ -132,10 +133,12 @@ public class MailServerService {
             throws MessagingException, UnsupportedEncodingException {
         List<Mail> mails = new ArrayList<>();
         try {
+            MailTemplate mailTemplate = emailCampaign.getMailTemplate();
             for(Audience audience: emailCampaign.getAudiences()){
-                String confirmationUrl = "https://traviss.beauty/index.html?category=all";
+//                String confirmationUrl = "https://traviss.beauty/index.html?category=all";
+                String confirmationUrl = mailTemplate.getUrl();
                 String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all",audience.getAudienceUUID());
+                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=%S",audience.getAudienceUUID(),confirmationUrl);
                 log.info(openTrackUrl);
                 log.info(clickTrackUrl);
                 String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
@@ -149,11 +152,12 @@ public class MailServerService {
                 email.setFrom(new InternetAddress(mailFrom, mailFromName));
 
                 final Context ctx = new Context(LocaleContextHolder.getLocale());
+                ctx.setVariable("subject",mailTemplate.getSubject());
                 ctx.setVariable("email", audience.getEmail());
+                ctx.setVariable("content",mailTemplate.getContent());
                 ctx.setVariable("name",audience.getName());
                 ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
-                ctx.setVariable("url", confirmationUrl);
-                ctx.setVariable("url2",clickTrackUrl);
+                ctx.setVariable("url", clickTrackUrl);
                 ctx.setVariable("endpoint",openTrackUrl);
                 final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
                 email.setText(htmlContent, true);

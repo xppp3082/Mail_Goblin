@@ -4,13 +4,11 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
-import com.example.personal_project.model.Audience;
-import com.example.personal_project.model.Campaign;
-import com.example.personal_project.model.EmailCampaign;
-import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.*;
 import com.example.personal_project.service.AudienceService;
 import com.example.personal_project.service.CampaignService;
 import com.example.personal_project.service.MailService;
+import com.example.personal_project.service.MailTemplateService;
 import com.example.personal_project.service.impl.CampaignServiceImpl;
 import com.example.personal_project.service.impl.MailServerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,14 +36,16 @@ public class MailConsumer {
     private  final AudienceService audienceService;
     private final MailService mailService;
     private final MailServerService mailServerService;
+    private final MailTemplateService mailTemplateService;
     private final CampaignService campaignService;
 
-    public MailConsumer(AmazonSQS amazonSQSClient, ObjectMapper objectMapper, AudienceService audienceService, MailService mailService, MailServerService mailServerService, CampaignService campaignService) {
+    public MailConsumer(AmazonSQS amazonSQSClient, ObjectMapper objectMapper, AudienceService audienceService, MailService mailService, MailServerService mailServerService, MailTemplateService mailTemplateService, CampaignService campaignService) {
         this.amazonSQSClient = amazonSQSClient;
         this.objectMapper = objectMapper;
         this.audienceService = audienceService;
         this.mailService = mailService;
         this.mailServerService = mailServerService;
+        this.mailTemplateService = mailTemplateService;
         this.campaignService = campaignService;
     }
 
@@ -86,7 +86,7 @@ public class MailConsumer {
     }
 
     public void consumeCampaignLongPoll() throws JsonProcessingException {
-        log.info("log polling start!");
+        log.info("long polling start!");
         String queueUrl = amazonSQSClient.getQueueUrl(queueName).getQueueUrl();
         ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest()
                 .withQueueUrl(queueURL)
@@ -109,16 +109,15 @@ public class MailConsumer {
 //                String id = jsonNode.get("id").asText();
                     // Check if the necessary keys exist before extracting their values
                     if (jsonNode.has("id")) {
-                        //String id = jsonNode.get("id").asText();
-                        //log.info("ID: {}", id);
                         Campaign campaign = objectMapper.treeToValue(jsonNode, Campaign.class);
-                        log.info("Campaign ID: {}", campaign.getId());
-                        log.info("Template ID: {}", campaign.getTemplateId());
-                        log.info("Tag ID: {}", campaign.getTagId());
-                        log.info("Automation ID: {}", campaign.getAutomationId());
-                        log.info("Execute Status: {}", campaign.getExecuteStatus());
+//                        log.info("Campaign ID: {}", campaign.getId());
+//                        log.info("Template ID: {}", campaign.getTemplateId());
+//                        log.info("Tag ID: {}", campaign.getTagId());
+//                        log.info("Automation ID: {}", campaign.getAutomationId());
+//                        log.info("Execute Status: {}", campaign.getExecuteStatus());
                         List<Audience> audiences = audienceService.getAllAudienceByCampaign(campaign);
-                        EmailCampaign emailCampaign = new EmailCampaign(campaign,audiences);
+                        MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
+                        EmailCampaign emailCampaign = new EmailCampaign(campaign,mailTemplate,audiences);
                         try{
                             List<Mail> mails =  mailServerService.sendBatchMails2(emailCampaign);
                             mailService.insertBatch(mails);

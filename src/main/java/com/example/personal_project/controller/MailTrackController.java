@@ -89,24 +89,6 @@ public class MailTrackController {
         }
         return  new ResponseEntity<>(output,HttpStatus.OK);
     }
-//    @PostMapping("/mailgun/webhook")
-//    public ResponseEntity<?> handleMailgunWebhook(@RequestBody MailgunWebhookEvent webhookEvent){
-//        log.info("mailgun webhook test!");
-//        log.info(webhookEvent.toString());
-//        String eventType = webhookEvent.getEvent();
-//        String recipientEmail = webhookEvent.getRecipient();
-//        if(eventType.equals("delivered")){
-//            //update user delivery
-//            try{
-//                Audience targetAudience = audienceService.findAudienceByEmail(recipientEmail);
-//                audienceService.updateMailClick(targetAudience.getAudienceUUID());
-//                log.info("Track email count successfully!");
-//            }catch (Exception e){
-//                log.error(String.format("error on tracking the email count of %s : %s"),recipientEmail,e.getMessage());
-//            }
-//        }
-//        return  new ResponseEntity<>(String.format("email send to %s failed.",recipientEmail),HttpStatus.OK);
-//    }
 
     @PostMapping("/mailgun/webhook")
     public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
