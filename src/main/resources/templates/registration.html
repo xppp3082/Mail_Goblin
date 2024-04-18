@@ -25,12 +25,12 @@
 <h1><b th:text="${subject}">subject</b> </h1>
 <div>Welcome to STYLiSH <b th:text="${name}">name</b> !</div>
 <p>
-    <b th:text="${content}">content</b>
-    Your account has been created on our platform; here is your login information
-    <br/><br/>
-    Email address : <b th:text="${email}">email</b><br/>
-    <br/>
-    To confirm the validity of your email address, please click on the link below
+    <b th:utext="${content}">content</b>
+<!--    Your account has been created on our platform; here is your login information-->
+<!--    <br/><br/>-->
+<!--    Email address : <b th:text="${email}">email</b><br/>-->
+<!--    <br/>-->
+<!--    To confirm the validity of your email address, please click on the link below-->
 </p>
 <p style="text-align: left;">
     <a class="link" href="#" th:href="${url}">Confirm my account</a>

@@ -54,6 +54,7 @@ public class S3Service {
             AmazonS3 s3Client = createS3Client();
             File file = convertMultipartFileToFile(multipartFile);
             s3Client.putObject(new PutObjectRequest(bucketName, keyName, file));
+            file.delete();//刪除臨時文件
         } catch (AmazonServiceException e) {
             log.error("Here's am a Amazon exception : "+e.getErrorMessage());
             System.exit(1);
