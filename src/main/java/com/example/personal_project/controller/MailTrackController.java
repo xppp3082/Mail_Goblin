@@ -60,24 +60,24 @@ public class MailTrackController {
     }
 
 //    @PostMapping("/mailgun/webhook")
-    public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
-        JsonNode rootNode = objectMapper.readTree(payload);
-        String eventType = rootNode.path("event-data").path("event").asText();
-        String recipientEmail = rootNode.path("event-data").path("recipient").asText();
-        log.info(recipientEmail);
-        log.info(eventType);
-        if(eventType.equals("delivered")){
-            //update user delivery
-            try{
-                //應該再多一層是對公司id的雙重篩選，因為同一個customer有可能兩間公司都有
-                Audience targetAudience = audienceService.findAudienceByEmail(recipientEmail);
-                audienceService.updateMailCount(targetAudience.getAudienceUUID());
-                log.info(targetAudience.getName());
-                log.info("Track email count successfully!");
-            }catch (Exception e){
-                log.error("Error on tracking mail count" +e.getMessage());
-            }
-        }
-        return  new ResponseEntity<>("Email send to "+recipientEmail+ "failed.",HttpStatus.OK);
-    }
+//    public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
+//        JsonNode rootNode = objectMapper.readTree(payload);
+//        String eventType = rootNode.path("event-data").path("event").asText();
+//        String recipientEmail = rootNode.path("event-data").path("recipient").asText();
+//        log.info(recipientEmail);
+//        log.info(eventType);
+//        if(eventType.equals("delivered")){
+//            //update user delivery
+//            try{
+//                //應該再多一層是對公司id的雙重篩選，因為同一個customer有可能兩間公司都有
+//                Audience targetAudience = audienceService.findAudienceByEmail(recipientEmail);
+//                audienceService.updateMailCount(targetAudience.getAudienceUUID());
+//                log.info(targetAudience.getName());
+//                log.info("Track email count successfully!");
+//            }catch (Exception e){
+//                log.error("Error on tracking mail count" +e.getMessage());
+//            }
+//        }
+//        return  new ResponseEntity<>("Email send to "+recipientEmail+ "failed.",HttpStatus.OK);
+//    }
 }
