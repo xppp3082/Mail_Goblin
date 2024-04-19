@@ -26,7 +26,8 @@ public class S3Service {
     private String s3AccessKey;
     @Value("${aws.secret.key}")
     private String s3SecretKey;
-    private final String bucketName = "appworks-travis-bucket";
+    @Value("${aws.s3.bucketName}")
+    private String bucketName;
     public AmazonS3 createS3Client(){
         BasicAWSCredentials awsCredentials =
                 new BasicAWSCredentials(s3AccessKey, s3SecretKey);

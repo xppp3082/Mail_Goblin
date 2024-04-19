@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
-@RequestMapping("/marketing")
+//@RequestMapping("/marketing")
 public class FrontController {
     public final MailTemplateService mailTemplateService;
     public final StorageService storageService;
@@ -26,39 +26,27 @@ public class FrontController {
 
     @GetMapping("/configure")
     public String showMarketingForm(Model model){
+        model.addAttribute("message");
+        model.addAttribute("error");
         model.addAttribute("mailTemplate",new MailTemplate());
         return "marketing_form";
     }
 
-//    @PostMapping("/configure")
-//    public String configureMarketing(String marketingUrl, String marketingSubject, Model model) {
-//        // 將行銷網址和主題放入模型中，以便在模板中使用
-//        model.addAttribute("marketingUrl", marketingUrl);
-//        model.addAttribute("marketingSubject", marketingSubject);
-//        return "marketing_confirmation";
-//    }
-
     @PostMapping("/saveTemplate")
     public String saveTemplate(@ModelAttribute MailTemplate mailTemplate,
-                               @RequestParam("file")MultipartFile multipartFile,
                                RedirectAttributes redirectAttributes){
-        String uploadDir = "/mail_campaigns/";
-        String folderName = "mail_campaigns";
         try{
-            log.info(mailTemplate.toString());
-            //save mail template via template service.
-            String campaignURL = storageService.store(multipartFile,uploadDir);
-            campaignURL = campaignURL.replace("\\","/");
-
-            mailTemplate.setPicture(campaignURL);
             mailTemplateService.insertNewTemplate(mailTemplate);
-            String keyName= campaignURL.substring(1);
-            log.info(keyName);
-            s3Service.getBucketsName(s3Service.createS3Client());
-            s3Service.uploadObject(keyName,multipartFile);
+            redirectAttributes.addFlashAttribute("message", "Successful save the mail template!");
         }catch (Exception e){
             log.error(e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Errors on saving the mail template!");
         }
         return "redirect:/marketing/configure";
+    }
+
+    @GetMapping("/templates")
+    public String showAlltemplate(){
+        return "templateList";
     }
 }

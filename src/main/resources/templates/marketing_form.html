@@ -13,28 +13,35 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 </head>
 <body>
-<h1>行銷設定</h1>
+<h1>Mail Template Setting</h1>
 <!--<form th:action="@{/marketing/configure}" method="post">-->
 <form th:action="@{/marketing/saveTemplate}" th:object="${mailTemplate}" method="post" enctype="multipart/form-data">
     <div>
         <label for="marketingSubject">主題:</label>
         <input type="text" id="marketingSubject" name="subject" th:field="*{subject}" th:required="required">
     </div>
-    <br><br>
+    <br>
     <div id="marketingContent2" th:field="*{content}" th:required="required" th:rows="4"></div>
-    <div>
-        <label for="marketingContent">行銷內容:</label>
+    <div style="display: none">
+        <label for="marketingContent">HTML Content:</label>
         <textarea type="text" id="marketingContent" name="content" th:field="*{content}" th:required="false" th:rows="4" ></textarea>
     </div>
-    <br><br>
+    <br>
     <div>
         <label for="marketingUrl">行銷網址:</label>
         <input type="text" id="marketingUrl" name="url" th:field="*{url}" th:required="required">
     </div>
-    <br><br>
+    <br>
+    <div th:if="${message}" style="color: green;">
+        <p th:text="${message}"></p>
+    </div>
+    <div th:if="${error}" style="color: red;">
+        <p th:text="${error}"></p>
+    </div>
+    <!-- Display success message if any -->
     <div>
-        <p>上傳圖片</p>
-        <input type="file" value="上傳照片" name="file" th:required="false"><br><br>
+<!--        <p>上傳圖片</p>-->
+<!--        <input type="file" value="上傳照片" name="file" th:required="false"><br><br>-->
         <button type="submit">更新Email</button>
     </div>
 </form>
@@ -42,6 +49,32 @@
     $(document).ready(function() {
         $('#marketingContent2').summernote({
             // 可以在這裡配置Summernote的選項
+            placeholder: 'Enter your text here...',
+            height: 300,
+            callbacks: {
+                onImageUpload: function(files) {
+                    // 将图片上传到服务器
+                    var formData = new FormData();
+                    formData.append('image', files[0]);
+
+                    $.ajax({
+                        url: '/upload-image', // 上传图片的接口地址
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            // 图片上传成功后，将图片 URL 插入到编辑器中
+                            console.log(response);
+                            // console.log(response.url);
+                            $('#marketingContent2').summernote('insertImage', response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                }
+            }
         });
     });
     $('form').on('submit', function() {

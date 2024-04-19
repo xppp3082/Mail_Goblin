@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Mail Templates</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>Mail Templates</h1>
+    <!-- 模板列表 -->
+    <ul id="templateList" class="list-group">
+        <!-- 模板项目将动态插入到这里 -->
+    </ul>
+</div>
+<!-- 引入 jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // 页面加载完成后，获取并显示所有模板
+        loadTemplates();
+
+        // 加载模板列表
+        async function loadTemplates() {
+            try {
+                const response = await fetch('api/1.0/template/all?id=1'); // 获取所有模板的 API 地址
+                console.log(response);
+                const templates = await response.json();
+                console.log(templates);
+                displayTemplates(templates);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // 显示模板列表
+        function displayTemplates(templates) {
+            var templateList = $('#templateList');
+            templateList.empty();
+            templates.forEach(function(template) {
+                var listItem = $('<li class="list-group-item"></li>');
+                listItem.text(template.content);
+
+                // 编辑按钮
+                var editButton = $('<button class="btn btn-primary btn-sm mr-2">Edit</button>');
+                editButton.click(function() {
+                    // 跳转到编辑页面，将模板 ID 作为 URL 参数传递
+                    window.location.href = '/edit-template.html?id=' + template.id;
+                });
+
+                // 删除按钮
+                var deleteButton = $('<button class="btn btn-danger btn-sm">Delete</button>');
+                deleteButton.click(function() {
+                    if (confirm('Are you sure you want to delete this template?')) {
+                        deleteTemplate(template.id);
+                    }
+                });
+
+                listItem.append(editButton);
+                listItem.append(deleteButton);
+                templateList.append(listItem);
+            });
+        }
+
+        // 删除模板
+        async function deleteTemplate(id) {
+            try {
+                const response = await fetch('api/1.0/template/delete?id=' + id, { method: 'DELETE' }); // 删除模板的 API 地址
+                if (response.ok) {
+                    alert('Template deleted successfully');
+                    loadTemplates(); // 重新加载模板列表
+                } else {
+                    throw new Error('Failed to delete template');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to delete template');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

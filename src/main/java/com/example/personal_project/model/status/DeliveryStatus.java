@@ -1,7 +1,7 @@
 package com.example.personal_project.model.status;
 
 public enum DeliveryStatus {
-    PENDING,
+    FAILED,
     RECEIVE,
     OPEN,
     CLICK

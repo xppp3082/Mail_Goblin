@@ -4,6 +4,7 @@ import com.example.personal_project.model.Campaign;
 import com.example.personal_project.model.MailTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,61 @@ public class MailTemplateRepo {
         } catch (Exception e) {
             log.error("error on insert new mailTemplate : " + e.getMessage());
         }
+    }
+
+    public void updateMailTemplate(MailTemplate mailTemplate){
+        String sql = """
+                UPDATE template 
+                SET company_id = ?, url = ?,subject = ?,content = ?, picture = ? 
+                WHERE id = ?;
+                """;
+        try{
+            jdbcTemplate.update(sql,
+                    mailTemplate.getCompanyId(), mailTemplate.getUrl(),
+                    mailTemplate.getSubject(), mailTemplate.getContent(),
+                    mailTemplate.getPicture(), mailTemplate.getId());
+        }catch (Exception e){
+            log.error("Error updating mail template with ID " + mailTemplate.getId() + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteMailTemplate(Long id){
+        String sql = """
+                DELETE FROM template WHERE id = ?;
+                """;
+        try{
+            jdbcTemplate.update(sql,id);
+        }catch (Exception e){
+            log.error("Error deleting mail template with id " + id +" : " + e.getMessage());
+        }
+    }
+
+    public  MailTemplate findMailTemplateById(Long templateId){
+        String sql = """
+                SELECT * FROM template WHERE id = ?;
+                """;
+        try{
+            return jdbcTemplate.queryForObject(sql,new Object[]{templateId},originTemplateRowMapper());
+        }catch (EmptyResultDataAccessException e){
+            log.error("No mail template found with ID: " + templateId);
+            return null;
+        }catch (Exception e){
+            log.error("Error on retrieving mail template with ID " + templateId + ": " + e.getMessage());
+            return null;
+        }
+    }
+    public List<MailTemplate> getAllMailTemplateBByCompany(Long company_id){
+        String sql = """
+                SELECT * FROM template WHERE company_id = ?;
+                """;
+        try {
+            RowMapper<MailTemplate> mapper = originTemplateRowMapper();
+            List<MailTemplate> templates = jdbcTemplate.query(sql,mapper,company_id);
+            return templates;
+        }catch (Exception e){
+            log.error("error on catching all the template under the company with id : "+company_id);
+        }
+        return  null;
     }
 
     public MailTemplate getMailTemplateByCampaign(Campaign campaign) {

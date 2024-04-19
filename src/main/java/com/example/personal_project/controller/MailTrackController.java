@@ -30,16 +30,6 @@ public class MailTrackController {
         this.objectMapper = objectMapper;
     }
 
-//    @GetMapping("/open")
-//    public ResponseEntity<?>trackUserOpen(@RequestParam(value = "UID")String userUUID,
-//                                          @RequestParam(value = "CID")String companyUUID){
-//        log.info("it's a set of " +userUUID +" and " + companyUUID);
-//        String output = String.format("track %s under %s open successfully!",userUUID,companyUUID);
-//        audienceService.updateMailOpen(userUUID, companyUUID);
-//        log.info(output);
-//        return new ResponseEntity<>(output,HttpStatus.OK);
-//    }
-
     @GetMapping("/open")
     public ResponseEntity<?>trackUserOpen(@RequestParam(value = "UID")String userUUID){
         log.info("it's a set of " +userUUID );
@@ -48,27 +38,6 @@ public class MailTrackController {
         log.info(output);
         return new ResponseEntity<>(output,HttpStatus.OK);
     }
-
-//    @GetMapping("/click")
-//    public ResponseEntity<?> trackUserClick(@RequestParam(value = "UID")String userUUID,
-//                                            @RequestParam(value = "CID")String companyUUID,
-//                                            @RequestParam(value = "cusWeb",required = false)String customerWebSite,
-//                                            HttpServletResponse response){
-//        log.info("it's a set of " +userUUID +" and " + companyUUID);
-//        String output = String.format("track %s under %s click successfully!",userUUID,companyUUID);
-//        log.info(output);
-//        if (customerWebSite != null && !customerWebSite.isEmpty()) {
-//            try {
-//                // 执行重定向到 customerWebSite
-//                audienceService.updateMailClick(userUUID, companyUUID);
-//                response.sendRedirect(customerWebSite);
-//            } catch (IOException e) {
-//                log.error("Failed to redirect to customer website: " + e.getMessage());
-//                return new ResponseEntity<>("Failed to redirect to customer website", HttpStatus.INTERNAL_SERVER_ERROR);
-//            }
-//        }
-//        return  new ResponseEntity<>(output,HttpStatus.OK);
-//    }
 
     @GetMapping("/click")
     public ResponseEntity<?> trackUserClick(@RequestParam(value = "UID")String userUUID,

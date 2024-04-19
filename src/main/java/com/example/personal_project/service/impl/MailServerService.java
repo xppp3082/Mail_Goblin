@@ -5,13 +5,9 @@ import com.example.personal_project.model.EmailCampaign;
 import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.status.DeliveryStatus;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.v3.oas.annotations.info.License;
 import jakarta.mail.MessagingException;
-import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
@@ -23,17 +19,11 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 
@@ -135,7 +125,6 @@ public class MailServerService {
         try {
             MailTemplate mailTemplate = emailCampaign.getMailTemplate();
             for(Audience audience: emailCampaign.getAudiences()){
-//                String confirmationUrl = "https://traviss.beauty/index.html?category=all";
                 String confirmationUrl = mailTemplate.getUrl();
                 String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
                 String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=%S",audience.getAudienceUUID(),confirmationUrl);
@@ -146,7 +135,6 @@ public class MailServerService {
                 final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
                 final MimeMessageHelper email;
                 email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//                email.setTo("xppp3081@gmail.com");
                 email.setTo(audience.getEmail());
                 email.setSubject(emailCampaign.getCampaign().getSubject());
                 email.setFrom(new InternetAddress(mailFrom, mailFromName));
@@ -162,9 +150,6 @@ public class MailServerService {
                 final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
                 email.setText(htmlContent, true);
 
-                ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
-                email.addInline("springLogo", clr, PNG_MIME);
-
                 Mail mail = new Mail();
                 mail.setCompanyID(emailCampaign.getCampaign().getId());
                 mail.setRecipientMail(audience.getEmail());
@@ -178,7 +163,7 @@ public class MailServerService {
                     mails.add(mail);
                 }catch (MailSendException e){
                     log.warn("Error on sending email to :" + audience.getEmail());
-                    mail.setStatus(DeliveryStatus.PENDING.name());
+                    mail.setStatus(DeliveryStatus.FAILED.name());
                     mails.add(mail);
                 }
             }
