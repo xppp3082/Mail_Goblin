@@ -23,24 +23,6 @@ import java.util.List;
 public class AudienceRepo {
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-//    public void insertNewAudience(Audience audience) {
-//        String sql = """
-//                INSERT INTO audience
-//                (name,email,birthday,audience_uuid,create_time,company_id,mailcount,opencount,clickcount)
-//                VALUES
-//                (?,?,?,?,?,?,0,0,0)
-//                """;
-//        try {
-//            jdbcTemplate.update(sql,
-//                    audience.getName(), audience.getEmail(), audience.getBirthday(),
-//                    audience.getAudienceUUID(), Timestamp.valueOf(LocalDateTime.now()),
-//                    audience.getCompanyId());
-//        } catch (Exception e) {
-//            log.error("error on creating new user in Repo layer : " + e.getMessage());
-//        }
-//    }
-
     public Audience insertNewAudience(Audience audience) {
         String sql = """
             INSERT INTO audience 
