@@ -59,7 +59,7 @@ public class MailTrackController {
         return  new ResponseEntity<>(output,HttpStatus.OK);
     }
 
-    @PostMapping("/mailgun/webhook")
+//    @PostMapping("/mailgun/webhook")
     public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
         JsonNode rootNode = objectMapper.readTree(payload);
         String eventType = rootNode.path("event-data").path("event").asText();

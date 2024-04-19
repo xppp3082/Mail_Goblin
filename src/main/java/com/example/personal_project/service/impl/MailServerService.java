@@ -5,6 +5,8 @@ import com.example.personal_project.model.EmailCampaign;
 import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.status.DeliveryStatus;
+import com.example.personal_project.repository.AudienceRepo;
+import com.example.personal_project.service.AudienceService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -12,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -37,11 +39,13 @@ public class MailServerService {
     private final Environment environment;
     private final JavaMailSender mailSender;
     private final TemplateEngine htmlTemplateEngine;
+    private final AudienceService audienceService;
 
-    public MailServerService(Environment environment, JavaMailSender mailSender, TemplateEngine htmlTemplateEngine) {
+    public MailServerService(Environment environment, JavaMailSender mailSender, TemplateEngine htmlTemplateEngine, AudienceService audienceService) {
         this.environment = environment;
         this.mailSender = mailSender;
         this.htmlTemplateEngine = htmlTemplateEngine;
+        this.audienceService = audienceService;
     }
 
     public String sendRegisterMail()
@@ -161,14 +165,52 @@ public class MailServerService {
                     mailSender.send(mimeMessage);
                     mail.setStatus(DeliveryStatus.RECEIVE.name());
                     mails.add(mail);
-                }catch (MailSendException e){
-                    log.warn("Error on sending email to :" + audience.getEmail());
+                    //update mail count when email been sent successfully.
+                    audienceService.updateMailCount(audience.getAudienceUUID());
+                    log.info("update mail count successfully!");
+                }catch (MailException e){
+                    Long audienceId = audience.getId();
+                    switch (getMialExceptionType(e)){
+                        case AUTHENTICATION:
+                            log.warn("Error on sending email due to authentication issue: " + e.getMessage());
+                            break;
+                        case PARSE:
+                            log.warn("Error on parsing email content: " + e.getMessage());
+                            break;
+                        case PREPARATION:
+                            log.warn("Error on sending email to audience with id : "+audienceId+ ": " + e.getMessage());
+                            break;
+                        default:
+                            // 其他MailException的處理邏輯
+                            log.warn("Generic mail exception: " + e.getMessage());
+                    }
                     mail.setStatus(DeliveryStatus.FAILED.name());
                     mails.add(mail);
                 }
             }
             return mails;
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private enum MailExceptionType{
+        AUTHENTICATION,
+        PARSE,
+        PREPARATION,
+        SEND
+    }
+
+    private MailExceptionType getMialExceptionType(MailException e){
+        if (e instanceof MailAuthenticationException) {
+            return MailExceptionType.AUTHENTICATION;
+        } else if (e instanceof MailParseException) {
+            return MailExceptionType.PARSE;
+        }else if(e instanceof MailPreparationException){
+            return MailExceptionType.PREPARATION;
+        } else if (e instanceof MailSendException) {
+            return MailExceptionType.SEND;
+        }else {
             return null;
         }
     }
