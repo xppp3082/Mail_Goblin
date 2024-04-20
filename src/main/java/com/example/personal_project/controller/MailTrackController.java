@@ -1,6 +1,5 @@
 package com.example.personal_project.controller;
 
-import com.example.personal_project.event.MailgunWebhookEvent;
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
 import com.example.personal_project.repository.AudienceRepo;

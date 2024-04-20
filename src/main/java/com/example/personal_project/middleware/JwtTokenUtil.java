@@ -10,6 +10,10 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -35,8 +39,21 @@ public class JwtTokenUtil {
         jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
+//    public Authentication getAuthentication(String token){
+//        Company company = parseToken(token).get("company",Company.class);
+//        UserDetails userDetails = User.withUsername(company.getAccount())
+//                .password("")
+//                .authorities()
+//                .build();
+//        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+//    }
     public Claims parseToken(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
+    }
+
+    public Boolean validate(String token){
+        final String companyAccount = getAccountFromToken(token);
+        return (companyAccount!=null && isTokenExpired(token));
     }
 
     public LoginResponse createToken(Company company) {
@@ -63,6 +80,18 @@ public class JwtTokenUtil {
                 setClaims(claims).
                 signWith(secretKey).
                 compact();
+    }
 
+    public String getAccountFromToken(String token){
+        return parseToken(token).getSubject();
+    }
+
+    public Date getExpirationDateFromToken(String token){
+        return parseToken(token).getExpiration();
+    }
+
+    public Boolean isTokenExpired(String token){
+        final Date expiration = getExpirationDateFromToken(token);
+        return expiration.before(new Date());
     }
 }
