@@ -39,21 +39,19 @@ public class JwtTokenUtil {
         jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
-//    public Authentication getAuthentication(String token){
-//        Company company = parseToken(token).get("company",Company.class);
-//        UserDetails userDetails = User.withUsername(company.getAccount())
-//                .password("")
-//                .authorities()
-//                .build();
-//        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-//    }
+    public UsernamePasswordAuthenticationToken getAuthentication(String token){
+        UserDetails userDetails = User.withUsername(getAccountFromToken(token))
+                .password("")
+                .build();
+        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+    }
     public Claims parseToken(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
     public Boolean validate(String token){
         final String companyAccount = getAccountFromToken(token);
-        return (companyAccount!=null && isTokenExpired(token));
+        return (companyAccount!=null && !isTokenExpired(token));
     }
 
     public LoginResponse createToken(Company company) {

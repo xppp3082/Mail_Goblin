@@ -22,6 +22,11 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public Company getCompanyByAccount(String account) {
+        return companyRepo.getCompanyByAccount(account);
+    }
+
+    @Override
     public Company signUp(Company company) {
         try{
             String originPassword = company.getPassword();

@@ -68,6 +68,7 @@ public class CompanyRepo {
         }
     }
 
+
     public RowMapper<Company> originCompanyRowMapper(){
         return  new RowMapper<Company>() {
             @Override

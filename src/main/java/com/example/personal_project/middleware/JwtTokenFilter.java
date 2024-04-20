@@ -6,11 +6,16 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -18,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.micrometer.common.util.StringUtils.isEmpty;
-
+@Slf4j
+@Component
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final ObjectMapper jsonObjectMapper = new ObjectMapper();
@@ -36,7 +42,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request,response);
                 return;
             }
+            UsernamePasswordAuthenticationToken authAfterSuccessLogin =jwtTokenUtil.getAuthentication(token);
+            authAfterSuccessLogin.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authAfterSuccessLogin);
 
+            // Set Authentication object to SecurityContextHolder
+            SecurityContextHolder.getContext().setAuthentication(authAfterSuccessLogin);
+            filterChain.doFilter(request,response);
         }catch (Exception e){
             Map<String, String> errorMsg = new HashMap<>();
             errorMsg.put("error", e.getMessage());
