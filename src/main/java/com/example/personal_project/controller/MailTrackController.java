@@ -1,9 +1,13 @@
 package com.example.personal_project.controller;
 
+import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
+import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.repository.AudienceRepo;
 import com.example.personal_project.service.AudienceService;
+import com.example.personal_project.service.CompanyService;
+import com.example.personal_project.service.MailService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -23,23 +29,39 @@ public class MailTrackController {
 
     private final AudienceService audienceService;
     private final ObjectMapper objectMapper;
+    private final MailService mailService;
+    private final CompanyService companyService;
+    private final AuthenticationComponent authenticationComponent;
 
-    public MailTrackController(AudienceService audienceService, ObjectMapper objectMapper) {
+
+    public MailTrackController(AudienceService audienceService, ObjectMapper objectMapper, MailService mailService, CompanyService companyService, AuthenticationComponent authenticationComponent) {
         this.audienceService = audienceService;
         this.objectMapper = objectMapper;
+        this.mailService = mailService;
+        this.companyService = companyService;
+        this.authenticationComponent = authenticationComponent;
     }
 
     @GetMapping("/open")
-    public ResponseEntity<?>trackUserOpen(@RequestParam(value = "UID")String userUUID){
-        log.info("it's a set of " +userUUID );
-        String output = String.format("track %s under open successfully!",userUUID);
-        audienceService.updateMailOpen(userUUID);
-        log.info(output);
-        return new ResponseEntity<>(output,HttpStatus.OK);
+    public ResponseEntity<?>trackUserOpen(@RequestParam(value = "UID")String userUUID,
+                                          @RequestParam(value = "CID")String campaignID){
+        try {
+            log.info("it's a set of " +userUUID );
+            String output = String.format("track %s under open successfully with campaignId : %s",userUUID,campaignID);
+            log.info(output);
+            audienceService.updateMailOpen(userUUID);
+            mailService.insertOpenRecord(campaignID, DeliveryStatus.OPEN.name(),userUUID);
+            return new ResponseEntity<>(output,HttpStatus.OK);
+        }catch (Exception e){
+            String errorMessage = "Error on tracking audience open record :";
+            log.error(errorMessage+e.getMessage());
+            return new ResponseEntity<>(errorMessage,HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/click")
     public ResponseEntity<?> trackUserClick(@RequestParam(value = "UID")String userUUID,
+                                            @RequestParam(value = "CID")String campaignID,
                                             @RequestParam(value = "cusWeb",required = false)String customerWebSite,
                                             HttpServletResponse response){
         log.info("it's a set of " +userUUID);
@@ -49,6 +71,7 @@ public class MailTrackController {
             try {
                 // 执行重定向到 customerWebSite
                 audienceService.updateMailClick(userUUID);
+                mailService.insertOpenRecord(campaignID, DeliveryStatus.CLICK.name(),userUUID);
                 response.sendRedirect(customerWebSite);
             } catch (IOException e) {
                 log.error("Failed to redirect to customer website: " + e.getMessage());
@@ -56,6 +79,35 @@ public class MailTrackController {
             }
         }
         return  new ResponseEntity<>(output,HttpStatus.OK);
+    }
+
+    @GetMapping("/delivery")
+    public  ResponseEntity<?> trackDeliveryRate(){
+        try{
+            String account = authenticationComponent.getAccountFromAuthentication();
+//            Long companyId = companyService.getIdByAccount(account);
+            Double successRate = mailService.getMailDeliveryRateForCompany(account);
+            return new ResponseEntity<>(successRate,HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on getting delivery rate of company.";
+            log.error(errorResponse+" : "+e.getMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/daily-delivery")
+    public ResponseEntity<?> DailyMailDeliveryRate(){
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+//            Long companyId = companyService.getIdByAccount(account);
+//            Map<LocalDate,Double> successRate = mailService.getDailyMailDeliveryRate(companyId);
+            Map<LocalDate,Double> successRate = mailService.trackDailyMailDeliveryRate(account);
+            return new ResponseEntity<>(successRate, HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on getting daily delivery rate of company.";
+            log.error(errorResponse+" : "+e.getMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        }
     }
 
 //    @PostMapping("/mailgun/webhook")

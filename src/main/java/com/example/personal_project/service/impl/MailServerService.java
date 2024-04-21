@@ -130,8 +130,8 @@ public class MailServerService {
             MailTemplate mailTemplate = emailCampaign.getMailTemplate();
             for(Audience audience: emailCampaign.getAudiences()){
                 String confirmationUrl = mailTemplate.getUrl();
-                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=%S",audience.getAudienceUUID(),confirmationUrl);
+                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S&CID=%S",audience.getAudienceUUID(),emailCampaign.getCampaign().getId());
+                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&CID=%S&cusWeb=%S",audience.getAudienceUUID(),emailCampaign.getCampaign().getId(),confirmationUrl);
                 log.info(openTrackUrl);
                 log.info(clickTrackUrl);
                 String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
@@ -156,6 +156,7 @@ public class MailServerService {
 
                 Mail mail = new Mail();
                 mail.setCompanyID(emailCampaign.getCampaign().getId());
+                mail.setAudienceID(audience.getId());
                 mail.setRecipientMail(audience.getEmail());
                 mail.setSubject(emailCampaign.getCampaign().getSubject());
                 mail.setSendDate(LocalDate.now());

@@ -12,6 +12,8 @@ public class Mail extends ReadObject{
     private Long id;
     @JsonProperty("company_id")
     private Long companyID;
+    @JsonProperty("audience_id")
+    private Long audienceID;
     private String recipientName;
     @JsonProperty("recipient_mail")
     private String recipientMail;
