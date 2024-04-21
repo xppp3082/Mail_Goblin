@@ -56,6 +56,18 @@ public class CompanyRepo {
         }
     }
 
+    public Long getIdByAccount(String account) {
+        String sql = "SELECT id FROM company WHERE account = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, Long.class, account);
+        } catch (EmptyResultDataAccessException e) {
+            return null; // or handle the case where no company is found for the given account
+        } catch (DataAccessException e) {
+            log.error("Error retrieving company ID for account " + account + ": " + e.getMessage());
+            throw new RuntimeException("Failed to retrieve company ID for account " + account);
+        }
+    }
+
     public Company getCompanyByAccount(String account) {
         String sql = "SELECT * FROM company WHERE account = ?";
         try {

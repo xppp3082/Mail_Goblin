@@ -6,7 +6,9 @@ import com.example.personal_project.model.Campaign;
 import java.util.List;
 
 public interface AudienceService {
-    List<Audience> getAllAudience(String account);
+    List<Audience> getAllAudienceByAccount(String account);
+    List<Audience>getAudiencesWithTagsByCompanyId(Long companyId);
+    List<Audience>searchAudiencesWithTagsByCompanyIdANDMail(Long companyId,String keyword);
     void updateMailCount(String audienceUUID, String account);
     void updateMailOpen(String audienceUUID,String companyUUID);
     void updateMailOpen(String audienceUUID);
@@ -17,5 +19,6 @@ public interface AudienceService {
     List<Audience>getAllAudienceByCampaign(Campaign campaign);
     Audience insertNewAudience(Audience audience);
     void insertBatchTagAudience(Audience audience);
-    void deleteAudience(Audience audience);
+    void deleteAudience(Long id);
+    Audience updateAudience(Audience audience);
 }

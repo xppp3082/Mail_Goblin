@@ -2,9 +2,11 @@ package com.example.personal_project.repository;
 
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
+import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,8 +16,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Repository
@@ -23,13 +29,14 @@ import java.util.List;
 public class AudienceRepo {
     @Autowired
     JdbcTemplate jdbcTemplate;
+
     public Audience insertNewAudience(Audience audience) {
         String sql = """
-            INSERT INTO audience 
-            (name,email,birthday,audience_uuid,create_time,company_id,mailcount,opencount,clickcount) 
-            VALUES
-            (?,?,?,?,?,?,0,0,0)
-            """;
+                INSERT INTO audience 
+                (name,email,birthday,audience_uuid,create_time,company_id,mailcount,opencount,clickcount) 
+                VALUES
+                (?,?,?,?,?,?,0,0,0)
+                """;
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
@@ -42,19 +49,44 @@ public class AudienceRepo {
                 ps.setLong(6, audience.getCompanyId());
                 return ps;
             }, keyHolder);
-
             // 拿到生成的 ID
             Long generatedId = keyHolder.getKey().longValue();
             // 在此處進行其他操作，如果需要的話
             audience.setId(generatedId);
             return audience;
+        } catch (DuplicateKeyException e) {
+            //company_id和email為複合唯一鍵
+            log.error("Duplicate account error on creating new audience under this company: " + e.getMessage());
+            throw new DuplicateKeyException("Audience already exists.");
         } catch (Exception e) {
             log.error("error on creating new user in Repo layer : " + e.getMessage());
             return null;
         }
     }
 
-    public void insertBatchToTagAudience(Audience audience){
+    public Audience updateAudience(Audience audience) {
+        String sql = """
+                UPDATE audience SET
+                name = ?,
+                email = ?,
+                birthday= ? where id =? and company_id = ?;
+                """;
+        try {
+            int rowsUpdated = jdbcTemplate.update(sql,
+                    audience.getName(), audience.getEmail(),
+                    audience.getBirthday(), audience.getId(), audience.getCompanyId());
+            if (rowsUpdated > 0) {
+                return audience; // 返回更新后的 Audience 对象
+            } else {
+                return null; // 或者根据业务需求返回其他值，比如 throw 一个异常
+            }
+        } catch (Exception e) {
+            log.error("Error updating audience with ID " + audience.getId() + ": " + e.getMessage());
+            return null; // 或者根据业务需求返回其他值，比如 throw 一个异常
+        }
+    }
+
+    public void insertBatchToTagAudience(Audience audience) {
         String sql = """
                 INSERT INTO 
                 tag_audience (tag_id,audience_id) 
@@ -65,9 +97,10 @@ public class AudienceRepo {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Tag tag = audience.getTagList().get(i);
-                ps.setLong(1,tag.getId());
-                ps.setLong(2,audience.getId());
+                ps.setLong(1, tag.getId());
+                ps.setLong(2, audience.getId());
             }
+
             @Override
             public int getBatchSize() {
                 return audience.getTagList().size();
@@ -75,34 +108,15 @@ public class AudienceRepo {
         });
     }
 
-    public void deleteAudience(Audience audience) {
+    public void deleteAudience(Long id) {
         String sql = """
                 DELETE FROM audience WHERE id = ?;
                 """;
         try {
-            jdbcTemplate.update(sql,audience.getId());
+            jdbcTemplate.update(sql, id);
         } catch (Exception e) {
-            log.error("error on deleting user in Repo layer : "+e.getMessage());
+            log.error("error on deleting user in Repo layer : " + e.getMessage());
         }
-    }
-
-    public List<Audience> retrieveAudienceByCompany(String account) {
-        String getAudienceQuery = """
-                select * from audience where(select id from company where account =?);
-                """;
-        return jdbcTemplate.query(getAudienceQuery, (rs, rowNum) -> {
-            Audience audience = new Audience();
-            audience.setName(rs.getString("name"));
-            audience.setEmail(rs.getString("email"));
-            audience.setEmail(rs.getString("birthday"));
-            audience.setAudienceUUID(rs.getString("audience_uuid"));
-            audience.setMailCount(rs.getInt("mailcount"));
-            audience.setOpenCount(rs.getInt("opencount"));
-            audience.setClickCount(rs.getInt("clickcount"));
-            audience.setCreateTime(rs.getTimestamp("timestamp"));
-            audience.setCompanyId(rs.getLong("company_id"));
-            return audience;
-        });
     }
 
     //根據user的UUID與company account將mailcount+=1
@@ -159,7 +173,6 @@ public class AudienceRepo {
         }
     }
 
-
     public void updateUserMailClick(String audienceUUID) {
         String updateQuery = """
                 update audience set clickcount = clickcount +1 
@@ -183,6 +196,106 @@ public class AudienceRepo {
             log.error("update user mail count failed : " + e.getMessage());
         }
     }
+
+    public List<Audience> getAllAudienceByAccount(String account) {
+        String sql = """
+                select au.* from audience
+                 as au 
+                 left join company 
+                 as co 
+                 on au.company_id = co.id 
+                 where co.account = ?;
+                """;
+        RowMapper<Audience> mapper = orginAudienceRowMapper();
+        List<Audience> audiences = jdbcTemplate.query(sql, mapper, account);
+        return audiences;
+    }
+
+    public List<Audience> getAudiencesWithTagsByCompanyId(Long companyId) {
+        String sql = """
+               SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
+                FROM audience AS au
+                LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
+                LEFT JOIN tag ON tag.id = tg.tag_id
+                WHERE au.company_id = ?
+                """;
+        Map<Long, Audience> audienceMap = new HashMap<>();
+        jdbcTemplate.query(sql, new Object[]{companyId}, rs -> {
+            Long audienceId = rs.getLong("id");
+            Audience audience;
+            if (!audienceMap.containsKey(audienceId)) {
+                audience = new Audience();
+                audience.setId(audienceId);
+                audience.setName(rs.getString("name"));
+                audience.setEmail(rs.getString("email"));
+                audience.setBirthday(rs.getString("birthday"));
+                audience.setCompanyId(rs.getLong("company_id"));
+                audienceMap.put(audienceId, audience);
+            } else {
+                audience = audienceMap.get(audienceId);
+            }
+
+            String tagName = rs.getString("tagName");
+            Long tagId = rs.getLong("ta_id");
+            Long tag_CompanyId = rs.getLong("ta_cid");
+            if (tagName != null) {
+                Tag tag = new Tag();
+                tag.setId(tagId);
+                tag.setCompanyId(tag_CompanyId);
+                tag.setName(tagName);
+
+                if (audience.getTagList() == null) {
+                    audience.setTagList(new ArrayList<>());
+                }
+                audience.getTagList().add(tag);
+            }
+        });
+        return new ArrayList<>(audienceMap.values());
+    }
+
+    public List<Audience> searchAudiencesWithTagsByCompanyIdANDMail(Long companyId,String keyword) {
+        String sql = """
+               SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
+                FROM audience AS au
+                LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
+                LEFT JOIN tag ON tag.id = tg.tag_id
+                WHERE au.company_id = ? and au.email like ?
+                """;
+        Map<Long, Audience> audienceMap = new HashMap<>();
+        keyword = MessageFormat.format("%{0}%", keyword);
+        jdbcTemplate.query(sql, new Object[]{companyId,keyword}, rs -> {
+            Long audienceId = rs.getLong("id");
+            Audience audience;
+            if (!audienceMap.containsKey(audienceId)) {
+                audience = new Audience();
+                audience.setId(audienceId);
+                audience.setName(rs.getString("name"));
+                audience.setEmail(rs.getString("email"));
+                audience.setBirthday(rs.getString("birthday"));
+                audience.setCompanyId(rs.getLong("company_id"));
+                audienceMap.put(audienceId, audience);
+            } else {
+                audience = audienceMap.get(audienceId);
+            }
+
+            String tagName = rs.getString("tagName");
+            Long tagId = rs.getLong("ta_id");
+            Long tag_CompanyId = rs.getLong("ta_cid");
+            if (tagName != null) {
+                Tag tag = new Tag();
+                tag.setId(tagId);
+                tag.setCompanyId(tag_CompanyId);
+                tag.setName(tagName);
+
+                if (audience.getTagList() == null) {
+                    audience.setTagList(new ArrayList<>());
+                }
+                audience.getTagList().add(tag);
+            }
+        });
+        return new ArrayList<>(audienceMap.values());
+    }
+
 
     public List<Audience> getAllAudienceByCampaign(Campaign campaign) {
         String sql = """

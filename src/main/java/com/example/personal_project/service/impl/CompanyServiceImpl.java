@@ -22,6 +22,11 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    public Long getIdByAccount(String account) {
+        return companyRepo.getIdByAccount(account);
+    }
+
+    @Override
     public Company getCompanyByAccount(String account) {
         return companyRepo.getCompanyByAccount(account);
     }
