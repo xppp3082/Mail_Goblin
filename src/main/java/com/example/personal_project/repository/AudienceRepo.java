@@ -16,12 +16,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
+import java.sql.Date;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Repository
@@ -213,12 +212,12 @@ public class AudienceRepo {
 
     public List<Audience> getAudiencesWithTagsByCompanyId(Long companyId) {
         String sql = """
-               SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
-                FROM audience AS au
-                LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
-                LEFT JOIN tag ON tag.id = tg.tag_id
-                WHERE au.company_id = ?
-                """;
+                SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
+                 FROM audience AS au
+                 LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
+                 LEFT JOIN tag ON tag.id = tg.tag_id
+                 WHERE au.company_id = ?
+                 """;
         Map<Long, Audience> audienceMap = new HashMap<>();
         jdbcTemplate.query(sql, new Object[]{companyId}, rs -> {
             Long audienceId = rs.getLong("id");
@@ -253,17 +252,17 @@ public class AudienceRepo {
         return new ArrayList<>(audienceMap.values());
     }
 
-    public List<Audience> searchAudiencesWithTagsByCompanyIdANDMail(Long companyId,String keyword) {
+    public List<Audience> searchAudiencesWithTagsByCompanyIdANDMail(Long companyId, String keyword) {
         String sql = """
-               SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
-                FROM audience AS au
-                LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
-                LEFT JOIN tag ON tag.id = tg.tag_id
-                WHERE au.company_id = ? and au.email like ?
-                """;
+                SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
+                 FROM audience AS au
+                 LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
+                 LEFT JOIN tag ON tag.id = tg.tag_id
+                 WHERE au.company_id = ? and au.email like ?
+                 """;
         Map<Long, Audience> audienceMap = new HashMap<>();
         keyword = MessageFormat.format("%{0}%", keyword);
-        jdbcTemplate.query(sql, new Object[]{companyId,keyword}, rs -> {
+        jdbcTemplate.query(sql, new Object[]{companyId, keyword}, rs -> {
             Long audienceId = rs.getLong("id");
             Audience audience;
             if (!audienceMap.containsKey(audienceId)) {
@@ -313,9 +312,50 @@ public class AudienceRepo {
         return audiences;
     }
 
+    public List<Audience> getAllAudienceByTagId(Long tagId, String account) {
+        String sql = """
+                SELECT au.* FROM audience AS au
+                LEFT JOIN tag_audience AS tau ON tau.audience_id=au.id
+                LEFT JOIN tag on tau.audience_id=tag.id
+                LEFT JOIN company AS com ON au.company_id=com.id
+                WHERE tau.tag_id=? AND com.account = ?;
+                """;
+        RowMapper<Audience> mapper = orginAudienceRowMapper();
+        List<Audience> audiences = jdbcTemplate.query(sql, mapper, tagId, account);
+        return audiences;
+    }
+
+    public Map<String, Integer> getNewAudienceCountLastWeek(String account,Integer daysCount) {
+        Map<String, Integer> newAudienceCountMap = new LinkedHashMap<>();
+        for (int i = 0; i < daysCount; i++) {
+            LocalDate date = LocalDate.now().minusDays(i);
+            String dateString = date.toString();
+            int newAUdienceCount = getNewAudienceCountForDate(date,account);
+            newAudienceCountMap.put(dateString, newAUdienceCount);
+        }
+        return newAudienceCountMap;
+    }
+
+    private int getNewAudienceCountForDate(LocalDate date,String account) {
+        String sql = """
+                SELECT COUNT(*) FROM audience 
+                LEFT JOIN company 
+                ON audience.company_id = company.id
+                WHERE DATE(create_time) = ?
+                AND
+                company.account = ?
+                """;
+        try{
+            return jdbcTemplate.queryForObject(sql, Integer.class, date,account);
+        }catch (Exception e){
+            log.error("error on getting new added audience for past days : "+e.getMessage());
+            return 0;
+        }
+
+    }
+
     public Audience finAudienceByEmail(String email) {
         String sql = "SELECT * FROM audience WHERE email = ?";
-//        String sql = "SELECT id, name, email, birthday, audience_uuid, mailcount, opencount, clickcount, create_time FROM audience WHERE email = ?";
         RowMapper<Audience> mapper = orginAudienceRowMapper();
         return jdbcTemplate.queryForObject(sql, mapper, email);
     }

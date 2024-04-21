@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -41,6 +42,32 @@ public class AudienceController {
             return new ResponseEntity<>(audiences,HttpStatus.OK);
         }catch (Exception e){
             String errorMessage = "error on getting all audience by company account.";
+            log.error(errorMessage);
+            return new ResponseEntity<>(errorMessage,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/tag")
+    public ResponseEntity<?>getAllAudienceByTag(@RequestParam("id")Long tagId){
+        try{
+            String account = authenticationComponent.getAccountFromAuthentication();
+            List<Audience> audiences = audienceService.getAudienceByTag(tagId,account);
+            return new ResponseEntity<>(audiences,HttpStatus.OK);
+        }catch (Exception e){
+            String errorMessage = "error on getting all audience by tag.";
+            log.error(errorMessage);
+            return new ResponseEntity<>(errorMessage,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/new-count")
+    public ResponseEntity<?> getNewAudienceCountLast7Days(@RequestParam("days")Integer days){
+        try{
+            String account = authenticationComponent.getAccountFromAuthentication();
+            Map<String,Integer> resultMap  = audienceService.getNewAudienceCountLastWeek(account,days);
+            return new ResponseEntity<>(resultMap,HttpStatus.OK);
+        }catch (Exception e){
+            String errorMessage = "error on getting audience been added on last 7 days.";
             log.error(errorMessage);
             return new ResponseEntity<>(errorMessage,HttpStatus.BAD_REQUEST);
         }

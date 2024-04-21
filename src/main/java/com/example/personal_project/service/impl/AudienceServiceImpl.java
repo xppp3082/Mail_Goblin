@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -77,6 +78,16 @@ public class AudienceServiceImpl implements AudienceService {
     @Override
     public List<Audience> getAllAudienceByCampaign(Campaign campaign) {
         return audienceRepo.getAllAudienceByCampaign(campaign);
+    }
+
+    @Override
+    public List<Audience> getAudienceByTag(Long tagId, String account) {
+        return audienceRepo.getAllAudienceByTagId(tagId,account);
+    }
+
+    @Override
+    public Map<String, Integer> getNewAudienceCountLastWeek(String account,Integer daysCount) {
+        return audienceRepo.getNewAudienceCountLastWeek(account,daysCount);
     }
 
     @Override
