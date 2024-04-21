@@ -179,4 +179,36 @@ public class MailRepo {
 
         return dailyDeliveryRates;
     }
+
+    public Map<String,Integer> calculateMailConversionRate(String account){
+        Map<String,Integer> conversionRates = new HashMap<>();
+        String sql = """
+                SELECT
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS RECEIVE,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS FAILED,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS OPEN,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS CLICK
+                FROM mail m
+                LEFT JOIN campaign c ON m.campaign_id = c.id
+                LEFT JOIN template t ON c.template_id = t.id
+                LEFT JOIN company comp ON t.company_id = comp.id
+                WHERE comp.account = ?
+                AND m.send_date >= CURDATE() - INTERVAL 30 DAY
+                """;
+
+        jdbcTemplate.query(sql, rs -> {
+            conversionRates.put("RECEIVE", rs.getInt("RECEIVE"));
+            conversionRates.put("FAILED", rs.getInt("FAILED"));
+            conversionRates.put("OPEN", rs.getInt("OPEN"));
+            conversionRates.put("CLICK", rs.getInt("CLICK"));
+        }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(), DeliveryStatus.OPEN.name(), DeliveryStatus.CLICK.name(), account);
+//        // 計算所有郵件的總數
+//        int totalMails = conversionRates.values().stream().mapToInt(Integer::intValue).sum();
+//        conversionRates.put("ALL", totalMails);
+        // 計算 "ALL"，即 RECEIVE 和 FAILED 的總和
+        int totalReceivedAndFailed = conversionRates.getOrDefault("RECEIVE", 0) + conversionRates.getOrDefault("FAILED", 0);
+        conversionRates.put("ALL", totalReceivedAndFailed);
+        return conversionRates;
+    }
+
 }

@@ -109,6 +109,18 @@ public class MailTrackController {
             return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping("/conversion")
+    public ResponseEntity<?>calculateMailConversionRate(){
+        try{
+            String account = authenticationComponent.getAccountFromAuthentication();
+            Map<String,Integer> conversionRates =mailService.calculateMailConversionRate(account);
+            return new ResponseEntity<>(conversionRates, HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on getting conversion rate of company.";
+            log.error(errorResponse+" : "+e.getMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        }
+    }
 
 //    @PostMapping("/mailgun/webhook")
 //    public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {

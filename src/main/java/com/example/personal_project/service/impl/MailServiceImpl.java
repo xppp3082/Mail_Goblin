@@ -46,4 +46,9 @@ public class MailServiceImpl implements MailService {
     public Map<LocalDate, Double> trackDailyMailDeliveryRate(String account) {
         return mailRepo.trackDailyMailDeliveryRate(account);
     }
+
+    @Override
+    public Map<String, Integer> calculateMailConversionRate(String account) {
+        return mailRepo.calculateMailConversionRate(account);
+    }
 }
