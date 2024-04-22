@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<div class="container mt-5">
+    <h1>Dashboard</h1>
+    <hr>
+    <div id="conversion-rate" class="container"></div>
+    <div id="delivery-rate" class="container"></div>
+    <div id="daily-delivery" class="container"></div>
+</div>
+<div id = "new-add" class="container"></div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+<script>
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const token = localStorage.getItem('token');
+    // 构建请求头
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+    };
+    getConversionRateGraph();
+    getDailyDeliveryRate();
+    async function getConversionRateGraph(){
+        try{
+            const response = await fetch('api/1.0/track/conversion',{
+                method:'GET',
+                headers:headers
+            });
+            const data = await response.json();
+            const expectedOrder = ["ALL", "RECEIVE", "OPEN", "CLICK", "FAILED"];
+            const sortedData = expectedOrder.map(key => [key, data[key]]);
+
+            const types = sortedData.map(pair => pair[0]);
+            const count = sortedData.map(pair => pair[1]);
+            // const types = Object.keys(data);
+            // const count = Object.values(data);
+
+            const plotData =[{
+                x:types,
+                y:count,
+                type:'bar'
+            }];
+            const layout ={
+                title:'History Conversion Rate',
+                xaxis: {
+                    title: 'Type'
+                },
+                yaxis: {
+                    title: 'Event Count'
+                }
+            };
+            Plotly.newPlot('conversion-rate',plotData,layout);
+        }catch (error){
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    async function getDailyDeliveryRate(){
+        try{
+            const response = await fetch('api/1.0/track/daily-delivery',{
+                method:'GET',
+                headers:headers
+            });
+            const data = await response.json();
+            const date = Object.keys(data);
+            const count = Object.values(data);
+            const traceData ={
+                x:date,
+                y:count,
+                type:'scatter'
+            }
+            const layout ={
+                title:'Daily Delivery Rate of Past 30 Days',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'Delivery Rate'
+                }
+            };
+            var graphData = [traceData];
+            Plotly.newPlot('daily-delivery',graphData,layout);
+        }catch (error){
+            console.error('Error fetching data:', error);
+        }
+    }
+</script>
+</body>
+</html>

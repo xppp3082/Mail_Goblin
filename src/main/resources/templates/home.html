@@ -31,10 +31,11 @@
 <!--    </div>-->
 <!--</nav>-->
 
-<div th:include="_components/navbar.html"></div>
+<div th:insert="_components/navbar.html"></div>
 <!-- Campaign Container -->
-<div class="container">
+<div class="container mt-5">
     <h1>Campaign</h1>
+    <hr>
     <br><br>
     <!-- Campaign List -->
     <div>
@@ -68,6 +69,12 @@
                 <label for="send_date">Send Date:</label>
                 <input type="date" class="form-control" id="send_date" name="send_date">
             </div>
+            <div class="form-group">
+                <label for="tag_id">Tag:</label>
+                <select class="form-control" id="tag_id" name="tag_id">
+                    <!-- Populate with available tags -->
+                </select>
+            </div>
             <button type="button" class="btn btn-primary" onclick="saveDraft()">Save Draft</button>
             <button type="button" class="btn btn-success" onclick="saveComplete()">Save Complete</button>
         </form>
@@ -89,7 +96,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-
     localStorage.setItem('token','eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     // 构建请求头
@@ -101,6 +107,7 @@
     window.onload = async function() {
         await loadCampaigns();
         await loadTemplates();
+        await loadTags();
     }
 
     function navigateToAddTemplate() {
@@ -274,6 +281,50 @@
             alert('Failed to delete template');
         }
     }
+
+    async function loadTags() {
+        try {
+            const response = await fetch('/api/1.0/tag/get', {
+                method: 'GET',
+                headers: headers
+            });
+            const tags = await response.json();
+            // displayTags(tags);
+            populateTagOptions(tags);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function populateTagOptions(tags) {
+        const tagSelect = document.getElementById('tag_id');
+        tagSelect.innerHTML = ''; // 清空選項
+
+        tags.forEach(function(tag) {
+            const option = document.createElement('option');
+            option.value = tag.id;
+            option.innerText = tag.name;
+            tagSelect.appendChild(option);
+        });
+    }
+
+    function displayTags(tags) {
+        const tagsContainer = document.getElementById('tagList');
+        tagsContainer.innerHTML = ''; // 清空容器
+
+        tags.forEach(function(tag) {
+            const tagItem = document.createElement('div');
+            tagItem.classList.add('tag-item');
+
+            const tagName = document.createElement('span');
+            tagName.innerText = tag.name;
+
+            tagItem.appendChild(tagName);
+            tagsContainer.appendChild(tagItem);
+        });
+    }
+
+
 </script>
 </body>
 </html>

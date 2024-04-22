@@ -59,4 +59,9 @@ public class FrontController {
     public String showAudiencePage(){
         return "audience";
     }
+
+    @GetMapping("/dashboard")
+    public String showDashboardPage(){
+        return "dashboard";
+    }
 }

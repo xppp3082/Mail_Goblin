@@ -354,7 +354,6 @@ public class AudienceRepo {
             log.error("error on getting new added audience for past days : "+e.getMessage());
             return 0;
         }
-
     }
 
     public Audience finAudienceByEmail(String email) {

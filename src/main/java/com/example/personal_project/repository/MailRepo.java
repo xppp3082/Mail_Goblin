@@ -181,7 +181,7 @@ public class MailRepo {
     }
 
     public Map<String,Integer> calculateMailConversionRate(String account){
-        Map<String,Integer> conversionRates = new HashMap<>();
+        Map<String,Integer> conversionRates = new LinkedHashMap<>();
         String sql = """
                 SELECT
                 SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS RECEIVE,

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-<div th:include="_components/navbar.html"></div>
+<div th:insert="_components/navbar.html"></div>
 <div class="container mt-5">
     <h1>Audience</h1>
     <hr>
@@ -34,6 +34,36 @@
 </div>
 <br><br>
 <div class="container">
+    <h1>Add User</h1>
+    <br><br>
+    <!-- Add User Form -->
+    <form id="addUserForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="birthday">Birthday:</label>
+            <input type="date" class="form-control" id="birthday" name="birthday">
+        </div>
+<!--        <div class="form-group">-->
+<!--            <label for="tags">Tags:</label>-->
+<!--            <select multiple class="form-control" id="tags" name="tags">-->
+<!--                &lt;!&ndash; Tags options will be populated here &ndash;&gt;-->
+<!--            </select>-->
+<!--        </div>-->
+        <div class="form-group" id="tagOptions">
+            <!-- Tags options will be populated here -->
+        </div>
+        <button type="submit" class="btn btn-primary">Add User</button>
+    </form>
+</div>
+<br><br>
+<div class="container">
     <h2>User List</h2>
     <!-- User Table -->
     <table class="table">
@@ -46,6 +76,7 @@
             <th>Open Count</th>
             <th>Click Count</th>
             <th>Tags</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody id="userList">
@@ -53,12 +84,12 @@
         </tbody>
     </table>
 </div>
+<div id = "new-add" class="container"></div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
 <script>
-
-
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     // 构建请求头
@@ -70,7 +101,7 @@
         await loadTags();
         await loadUsers();
     }
-
+    newAudienceCountLast7Fays();
     document.getElementById('addTagForm').addEventListener('submit', function (event) {
         event.preventDefault(); // 阻止表單默認行為
         const formData = new FormData(this);
@@ -102,6 +133,7 @@
             });
             const tags = await response.json();
             displayTags(tags);
+            populateTagOptions(tags);
         } catch (error) {
             console.error(error);
         }
@@ -180,6 +212,7 @@
                 <td>${user.opencount}</td>
                 <td>${user.clickcount}</td>
                 <td>${getTagsAsString(user.tags)}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button></td>
             `;
             userList.appendChild(row);
         });
@@ -191,6 +224,141 @@
             return 'No tags';
         }
         return tags.map(tag => tag.name).join(', ');
+    }
+
+    // 刪除使用者
+    async function deleteUser(userId) {
+        try {
+            const response = await fetch(`/api/1.0/audience/delete?id=${userId}`, {
+                method: 'DELETE',
+                headers:headers
+            });
+            if (response.ok) {
+                alert('User deleted successfully');
+                await loadUsers(); // 重新載入使用者列表
+            } else {
+                throw new Error('Failed to delete user');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete user');
+        }
+    }
+
+    // 填充標籤選項
+    function populateTagOptions(tags) {
+        // const tagSelect = document.getElementById('tags');
+        // tagSelect.innerHTML = ''; // 清空選項
+
+        // tags.forEach(function(tag) {
+        //     const option = document.createElement('option');
+        //     option.value = tag.id;
+        //     option.innerText = tag.name;
+        //     tagSelect.appendChild(option);
+        // });
+        const tagOptionsDiv = document.getElementById('tagOptions');
+        tagOptionsDiv.innerHTML = ''; // 清空選項
+
+        tags.forEach(function(tag) {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.classList.add('form-check');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('form-check-input');
+            checkbox.value = tag.id;
+            checkbox.name = 'tags';
+            checkbox.id = 'tag' + tag.id;
+
+            const label = document.createElement('label');
+            label.classList.add('form-check-label');
+            label.htmlFor = 'tag' + tag.id;
+            label.innerText = tag.name;
+
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+
+            tagOptionsDiv.appendChild(checkboxDiv);
+        });
+    }
+
+    document.getElementById('addUserForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 阻止表單默認提交行為
+
+        // 手動構建包含 name、email 和 birthday 的對象
+        const user = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            birthday: document.getElementById('birthday').value,
+            tags: [] // 初始化 tags 數組
+        };
+
+        // 遍歷選中的標籤，將其添加到 tags 數組中
+        document.querySelectorAll('input[name="tags"]:checked').forEach(function(checkbox) {
+            user.tags.push({
+                id: parseInt(checkbox.value), // 將值轉換為整數
+                company_id: 11, // 假設 company_id 固定為 1，你可以根據實際情況調整
+                name: checkbox.dataset.name // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+            });
+        });
+
+        // 將 user 對象轉換為 JSON 字符串並添加到 FormData 中
+        const formData = new FormData();
+        formData.append('user', JSON.stringify(user));
+
+        console.log(formData.toString()); // 輸出 FormData 字符串表示形式
+        console.log([...formData]); // 輸出 FormData 中的鍵值對
+
+        // 提交 FormData
+        try {
+                const response = await fetch('/api/1.0/audience/add', {
+                    method: 'POST',
+                    headers: headers,
+                    body:  JSON.stringify(user)
+                    // body: JSON.stringify(requestData)
+                });
+                if (response.ok) {
+                    alert('User added successfully');
+                    // 清空表單
+                    this.reset();
+                    await loadTags(); // 重新載入標籤列表
+                } else {
+                    throw new Error('Failed to add user');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to add user');
+            }
+    });
+
+    async function newAudienceCountLast7Fays(){
+        try {
+            const response = await  fetch('/api/1.0/audience/new-count?days=7',{
+                method:'GET',
+                headers:headers
+            });
+            const data = await  response.json();
+            const dates = Object.keys(data);
+            const count = Object.values(data);
+
+            const plotData = [{
+                x: dates,
+                y: count,
+                type: 'bar'
+            }];
+            const layout = {
+                title: 'New Audience Count in Last 7 Days',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'New Audience Count'
+                }
+            };
+            Plotly.newPlot('new-add', plotData, layout);
+        }catch (error){
+            console.error('Error fetching data:', error);
+        }
     }
 </script>
 </body>
