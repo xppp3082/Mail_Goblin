@@ -229,6 +229,9 @@ public class AudienceRepo {
                 audience.setEmail(rs.getString("email"));
                 audience.setBirthday(rs.getString("birthday"));
                 audience.setCompanyId(rs.getLong("company_id"));
+                audience.setMailCount(rs.getInt("mailcount"));
+                audience.setOpenCount(rs.getInt("opencount"));
+                audience.setClickCount(rs.getInt("clickcount"));
                 audienceMap.put(audienceId, audience);
             } else {
                 audience = audienceMap.get(audienceId);

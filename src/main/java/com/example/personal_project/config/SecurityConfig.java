@@ -2,6 +2,7 @@ package com.example.personal_project.config;
 
 import com.example.personal_project.middleware.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,8 +43,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/1.0/company/sign-up", "/api/1.0/company/sign-in","api/1.0/track/**", "/v3/api-docs/**", "/swagger-ui/**","/configure").permitAll() // Allow access to signup and signin without authentication
-                                .anyRequest().authenticated() // All other requests require authentication
+                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                .requestMatchers("/api/1.0/company/sign-up", "/api/1.0/company/sign-in","api/1.0/track/**","api/1.0/template/**","/upload-image").permitAll() // Allow access to signup and signin without authentication
+                                .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll()
+//                                .requestMatchers("/api/1.0/company/sign-up", "/api/1.0/company/sign-in","api/1.0/track/**", "/v3/api-docs/**", "/swagger-ui/**","/configure").permitAll() // Allow access to signup and signin without authentication
+//                                .anyRequest().authenticated() // All other requests require authentication
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT Token filter
         return http.build();

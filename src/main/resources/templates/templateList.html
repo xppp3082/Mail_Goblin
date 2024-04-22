@@ -26,7 +26,7 @@
         // 加载模板列表
         async function loadTemplates() {
             try {
-                const response = await fetch('api/1.0/template/all?id=1'); // 获取所有模板的 API 地址
+                const response = await fetch('api/1.0/template/all?id=11'); // 获取所有模板的 API 地址
                 console.log(response);
                 const templates = await response.json();
                 console.log(templates);

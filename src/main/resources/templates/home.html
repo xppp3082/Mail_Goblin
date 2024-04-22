@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light">-->
+<!--    <a class="navbar-brand" href="#">Mail Goblin</a>-->
+<!--    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"-->
+<!--            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--        <span class="navbar-toggler-icon"></span>-->
+<!--    </button>-->
+
+<!--    <div class="collapse navbar-collapse" id="navbarSupportedContent">-->
+<!--        <ul class="navbar-nav mr-auto">-->
+<!--            <li class="nav-item active">-->
+<!--                <a class="nav-link" href="/homePage">Campaign</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/audience">Audience</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/dashboard">Dashboard</a>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<div th:include="_components/navbar.html"></div>
+<!-- Campaign Container -->
+<div class="container">
+    <h1>Campaign</h1>
+    <br><br>
+    <!-- Campaign List -->
+    <div>
+        <h2>All Campaigns</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Target Date</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody id="campaignList"></tbody>
+        </table>
+    </div>
+    <!-- Create New Campaign Form -->
+    <div>
+        <h2>Create New Campaign</h2>
+        <form id="newCampaignForm">
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" class="form-control" id="subject" name="subject">
+            </div>
+            <div class="form-group">
+                <label for="templateId">Template:</label>
+                <select class="form-control" id="templateId" name="template_id">
+                    <!-- Populate with existing templates -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="send_date">Send Date:</label>
+                <input type="date" class="form-control" id="send_date" name="send_date">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="saveDraft()">Save Draft</button>
+            <button type="button" class="btn btn-success" onclick="saveComplete()">Save Complete</button>
+        </form>
+    </div>
+</div>
+<br><br>
+<!-- Template Container -->
+<div class="container">
+    <h2>Template List</h2>
+    <div id="templateContainer"></div>
+</div>
+
+<div class="container">
+    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>
+</div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+
+    localStorage.setItem('token','eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const token = localStorage.getItem('token');
+    // 构建请求头
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+    };
+    // 页面加载完成后，获取并显示所有模板
+    window.onload = async function() {
+        await loadCampaigns();
+        await loadTemplates();
+    }
+
+    function navigateToAddTemplate() {
+        window.location.href = '/configure';
+    }
+
+    // Load all campaigns
+    async function loadCampaigns() {
+        try {
+            const response = await fetch('/api/1.0/campaign/all',{
+                method: 'GET', // 或其他请求方法
+                headers: headers
+            });
+            const campaigns = await response.json();
+            displayCampaigns(campaigns);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    // Display campaigns
+    function displayCampaigns(campaigns) {
+        const campaignList = document.getElementById('campaignList');
+        campaignList.innerHTML = ''; // Clear existing list
+
+        campaigns.forEach(function(campaign) {
+            const row = document.createElement('tr');
+            console.log(campaign);
+            row.innerHTML = `
+                <td>${campaign.subject}</td>
+                <td>${campaign.send_date}</td>
+                <td>${campaign.status}</td>
+            `;
+            campaignList.appendChild(row);
+        });
+    }
+
+    // 加载模板列表
+    async function loadTemplates() {
+        try {
+            const response = await fetch('/api/1.0/template/all?id=11'); // 获取所有模板的 API 地址
+            const templates = await response.json();
+            populateTemplateDropdown(templates);
+            displayTemplates(templates);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    // Populate template dropdown
+    function populateTemplateDropdown(templates) {
+        const templateDropdown = document.getElementById('templateId');
+        templateDropdown.innerHTML = ''; // Clear existing options
+
+        templates.forEach(function(template) {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.innerText = template.subject;
+            templateDropdown.appendChild(option);
+        });
+    }
+
+    // Save draft
+    async function saveDraft() {
+        const formData = new FormData(document.getElementById('newCampaignForm'));
+        const requestData = Object.fromEntries(formData.entries());
+        console.log(requestData);
+        try {
+            const response = await fetch('/api/1.0/campaign/draft', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestData)
+            });
+            if (response.ok) {
+                alert('Draft saved successfully');
+                await loadCampaigns(); // Reload campaigns
+            } else {
+                throw new Error('Failed to save draft');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save draft');
+        }
+    }
+
+    // Save complete
+    async function saveComplete() {
+        const formData = new FormData(document.getElementById('newCampaignForm'));
+        const requestData = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/1.0/campaign/complete', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestData)
+            });
+            if (response.ok) {
+                alert('Complete campaign saved successfully');
+                await loadCampaigns(); // Reload campaigns
+            } else {
+                throw new Error('Failed to save complete campaign');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save complete campaign');
+        }
+    }
+
+    // 显示模板列表
+    function displayTemplates(templates) {
+        const templateContainer = document.getElementById('templateContainer');
+        templateContainer.innerHTML = ''; // 清空容器内容
+
+        templates.forEach(function(template) {
+            // 创建模板卡片
+            const templateCard = document.createElement('div');
+            templateCard.classList.add('card', 'mb-3');
+
+            // 卡片内容
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+
+            // 主题
+            const subject = document.createElement('h5');
+            subject.classList.add('card-title');
+            subject.innerText = template.subject;
+
+            // 编辑按钮
+            const editButton = document.createElement('button');
+            editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
+            editButton.innerText = 'Edit';
+            editButton.onclick = function() {
+                editTemplate(template.id);
+            };
+
+            // 删除按钮
+            const deleteButton = document.createElement('button');
+            deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = function() {
+                deleteTemplate(template.id);
+            };
+
+            // 组装卡片内容
+            cardBody.appendChild(subject);
+            cardBody.appendChild(editButton);
+            cardBody.appendChild(deleteButton);
+            templateCard.appendChild(cardBody);
+
+            // 添加到模板容器中
+            templateContainer.appendChild(templateCard);
+        });
+    }
+    // 编辑模板
+    function editTemplate(templateId) {
+        // 构造编辑页面的 URL
+        const editUrl = '/edit-template.html?id=' + templateId;
+        // 在当前窗口中打开编辑页面
+        window.location.href = editUrl;
+    }
+    // 删除模板
+    async function deleteTemplate(templateId) {
+        try {
+            const response = await fetch('/api/1.0/template/delete?id=' + templateId, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Template deleted successfully');
+                await loadTemplates(); // 重新加载模板列表
+            } else {
+                throw new Error('Failed to delete template');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete template');
+        }
+    }
+</script>
+</body>
+</html>

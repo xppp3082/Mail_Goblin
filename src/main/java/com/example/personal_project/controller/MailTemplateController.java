@@ -77,7 +77,7 @@ public class MailTemplateController {
         }
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<?> updateTemplate(@RequestParam(value = "id") Long templateId,@RequestBody MailTemplate mailTemplate){
         try {
             mailTemplate.setId(templateId);

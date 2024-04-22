@@ -1,12 +1,10 @@
 package com.example.personal_project.repository;
 
-import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
 import com.example.personal_project.model.status.CampaignStatus;
 import com.example.personal_project.model.status.ExecuteStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mapping.model.SpELContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -28,8 +26,22 @@ public class CampaignRepo {
         String sql = """
                 select * from campaign;
                 """;
-        RowMapper<Campaign> mapper = orginCampaignRowMapper();
+        RowMapper<Campaign> mapper = originCampaignRowMapper();
         List<Campaign>campaigns = jdbcTemplate.query(sql,mapper);
+        return campaigns;
+    }
+
+    public List<Campaign> getAllCampaignsByAccount(String account){
+        String sql = """
+                select campaign.* from campaign
+                left join template 
+                on 
+                campaign.template_id= template.id
+                where 
+                template.company_id = (select id from company where account = ?);
+                """;
+        RowMapper<Campaign>mapper = originCampaignRowMapper();
+        List<Campaign> campaigns = jdbcTemplate.query(sql,mapper,account);
         return campaigns;
     }
 
@@ -37,7 +49,7 @@ public class CampaignRepo {
         String sql = """
                 select * from campaign where status =?;
                 """;
-        RowMapper<Campaign> mapper = orginCampaignRowMapper();
+        RowMapper<Campaign> mapper = originCampaignRowMapper();
         List<Campaign>campaigns = jdbcTemplate.query(sql,mapper, CampaignStatus.COMPLETED.name());
         return campaigns;
     }
@@ -53,7 +65,25 @@ public class CampaignRepo {
         }
     }
 
-    public RowMapper<Campaign>orginCampaignRowMapper(){
+    public Campaign insertNewCampaign(Campaign campaign){
+        String sql = """
+                INSERT INTO campaign 
+                (template_id,subject,target_date,status,tag_id,execute_status)
+                VALUES
+                (?,?,?,?,?,?);
+                """;
+        try{
+            jdbcTemplate.update(sql,
+                    campaign.getTemplateId(),campaign.getSubject(),
+                    campaign.getSendDate(),campaign.getStatus(),
+                    campaign.getTagId(),campaign.getExecuteStatus());
+        }catch (Exception e){
+            log.error("Error on inserting new campaign with templateId : " +campaign.getTemplateId());
+        }
+        return campaign;
+    }
+
+    public RowMapper<Campaign> originCampaignRowMapper(){
         return new RowMapper<Campaign>() {
             @Override
             public Campaign mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -64,6 +94,7 @@ public class CampaignRepo {
                 Date senDateSQL = rs.getDate("target_date");
                 LocalDate sendDate = senDateSQL.toLocalDate();
                 campaign.setSendDate(sendDate);
+                campaign.setStatus(rs.getString("status"));
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));
                 campaign.setExecuteStatus(rs.getString("execute_status"));

@@ -39,12 +39,12 @@ public class MailTemplateRepo {
     public void updateMailTemplate(MailTemplate mailTemplate){
         String sql = """
                 UPDATE template 
-                SET company_id = ?, url = ?,subject = ?,content = ?, picture = ? 
+                SET url = ?,subject = ?,content = ?, picture = ? 
                 WHERE id = ?;
                 """;
         try{
             jdbcTemplate.update(sql,
-                    mailTemplate.getCompanyId(), mailTemplate.getUrl(),
+                    mailTemplate.getUrl(),
                     mailTemplate.getSubject(), mailTemplate.getContent(),
                     mailTemplate.getPicture(), mailTemplate.getId());
         }catch (Exception e){

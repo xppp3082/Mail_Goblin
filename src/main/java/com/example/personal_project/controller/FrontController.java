@@ -42,11 +42,21 @@ public class FrontController {
             log.error(e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Errors on saving the mail template!");
         }
-        return "redirect:/marketing/configure";
+        return "redirect:/configure";
     }
 
     @GetMapping("/templates")
     public String showAlltemplate(){
         return "templateList";
+    }
+
+    @GetMapping("/homePage")
+    public String showHomePage(){
+        return "home";
+    }
+
+    @GetMapping("/audience")
+    public String showAudiencePage(){
+        return "audience";
     }
 }

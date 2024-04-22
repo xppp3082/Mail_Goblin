@@ -15,7 +15,7 @@
 <body>
 <h1>Mail Template Setting</h1>
 <!--<form th:action="@{/marketing/configure}" method="post">-->
-<form th:action="@{/marketing/saveTemplate}" th:object="${mailTemplate}" method="post" enctype="multipart/form-data">
+<form th:action="@{/saveTemplate}" th:object="${mailTemplate}" method="post" enctype="multipart/form-data">
     <div>
         <label for="marketingSubject">主題:</label>
         <input type="text" id="marketingSubject" name="subject" th:field="*{subject}" th:required="required">

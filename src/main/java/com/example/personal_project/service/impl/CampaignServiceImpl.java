@@ -2,6 +2,7 @@ package com.example.personal_project.service.impl;
 
 import com.example.personal_project.model.*;
 import com.example.personal_project.model.status.DeliveryStatus;
+import com.example.personal_project.model.status.ExecuteStatus;
 import com.example.personal_project.repository.CampaignRepo;
 import com.example.personal_project.repository.MailTemplateRepo;
 import com.example.personal_project.service.CampaignService;
@@ -41,8 +42,8 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public List<Campaign> getAllCampaigns() {
-        return campaignRepo.getAllCampaigns();
+    public List<Campaign> getAllCampaignsByAccount(String account) {
+        return campaignRepo.getAllCampaignsByAccount(account);
     }
 
     @Override
@@ -66,6 +67,13 @@ public class CampaignServiceImpl implements CampaignService {
         }catch (Exception e){
             log.error("batch insert email record fail : "+e.getMessage());
         }
+    }
+
+    @Override
+    public Campaign insertNewCampaign(Campaign campaign,String status) {
+        campaign.setStatus(status);
+        campaign.setExecuteStatus(ExecuteStatus.PENDING.name());
+        return campaignRepo.insertNewCampaign(campaign);
     }
 
     //根據Campaign的時稱安排進行自動排程寄送
