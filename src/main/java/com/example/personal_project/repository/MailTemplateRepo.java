@@ -6,11 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 @Slf4j
@@ -33,6 +35,54 @@ public class MailTemplateRepo {
                     mailTemplate.getPicture());
         } catch (Exception e) {
             log.error("error on insert new mailTemplate : " + e.getMessage());
+        }
+    }
+
+//    public void insertMailTemplateWithAcount(String account,MailTemplate mailTemplate) {
+//        String sql = """
+//                INSERT INTO template
+//                (company_id,url,subject,content,picture)
+//                VALUES
+//                ((SELECT id FROM company WHERE account =?),?,?,?,?);
+//                """;
+//        try {
+//            jdbcTemplate.update(sql,
+//                    account, mailTemplate.getUrl(),
+//                    mailTemplate.getSubject(), mailTemplate.getContent(),
+//                    mailTemplate.getPicture());
+//        } catch (Exception e) {
+//            log.error("error on insert new mailTemplate : " + e.getMessage());
+//        }
+//    }
+
+    public MailTemplate insertMailTemplateWithAcount(String account,MailTemplate mailTemplate) {
+        String sql = """
+                INSERT INTO template 
+                (company_id,url,subject,content,picture) 
+                VALUES 
+                ((SELECT id FROM company WHERE account =?),?,?,?,?);
+                """;
+        try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(
+                    new PreparedStatementCreator() {
+                        @Override
+                        public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                            PreparedStatement ps  = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                            ps.setString(1,account);
+                            ps.setString(2,mailTemplate.getUrl());
+                            ps.setString(3,mailTemplate.getSubject());
+                            ps.setString(4,mailTemplate.getContent());
+                            ps.setString(5,mailTemplate.getPicture());
+                            return ps;
+                        }
+                    },keyHolder);
+            Long generateId = keyHolder.getKey().longValue();
+            mailTemplate.setId(generateId);
+            return mailTemplate;
+        } catch (Exception e) {
+            log.error("error on insert new mailTemplate : " + e.getMessage());
+            return null;
         }
     }
 

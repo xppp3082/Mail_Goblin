@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Edit Mail Template</title>
+<!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" href="/_css/navbar.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<!-- Summernote 编辑器 -->
+<div class="container mt-5">
+    <h1>Mail Template Setting</h1>
+    <hr>
+    <div>
+        <label for="marketingSubject">主題:</label>
+        <input type="text" id="marketingSubject" name="subject" required="required">
+    </div>
+    <br>
+    <textarea id="templateContent"></textarea>
+    <br>
+    <div>
+        <label for="marketingUrl">行銷網址:</label>
+        <input type="text" id="marketingUrl" name="url" required="required">
+    </div>
+    <br>
+    <!-- 提交按钮 -->
+    <button id="updateTemplateBtn">Update Template</button>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        //從URL中獲取模板ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateId = urlParams.get('id');
+        console.log(templateId);
+        //初始化Summernote編輯器
+        $('#templateContent').summernote({
+            placeholder: 'Enter template content here...',
+            height: 600,
+            callbacks: {
+                onImageUpload: function (files) {
+                    // 将图片上传到服务器
+                    var formData = new FormData();
+                    formData.append('image', files[0]);
+
+                    $.ajax({
+                        url: '/upload-image', // 上传图片的接口地址
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            // 图片上传成功后，将图片 URL 插入到编辑器中
+                            console.log(response);
+                            // console.log(response.url);
+                            $('#templateContent').summernote('insertImage', response);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    });
+                }
+            }
+        });
+
+        // 如果有模板 ID，載入模板内容到编辑器中
+        if (templateId) {
+            loadTemplate(templateId);
+        }
+
+        //載入模板內容
+        async function loadTemplate(id) {
+            try {
+                const response = await fetch("api/1.0/template/get?id=" + id);
+                const template = await response.json();
+                console.log("template :"+template);
+                //將模板內容載入Summernote編輯器
+                $('#marketingSubject').val(template.subject);
+                $('#marketingUrl').val(template.url);
+                $('#templateContent').summernote('code', template.content);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        $('#updateTemplateBtn').on('click', async function () {
+            const content = $('#templateContent').summernote('code');
+            const requestData = {
+                content: content
+                //如果還有其他部分要更新，也在這邊加入
+            };
+            try {
+                //發送更新請求
+                const response = await fetch(`api/1.0/template/update?id=` + templateId, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                if (response.ok) {
+                    alert('Template updated successfully');
+                } else {
+                    throw new Error('Failed to update template');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to update template');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

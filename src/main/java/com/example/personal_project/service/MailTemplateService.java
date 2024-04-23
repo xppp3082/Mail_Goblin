@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface MailTemplateService {
     void insertNewTemplate(MailTemplate mailTemplate);
+    MailTemplate insertNewTemplateWithAccount(String account , MailTemplate mailTemplate);
     void deleteTemplate(Long id);
     void updateTemplate(MailTemplate mailTemplate);
     MailTemplate findMailTemplateById(Long templateId);

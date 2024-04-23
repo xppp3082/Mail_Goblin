@@ -147,8 +147,9 @@ public class MailRepo {
     public  Map<LocalDate,Double> trackDailyMailDeliveryRate(String account){
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
         LocalDate startDate = LocalDate.now().minusDays(30);
+        LocalDate endDate = LocalDate.now().plusDays(1);
         // 初始化所有日期的成功率為 0.0
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i <= 30; i++) {
             dailyDeliveryRates.put(startDate.plusDays(i), 0.0);
         }
         String sql = """
@@ -175,7 +176,7 @@ public class MailRepo {
             // 將日期和對應的郵件送達率存儲在 Map 中
             dailyDeliveryRates.put(sendDate, deliveryRate);
         },  DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
-                account, startDate, LocalDate.now());
+                account, startDate, endDate);
 
         return dailyDeliveryRates;
     }

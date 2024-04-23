@@ -24,6 +24,11 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    public MailTemplate insertNewTemplateWithAccount(String account, MailTemplate mailTemplate) {
+        return mailTemplateRepo.insertMailTemplateWithAcount(account, mailTemplate);
+    }
+
+    @Override
     public void deleteTemplate(Long id) {
         mailTemplateRepo.deleteMailTemplate(id);
     }

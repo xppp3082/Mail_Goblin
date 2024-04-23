@@ -1,6 +1,8 @@
 package com.example.personal_project.controller;
 
+import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.MailTemplate;
+import com.example.personal_project.service.CompanyService;
 import com.example.personal_project.service.MailTemplateService;
 import com.example.personal_project.service.StorageService;
 import com.example.personal_project.service.impl.S3Service;
@@ -18,10 +20,14 @@ public class FrontController {
     public final MailTemplateService mailTemplateService;
     public final StorageService storageService;
     public final S3Service s3Service;
-    public FrontController(MailTemplateService mailTemplateService, StorageService storageService, S3Service s3Service) {
+    private final AuthenticationComponent authenticationComponent;
+    private final CompanyService companyService;
+    public FrontController(MailTemplateService mailTemplateService, StorageService storageService, S3Service s3Service, AuthenticationComponent authenticationComponent, CompanyService companyService) {
         this.mailTemplateService = mailTemplateService;
         this.storageService = storageService;
         this.s3Service = s3Service;
+        this.authenticationComponent = authenticationComponent;
+        this.companyService = companyService;
     }
 
     @GetMapping("/configure")
@@ -36,6 +42,9 @@ public class FrontController {
     public String saveTemplate(@ModelAttribute MailTemplate mailTemplate,
                                RedirectAttributes redirectAttributes){
         try{
+            String account = authenticationComponent.getAccountFromAuthentication();
+            Long companyId = companyService.getIdByAccount(account);
+            mailTemplate.setCompanyId(companyId);
             mailTemplateService.insertNewTemplate(mailTemplate);
             redirectAttributes.addFlashAttribute("message", "Successful save the mail template!");
         }catch (Exception e){
@@ -50,6 +59,10 @@ public class FrontController {
         return "templateList";
     }
 
+    @GetMapping("/templateEditor")
+    public String editTemplate(@RequestParam("id") Long templateId){
+        return "templateEditor";
+    }
     @GetMapping("/homePage")
     public String showHomePage(){
         return "home";

@@ -1,6 +1,7 @@
 package com.example.personal_project.controller;
 
 import com.amazonaws.services.cloudwatchrum.model.UserDetails;
+import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.Company;
 import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.service.CompanyService;
@@ -23,9 +24,12 @@ import java.util.List;
 public class MailTemplateController {
     private final MailTemplateService mailTemplateService;
     private final CompanyService companyService;
-    public MailTemplateController(MailTemplateService mailTemplateService, CompanyService companyService) {
+    private final AuthenticationComponent authenticationComponent;
+
+    public MailTemplateController(MailTemplateService mailTemplateService, CompanyService companyService, AuthenticationComponent authenticationComponent) {
         this.mailTemplateService = mailTemplateService;
         this.companyService = companyService;
+        this.authenticationComponent = authenticationComponent;
     }
 
     @GetMapping("/all")
@@ -86,6 +90,20 @@ public class MailTemplateController {
         }catch (Exception e){
             log.error("error on updating the template with id : " + mailTemplate.getId());
             return new ResponseEntity<>("Failed on updating the template, please check you request." , HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addTemplate(@RequestBody MailTemplate mailTemplate){
+        try {
+            log.info("Adding tempalate via endpoint!");
+            String account = authenticationComponent.getAccountFromAuthentication();
+            MailTemplate targetTemplate = mailTemplateService.insertNewTemplateWithAccount(account,mailTemplate);
+            return new ResponseEntity<>(targetTemplate,HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on creating new template by company";
+            log.error(errorResponse+" : "+e.getMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
     }
 }
