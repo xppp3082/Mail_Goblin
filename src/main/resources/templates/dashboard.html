@@ -2,26 +2,40 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="/_css/navbar.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="/_css/highchart.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
 <div class="container mt-5">
     <h1>Dashboard</h1>
     <hr>
-    <div id="conversion-rate" class="container"></div>
-    <div id="delivery-rate" class="container"></div>
-    <div id="daily-delivery" class="container"></div>
-    <div id="daily-event" class="container"></div>
+    <figure class="container">
+        <div id="event-container"></div>
+        <p class="highcharts-description"></p>
+        <div id="conversion-container"></div>
+        <div id="daily-delivery-container"></div>
+    </figure>
+    <div class="container" id="conversion-rate"></div>
+    <div class="container" id="delivery-rate"></div>
+    <div class="container" id="daily-delivery"></div>
+    <div class="container" id="daily-event"></div>
 </div>
 <!--<div id = "new-add" class="container"></div>-->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+<script charset="utf-8" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<!--high chart import test-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 <script>
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
@@ -30,310 +44,428 @@
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
     };
-    getConversionRateGraph();
-    getDailyDeliveryRate();
-    getDailyEventCount(30);
-    async function getConversionRateGraph(){
-        try{
-            const response = await fetch('api/1.0/track/conversion',{
-                method:'GET',
-                headers:headers
-            });
-            const data = await response.json();
-            const expectedOrder = ["ALL", "RECEIVE", "OPEN", "CLICK", "FAILED"];
-            const sortedData = expectedOrder.map(key => [key, data[key]]);
+    // call function for drawing highchart
+    fetchDataAndDrawChart();
+    fetchAndDrawConversionChart();
+    fetchAndDrawDeliveryChart();
 
-            const types = sortedData.map(pair => pair[0]);
-            const count = sortedData.map(pair => pair[1]);
-            // const types = Object.keys(data);
-            // const count = Object.values(data);
-
-            const plotData =[{
-                x:types,
-                y:count,
-                type:'bar'
-            }];
-            const layout ={
-                title:'History Conversion Rate',
-                xaxis: {
-                    title: 'Type'
-                },
-                yaxis: {
-                    title: 'Event Count'
-                }
-            };
-            Plotly.newPlot('conversion-rate',plotData,layout);
-        }catch (error){
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    async function getDailyDeliveryRate(){
-        try{
-            const response = await fetch('api/1.0/track/daily-delivery',{
-                method:'GET',
-                headers:headers
-            });
-            const data = await response.json();
-            const date = Object.keys(data);
-            const count = Object.values(data);
-            const traceData ={
-                x:date,
-                y:count,
-                type:'scatter'
-            }
-            const layout ={
-                title:'Daily Delivery Rate of Past 30 Days',
-                xaxis: {
-                    title: 'Date'
-                },
-                yaxis: {
-                    title: 'Delivery Rate'
-                }
-            };
-            var graphData = [traceData];
-            Plotly.newPlot('daily-delivery',graphData,layout);
-        }catch (error){
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    async function getDailyEventCount(days){
+    async function fetchEventCountData(days) {
         try {
-            const response = await fetch('api/1.0/track/daily-event?days='+days,{
-                method:'GET',
-                headers:headers
-            });
-            const data = await response.json();
-            const receiveDates = Object.keys(data["RECEIVE"]);
-            const receiveCounts  = Object.values(data["RECEIVE"]);
-            const failedDates = Object.keys(data["FAILED"]);
-            const failCounts = Object.values(data["FAILED"]);
-            const openDates = Object.keys(data["OPEN"])
-            const openCounts = Object.values(data["OPEN"])
-            const clickDates = Object.keys(data["CLICK"])
-            const clickCounts = Object.values(data["CLICK"])
-
-            let receiveEvent ={
-                x:receiveDates,
-                y:receiveCounts,
-                type:'scatter',
-                name: 'RECEIVE'
-            };
-            let failEvent={
-                x:failedDates,
-                y:failCounts,
-                type:'scatter',
-                name: 'FAIL'
-            };
-            let openEvent={
-                x:openDates,
-                y:openCounts,
-                type:'scatter',
-                name: 'OPEN'
-            };
-            let clickEvent={
-                x:clickDates,
-                y:clickCounts,
-                type:'scatter',
-                name: 'CLICK'
+            const response = await fetch('api/1.0/track/daily-event?days=' + days, {
+                method: 'GET',
+                headers: headers
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-            const layout ={
-                title:'Daily Event Count of Past 30 Days',
-                xaxis: {
-                    title: 'Date'
-                },
-                yaxis: {
-                    title: 'Event Count'
-                }
-            };
-
-            const traceData = [receiveEvent,failEvent,openEvent,clickEvent]
-            Plotly.newPlot('daily-event', traceData,layout);
-        }catch (error){
-            console.error('Error fetching data:', error);
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error)
         }
     }
-</script>
-
-<style>
-    #chartdiv {
-        width: 70%;
-        height: 500px;
-    }
-</style>
-
-<!-- Resources -->
-<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-
-<!-- Chart code -->
-<script>
-
-    async function fetchData() {
-        const response = await fetch('api/1.0/track/daily-delivery',{
-            method:'GET',
-            headers:headers
-        });
-        return await response.json();
-    }
-
-    async function processData() {
-        const responseData = await fetchData();
-        const dataArray = [];
-
-        for (const [date, value] of Object.entries(responseData)) {
-            const parsedDate = new Date(date);
-            dataArray.push({ date: parsedDate.getTime(), value: value*100 });
-        }
-        console.log(dataArray)
-        return dataArray;
-    }
-    async function updateChart(series) {
-        const data2 = await processData();
-        series.data.setAll(data2);
-
-        // Make stuff animate on load
-        series.appear(1000);
-        chart.appear(1000, 100);
-    }
 
 
-    am5.ready(async function() {
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
-        var root = am5.Root.new("chartdiv");
-        const myTheme = am5.Theme.new(root);
-        myTheme.rule("AxisLabel", ["minor"]).setAll({
-            dy: 1
-        });
-
-// Tweak minor grid opacity
-        myTheme.rule("Grid", ["minor"]).setAll({
-            strokeOpacity: 0.08
-        });
-
-// Set themes
-        root.setThemes([
-            am5themes_Animated.new(root),
-            myTheme
-        ]);
-
-// Create chart
-        var chart = root.container.children.push(am5xy.XYChart.new(root, {
-            panX: false,
-            panY: false,
-            wheelX: "panX",
-            wheelY: "zoomX",
-            paddingLeft: 0
-        }));
-
-
-// Add cursor
-        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-            behavior: "zoomX"
-            // behavior: "none"
-        }));
-        cursor.lineY.set("visible", false);
-
-
-       // ========== generate fake data =============
-        var date = new Date();
-        date.setHours(0, 0, 0, 0);
-        var value = 100;
-
-        function generateData() {
-            value = Math.round((Math.random() * 10 - 5) + value);
-            am5.time.add(date, "day", 1);
-            return {
-                date: date.getTime(),
-                value: value
-            };
-        }
-
-        function generateDatas(count) {
-            var data = [];
-            for (var i = 0; i < count; ++i) {
-                data.push(generateData());
-            }
-            console.log(data)
-            return data;
-        }
-
-        // ========== generate fake data =============
-
-// Create axes
-        var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-            maxDeviation: 0,
-            baseInterval: {
-                timeUnit: "day",
-                count: 1
+    function drawLineChart(data, elementID) {
+        // 整理數據
+        const categories = Object.keys(data["RECEIVE"]); // 取得日期列表
+        const receiveData = Object.values(data["RECEIVE"]); // 接收事件數據
+        const failedData = Object.values(data["FAILED"]); // 失敗事件數據
+        const openData = Object.values(data["OPEN"]); // 打開事件數據
+        const clickData = Object.values(data["CLICK"]); // 點擊事件數據
+        // 使用Highcharts繪製圖表
+        Highcharts.chart(elementID, {
+            title: {
+                text: 'Event Types Over Time',
+                align: 'left'
             },
-            renderer: am5xy.AxisRendererX.new(root, {
-                minorGridEnabled: true,
-                // minGridDistance: 200,
-                minorLabelsEnabled: true
-            }),
-            tooltip: am5.Tooltip.new(root, {})
-        }));
-
-        xAxis.set("minorDateFormats", {
-            day: "dd",
-            month: "MM"
+            subtitle: {
+                text: 'By Date',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories, // X軸日期
+                accessibility: {
+                    rangeDescription: 'Range: 2024-03-25 to 2024-04-24'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Events'
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+            plotOptions: {
+                series: {
+                    label: {
+                        connectorAllowed: false
+                    }
+                }
+            },
+            series: [{
+                name: 'RECEIVE',
+                data: receiveData // 接收事件數據
+            }, {
+                name: 'FAILED',
+                data: failedData // 失敗事件數據
+            }, {
+                name: 'OPEN',
+                data: openData // 打開事件數據
+            }, {
+                name: 'CLICK',
+                data: clickData // 點擊事件數據
+            }],
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
         });
+    }
 
-        var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-            renderer: am5xy.AxisRendererY.new(root, {})
-        }));
+    // 使用async/await等待數據獲取完成並繪製Highchart
+    async function fetchDataAndDrawChart() {
+        try {
+            const data = await fetchEventCountData(30);
+            console.log(data);
+            drawLineChart(data, 'event-container');
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
-
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-        var series = chart.series.push(am5xy.LineSeries.new(root, {
-            name: "Series",
-            xAxis: xAxis,
-            yAxis: yAxis,
-            valueYField: "value",
-            valueXField: "date",
-            tooltip: am5.Tooltip.new(root, {
-                labelText: "{valueY}"
-            })
-        }));
-
-// Actual bullet
-        series.bullets.push(function () {
-            var bulletCircle = am5.Circle.new(root, {
-                radius: 5,
-                fill: series.get("fill")
+    async function fetchConversionData() {
+        try {
+            const response = await fetch('api/1.0/track/conversion', {
+                method: 'GET',
+                headers: headers
             });
-            return am5.Bullet.new(root, {
-                sprite: bulletCircle
-            })
-        })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
 
-// Add scrollbar
-// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-        chart.set("scrollbarX", am5.Scrollbar.new(root, {
-            orientation: "horizontal"
-        }));
+    //function for drawing column chart
+    function drawConversionChart(data, elementID) {
+        const expectedOrder = ["ALL", "RECEIVE", "OPEN", "CLICK", "FAILED"];
+        const sortedData = expectedOrder.map(key => [key, data[key]]);
 
-        await updateChart(series); // 更新图表
-//         var data = generateDatas(31);
-//
-//         var data2 = processData();
-//         series.data.setAll(data2);
-//
-//
-// // Make stuff animate on load
-//         series.appear(1000);
-//         chart.appear(1000, 100);
+        const categories = sortedData.map(pair => pair[0]);
+        const eventData = sortedData.map(pair => pair[1]);
+        // const categories = Object.keys(data);//獲取事件類型
+        // const eventData = Object.values(data);
+        Highcharts.chart(elementID, {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Event Type Conversion',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Source: Your API Endpoint',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories,
+                crosshair: true,
+                accessibility: {
+                    description: 'Event Types'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Count'
+                }
+            },
+            tooltip: {
+                valueSuffix: ''
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Events',
+                data: eventData
+            }]
+        });
+    }
 
-    }); // end am5.ready()
+    async function fetchAndDrawConversionChart() {
+        try {
+            const data = await fetchConversionData();
+            drawConversionChart(data, 'conversion-container');
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function fetchDeliveryData() {
+        try {
+            const response = await fetch('/api/1.0/track/daily-delivery', {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+
+        }
+    }
+
+    function drawDailyDeliveryChart(data, elementID) {
+        // 整理數據
+        const categories = Object.keys(data); // 取得日期列表
+        const deliveryData = Object.values(data).map(value => parseFloat((value * 100).toFixed(2))); // 將值轉換為百分比
+
+        // 使用Highcharts繪製折線圖
+        Highcharts.chart(elementID, {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Daily Delivery Success Rate',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Source: Your API Endpoint',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories,
+                accessibility: {
+                    description: 'Dates'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Success Rate (%)'
+                }
+            },
+            tooltip: {
+                valueSuffix: '%'
+            },
+            series: [{
+                name: 'Success Rate',
+                data: deliveryData
+            }]
+        });
+    }
+
+    async function fetchAndDrawDeliveryChart() {
+        try {
+            const data = await fetchDeliveryData();
+            drawDailyDeliveryChart(data, 'daily-delivery-container')
+        } catch (error) {
+            console.log(error);
+        }
+    }
 </script>
+<!--<script src="/_js/dashboard_plotly.js"></script>-->
 
-<!-- HTML -->
-<div id="chartdiv" class="container"></div>
+<!--&lt;!&ndash;-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;testing for amchart5&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;-->
+<!--<style>-->
+<!--    #chartdiv {-->
+<!--        width: 70%;-->
+<!--        height: 500px;-->
+<!--    }-->
+<!--</style>-->
+
+<!--&lt;!&ndash; Resources &ndash;&gt;-->
+<!--<script src="https://cdn.amcharts.com/lib/5/index.js"></script>-->
+<!--<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>-->
+<!--<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>-->
+
+<!--&lt;!&ndash; Chart code &ndash;&gt;-->
+<!--<script>-->
+
+<!--    async function fetchData() {-->
+<!--        const response = await fetch('api/1.0/track/daily-delivery', {-->
+<!--            method: 'GET',-->
+<!--            headers: headers-->
+<!--        });-->
+<!--        return await response.json();-->
+<!--    }-->
+
+<!--    async function processData() {-->
+<!--        const responseData = await fetchData();-->
+<!--        const dataArray = [];-->
+
+<!--        for (const [date, value] of Object.entries(responseData)) {-->
+<!--            const parsedDate = new Date(date);-->
+<!--            dataArray.push({date: parsedDate.getTime(), value: value * 100});-->
+<!--        }-->
+<!--        console.log(dataArray)-->
+<!--        return dataArray;-->
+<!--    }-->
+
+<!--    async function updateChart(series) {-->
+<!--        const data2 = await processData();-->
+<!--        series.data.setAll(data2);-->
+
+<!--        // Make stuff animate on load-->
+<!--        series.appear(1000);-->
+<!--        chart.appear(1000, 100);-->
+<!--    }-->
+
+
+<!--    am5.ready(async function () {-->
+<!--// Create root element-->
+<!--// https://www.amcharts.com/docs/v5/getting-started/#Root_element-->
+<!--        var root = am5.Root.new("chartdiv");-->
+<!--        const myTheme = am5.Theme.new(root);-->
+<!--        myTheme.rule("AxisLabel", ["minor"]).setAll({-->
+<!--            dy: 1-->
+<!--        });-->
+
+<!--// Tweak minor grid opacity-->
+<!--        myTheme.rule("Grid", ["minor"]).setAll({-->
+<!--            strokeOpacity: 0.08-->
+<!--        });-->
+
+<!--// Set themes-->
+<!--        root.setThemes([-->
+<!--            am5themes_Animated.new(root),-->
+<!--            myTheme-->
+<!--        ]);-->
+
+<!--// Create chart-->
+<!--        var chart = root.container.children.push(am5xy.XYChart.new(root, {-->
+<!--            panX: false,-->
+<!--            panY: false,-->
+<!--            wheelX: "panX",-->
+<!--            wheelY: "zoomX",-->
+<!--            paddingLeft: 0-->
+<!--        }));-->
+
+
+<!--// Add cursor-->
+<!--        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {-->
+<!--            behavior: "zoomX"-->
+<!--            // behavior: "none"-->
+<!--        }));-->
+<!--        cursor.lineY.set("visible", false);-->
+
+
+<!--        // ========== generate fake data =============-->
+<!--        var date = new Date();-->
+<!--        date.setHours(0, 0, 0, 0);-->
+<!--        var value = 100;-->
+
+<!--        function generateData() {-->
+<!--            value = Math.round((Math.random() * 10 - 5) + value);-->
+<!--            am5.time.add(date, "day", 1);-->
+<!--            return {-->
+<!--                date: date.getTime(),-->
+<!--                value: value-->
+<!--            };-->
+<!--        }-->
+
+<!--        function generateDatas(count) {-->
+<!--            var data = [];-->
+<!--            for (var i = 0; i < count; ++i) {-->
+<!--                data.push(generateData());-->
+<!--            }-->
+<!--            console.log(data)-->
+<!--            return data;-->
+<!--        }-->
+
+<!--        // ========== generate fake data =============-->
+
+<!--// Create axes-->
+<!--        var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {-->
+<!--            maxDeviation: 0,-->
+<!--            baseInterval: {-->
+<!--                timeUnit: "day",-->
+<!--                count: 1-->
+<!--            },-->
+<!--            renderer: am5xy.AxisRendererX.new(root, {-->
+<!--                minorGridEnabled: true,-->
+<!--                // minGridDistance: 200,-->
+<!--                minorLabelsEnabled: true-->
+<!--            }),-->
+<!--            tooltip: am5.Tooltip.new(root, {})-->
+<!--        }));-->
+
+<!--        xAxis.set("minorDateFormats", {-->
+<!--            day: "dd",-->
+<!--            month: "MM"-->
+<!--        });-->
+
+<!--        var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {-->
+<!--            renderer: am5xy.AxisRendererY.new(root, {})-->
+<!--        }));-->
+
+
+<!--// Add series-->
+<!--// https://www.amcharts.com/docs/v5/charts/xy-chart/series/-->
+<!--        var series = chart.series.push(am5xy.LineSeries.new(root, {-->
+<!--            name: "Series",-->
+<!--            xAxis: xAxis,-->
+<!--            yAxis: yAxis,-->
+<!--            valueYField: "value",-->
+<!--            valueXField: "date",-->
+<!--            tooltip: am5.Tooltip.new(root, {-->
+<!--                labelText: "{valueY}"-->
+<!--            })-->
+<!--        }));-->
+
+<!--// Actual bullet-->
+<!--        series.bullets.push(function () {-->
+<!--            var bulletCircle = am5.Circle.new(root, {-->
+<!--                radius: 5,-->
+<!--                fill: series.get("fill")-->
+<!--            });-->
+<!--            return am5.Bullet.new(root, {-->
+<!--                sprite: bulletCircle-->
+<!--            })-->
+<!--        })-->
+
+<!--// Add scrollbar-->
+<!--// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/-->
+<!--        chart.set("scrollbarX", am5.Scrollbar.new(root, {-->
+<!--            orientation: "horizontal"-->
+<!--        }));-->
+
+<!--        await updateChart(series); // 更新图表-->
+<!--//         var data = generateDatas(31);-->
+<!--//-->
+<!--//         var data2 = processData();-->
+<!--//         series.data.setAll(data2);-->
+<!--//-->
+<!--//-->
+<!--// // Make stuff animate on load-->
+<!--//         series.appear(1000);-->
+<!--//         chart.appear(1000, 100);-->
+
+<!--    }); // end am5.ready()-->
+<!--</script>-->
+
+<!--&lt;!&ndash; HTML &ndash;&gt;-->
+<!--<div class="container" id="chartdiv"></div>-->
 
 </body>
 </html>
