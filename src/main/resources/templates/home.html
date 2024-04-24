@@ -24,6 +24,7 @@
                 <th>Subject</th>
                 <th>Target Date</th>
                 <th>Status</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody id="campaignList"></tbody>
@@ -117,9 +118,28 @@
                 <td>${campaign.subject}</td>
                 <td>${campaign.send_date}</td>
                 <td>${campaign.status}</td>
+                <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button></td>
             `;
             campaignList.appendChild(row);
         });
+    }
+
+    async function sendCampaign(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/campaign/send?id=${campaignId}`, {
+                method: 'POST',
+                headers: headers
+            });
+            if (response.ok) {
+                alert('Campaign sent successfully');
+                await loadCampaigns(); // Reload campaigns
+            } else {
+                throw new Error('Failed to send campaign');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send campaign');
+        }
     }
 
     // 加载模板列表

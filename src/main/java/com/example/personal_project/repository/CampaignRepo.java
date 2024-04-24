@@ -5,6 +5,7 @@ import com.example.personal_project.model.status.CampaignStatus;
 import com.example.personal_project.model.status.ExecuteStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,30 @@ import java.util.List;
 public class CampaignRepo {
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    public Campaign findCampaignById(Long id){
+        String sql = """
+                SELECT * FROM campaign WHERE id = ?;
+                """;
+        RowMapper<Campaign> mapper = originCampaignRowMapper();
+        try{
+            return jdbcTemplate.queryForObject(sql,mapper,id);
+        }catch (EmptyResultDataAccessException e){
+            log.error("error on finding campaign with this id.");
+            return null;
+        }
+    }
+
+    public void deleteCampaign(Long id){
+        String sql = """
+                DELETE FROM campaign WHERE id = ?;
+                """;
+        try{
+            jdbcTemplate.update(sql,id);
+        }catch (Exception e){
+            log.error("error on deleting the campaign.");
+        }
+    }
 
     public List<Campaign> getAllCampaigns(){
         String sql = """

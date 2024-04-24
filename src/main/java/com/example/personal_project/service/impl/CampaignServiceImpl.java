@@ -42,6 +42,11 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
+    public Campaign findCampaignById(Long id) {
+        return campaignRepo.findCampaignById(id);
+    }
+
+    @Override
     public List<Campaign> getAllCampaignsByAccount(String account) {
         return campaignRepo.getAllCampaignsByAccount(account);
     }
@@ -56,6 +61,7 @@ public class CampaignServiceImpl implements CampaignService {
         campaignRepo.updateCampaignExecuteStatus(campaign);
     }
 
+    @Override
     public void sendCampaign(Campaign campaign) throws MessagingException, UnsupportedEncodingException {
         List<Audience> audiences = audienceService.getAllAudienceByCampaign(campaign);
         MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
@@ -70,10 +76,21 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
+    public void sendCampaignById(Long id) throws MessagingException, UnsupportedEncodingException {
+        Campaign targetCampaign = findCampaignById(id);
+        sendCampaign(targetCampaign);
+    }
+
+    @Override
     public Campaign insertNewCampaign(Campaign campaign,String status) {
         campaign.setStatus(status);
         campaign.setExecuteStatus(ExecuteStatus.PENDING.name());
         return campaignRepo.insertNewCampaign(campaign);
+    }
+
+    @Override
+    public void deleteCampaign(Long id) {
+        campaignRepo.deleteCampaign(id);
     }
 
     //根據Campaign的時稱安排進行自動排程寄送

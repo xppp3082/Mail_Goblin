@@ -13,5 +13,6 @@ public interface MailService {
     Map<LocalDate,Double>getDailyMailDeliveryRate(Long companyId);
     Map<LocalDate,Double>trackDailyMailDeliveryRate(String account);
     Map<String,Integer> calculateMailConversionRate(String account);
+    Map<String,Map<LocalDate,Integer>>analyzeEventPastDays(String account,Integer days);
 //    void insertBatch(List<Mail> mails,Long companyId);
 }

@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.example.personal_project.model.Campaign;
 import com.example.personal_project.service.CampaignService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,17 @@ public class MailPublisher {
             }
         }catch (Exception e){
             log.error("Queue Exception Message: {}", e.getMessage());
+        }
+    }
+
+    public void publishCampaign(Campaign campaign){
+        try{
+            GetQueueUrlResult queueUrlResult = amazonSQSClient.getQueueUrl(queueName);
+            log.info("寄送測試 " + campaign.toString());
+            var result = amazonSQSClient.sendMessage(queueUrlResult.getQueueUrl(),objectMapper.writeValueAsString(campaign));
+        } catch (JsonProcessingException e) {
+            log.error("Queue Exception Message: {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

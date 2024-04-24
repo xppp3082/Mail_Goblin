@@ -1,6 +1,7 @@
 package com.example.personal_project.controller;
 
 import com.example.personal_project.component.AuthenticationComponent;
+import com.example.personal_project.component.MailPublisher;
 import com.example.personal_project.model.Campaign;
 import com.example.personal_project.model.status.CampaignStatus;
 import com.example.personal_project.service.CampaignService;
@@ -18,9 +19,12 @@ public class CampaignController {
     private final AuthenticationComponent authenticationComponent;
     private final CampaignService campaignService;
 
-    public CampaignController(AuthenticationComponent authenticationComponent, CampaignService campaignService) {
+    private final MailPublisher mailPublisher;
+
+    public CampaignController(AuthenticationComponent authenticationComponent, CampaignService campaignService, MailPublisher mailPublisher) {
         this.authenticationComponent = authenticationComponent;
         this.campaignService = campaignService;
+        this.mailPublisher = mailPublisher;
     }
 
     @GetMapping("/all")
@@ -57,6 +61,20 @@ public class CampaignController {
             String errorMessage = "Error on insert new campaign in controller layer : "+e.getMessage();
             log.error(errorMessage);
             return new ResponseEntity<>(errorMessage,HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/send")
+    public ResponseEntity<?>sendCampaignById(@RequestParam("id")Long campaignId){
+        try {
+//            campaignService.sendCampaignById(campaignId);
+            Campaign campaign = campaignService.findCampaignById(campaignId);
+            mailPublisher.publishCampaign(campaign);
+            String successResponse = "Successfully send campaign with id : "+campaignId;
+            return new ResponseEntity<>(successResponse,HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on sending campaign with id : "+campaignId;
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
     }
 }

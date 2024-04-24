@@ -94,9 +94,13 @@
         }
 
         $('#updateTemplateBtn').on('click', async function () {
+            const subject = $('#marketingSubject').val();
+            const url = $('#marketingUrl').val();
             const content = $('#templateContent').summernote('code');
             const requestData = {
-                content: content
+                subject:subject,
+                content: content,
+                url:url
                 //如果還有其他部分要更新，也在這邊加入
             };
             try {

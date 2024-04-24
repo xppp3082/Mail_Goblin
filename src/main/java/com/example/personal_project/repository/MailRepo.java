@@ -131,7 +131,7 @@ public class MailRepo {
                     AND (m.status = ? OR m.status = ?)
                     """;
             Integer totalMailsCount = jdbcTemplate.queryForObject(sql,
-                    Integer.class, companyID, date,DeliveryStatus.RECEIVE.name(),DeliveryStatus.FAILED.name());
+                    Integer.class, companyID, date, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name());
 
             // 計算郵件送達率
             double deliveryRate = totalMailsCount != null && totalMailsCount > 0 ?
@@ -144,7 +144,7 @@ public class MailRepo {
         return dailyDeliveryRates;
     }
 
-    public  Map<LocalDate,Double> trackDailyMailDeliveryRate(String account){
+    public Map<LocalDate, Double> trackDailyMailDeliveryRate(String account) {
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
         LocalDate startDate = LocalDate.now().minusDays(30);
         LocalDate endDate = LocalDate.now().plusDays(1);
@@ -165,24 +165,24 @@ public class MailRepo {
                 """;
         // 執行 SQL 查詢
         jdbcTemplate.query(sql, rs -> {
-            LocalDate sendDate = rs.getDate("send_date").toLocalDate();
-            int successfulMailsCount = rs.getInt("successful_mails");
-            int totalMailsCount = rs.getInt("total_mails");
+                    LocalDate sendDate = rs.getDate("send_date").toLocalDate();
+                    int successfulMailsCount = rs.getInt("successful_mails");
+                    int totalMailsCount = rs.getInt("total_mails");
 
-            // 計算郵件送達率
-            double deliveryRate = totalMailsCount > 0 ?
-                    (double) successfulMailsCount / totalMailsCount : 0.0;
+                    // 計算郵件送達率
+                    double deliveryRate = totalMailsCount > 0 ?
+                            (double) successfulMailsCount / totalMailsCount : 0.0;
 
-            // 將日期和對應的郵件送達率存儲在 Map 中
-            dailyDeliveryRates.put(sendDate, deliveryRate);
-        },  DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
+                    // 將日期和對應的郵件送達率存儲在 Map 中
+                    dailyDeliveryRates.put(sendDate, deliveryRate);
+                }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
                 account, startDate, endDate);
 
         return dailyDeliveryRates;
     }
 
-    public Map<String,Integer> calculateMailConversionRate(String account){
-        Map<String,Integer> conversionRates = new LinkedHashMap<>();
+    public Map<String, Integer> calculateMailConversionRate(String account) {
+        Map<String, Integer> conversionRates = new LinkedHashMap<>();
         String sql = """
                 SELECT
                 SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS RECEIVE,
@@ -212,4 +212,40 @@ public class MailRepo {
         return conversionRates;
     }
 
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account,Integer days) {
+        Map<String, Map<LocalDate, Integer>> eventAnalysis = new LinkedHashMap<>();
+
+        LocalDate startDate = LocalDate.now().minusDays(days);
+        LocalDate endDate = LocalDate.now();
+
+        for (String event : new String[]{"RECEIVE", "FAILED", "OPEN", "CLICK"}) {
+            eventAnalysis.put(event, new LinkedHashMap<>());
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                eventAnalysis.get(event).put(date, 0);
+            }
+        }
+        String sql = """
+                SELECT 
+                m.status,
+                DATE(m.send_date) AS send_date,
+                COUNT(*) AS count 
+                FROM mail m
+                LEFT JOIN campaign c ON m.campaign_id = c.id
+                LEFT JOIN template t ON c.template_id = t.id
+                LEFT JOIN company comp ON t.company_id = comp.id
+                WHERE comp.account = ?
+                AND send_date BETWEEN ? AND ?
+                GROUP BY status, DATE(send_date)
+                """;
+        jdbcTemplate.query(sql, rs -> {
+            String status = rs.getString("status");
+            LocalDate sendDate = rs.getDate("send_date").toLocalDate();
+            int count = rs.getInt("count");
+
+//            //generate a new map once the event type is not exist in eventAnalysis.
+//            eventAnalysis.computeIfAbsent(status,k->new LinkedHashMap<>()).put(sendDate,count);
+            eventAnalysis.get(status).put(sendDate, count);
+        }, account, startDate, endDate);
+        return eventAnalysis;
+    }
 }

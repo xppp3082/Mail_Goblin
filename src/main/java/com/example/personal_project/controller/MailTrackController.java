@@ -96,7 +96,7 @@ public class MailTrackController {
     }
 
     @GetMapping("/daily-delivery")
-    public ResponseEntity<?> DailyMailDeliveryRate(){
+    public ResponseEntity<?> dailyMailDeliveryRate(){
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
 //            Long companyId = companyService.getIdByAccount(account);
@@ -117,6 +117,18 @@ public class MailTrackController {
             return new ResponseEntity<>(conversionRates, HttpStatus.OK);
         }catch (Exception e){
             String errorResponse = "Error on getting conversion rate of company.";
+            log.error(errorResponse+" : "+e.getMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping("/daily-event")
+    public ResponseEntity<?> dailyEventCount(@RequestParam("days")Integer days){
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+            Map<String,Map<LocalDate,Integer>> result = mailService.analyzeEventPastDays(account,days);
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        }catch (Exception e){
+            String errorResponse = "Error on getting daily event count of company.";
             log.error(errorResponse+" : "+e.getMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }

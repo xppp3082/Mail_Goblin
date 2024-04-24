@@ -51,4 +51,9 @@ public class MailServiceImpl implements MailService {
     public Map<String, Integer> calculateMailConversionRate(String account) {
         return mailRepo.calculateMailConversionRate(account);
     }
+
+    @Override
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account,Integer days) {
+        return mailRepo.analyzeEventPastDays(account,days);
+    }
 }
