@@ -6,7 +6,12 @@ import java.util.List;
 
 public interface TagService {
     void insertTag(Tag tag);
-    void deleteTag(Long tagId,Long companyId);
+
+    void deleteTag(Long tagId, Long companyId);
+
     List<Tag> getTagsByCompany(Long companyId);
+
     List<Tag> getTagsByCompanyAccount(String account);
+
+    List<Tag> getPageTagsByCompanyAccount(String account, int paging);
 }

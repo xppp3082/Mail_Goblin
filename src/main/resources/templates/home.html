@@ -2,11 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Home Page</title>
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/_css/navbar.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
@@ -29,6 +29,8 @@
             </thead>
             <tbody id="campaignList"></tbody>
         </table>
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-4" id="pagination"></div>
     </div>
     <!-- Create New Campaign Form -->
     <div>
@@ -36,7 +38,7 @@
         <form id="newCampaignForm">
             <div class="form-group">
                 <label for="subject">Subject:</label>
-                <input type="text" class="form-control" id="subject" name="subject">
+                <input class="form-control" id="subject" name="subject" type="text">
             </div>
             <div class="form-group">
                 <label for="templateId">Template:</label>
@@ -46,7 +48,7 @@
             </div>
             <div class="form-group">
                 <label for="send_date">Send Date:</label>
-                <input type="date" class="form-control" id="send_date" name="send_date">
+                <input class="form-control" id="send_date" name="send_date" type="date">
             </div>
             <div class="form-group">
                 <label for="tag_id">Tag:</label>
@@ -54,8 +56,8 @@
                     <!-- Populate with available tags -->
                 </select>
             </div>
-            <button type="button" class="btn btn-primary" onclick="saveDraft()">Save Draft</button>
-            <button type="button" class="btn btn-success" onclick="saveComplete()">Save Complete</button>
+            <button class="btn btn-primary" onclick="saveDraft()" type="button">Save Draft</button>
+            <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>
         </form>
     </div>
 </div>
@@ -64,6 +66,11 @@
 <div class="container">
     <h2>Template List</h2>
     <div id="templateContainer"></div>
+</div>
+<div class="d-flex justify-content-center mt-4" id="template-pagination">
+    <button onclick="previousPage()"> <<</button>
+    <span id="template-currentPage">1</span>
+    <button onclick="nextPage()"> >></button>
 </div>
 
 <div class="container">
@@ -75,43 +82,78 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    localStorage.setItem('token','eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     // 构建请求头
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
     };
-    // 页面加载完成后，获取并显示所有模板
-    window.onload = async function() {
-        await loadCampaigns();
+    // Load all template after windows loading completed
+    window.onload = async function () {
+        // await loadCampaigns();
         await loadTemplates();
+        await loadTemplatesWithPage(currentPage);
         await loadTags();
+        await loadCampaignsWihPage(0);
     }
 
     function navigateToAddTemplate() {
         window.location.href = '/configure';
     }
 
-    // Load all campaigns
-    async function loadCampaigns() {
+    // // Load all campaigns
+    // async function loadCampaigns() {
+    //     try {
+    //         const response = await fetch('/api/1.0/campaign/all', {
+    //             method: 'GET', // 或其他请求方法
+    //             headers: headers
+    //         });
+    //         const campaigns = await response.json();
+    //         displayCampaigns(campaigns);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+
+    async function loadCampaignsWihPage(pageNumber) {
         try {
-            const response = await fetch('/api/1.0/campaign/all',{
+            const response = await fetch(`/api/1.0/campaign/paging?number=${pageNumber}`, {
                 method: 'GET', // 或其他请求方法
                 headers: headers
             });
-            const campaigns = await response.json();
+            const campaignData = await response.json();
+            const campaigns = campaignData.data;
+            const totalPages = campaignData.total_paging;
+            console.log(totalPages);
             displayCampaigns(campaigns);
+            createPagination(totalPages);
         } catch (error) {
             console.error(error);
         }
     }
+
+    function createPagination(totalPages) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = ''; // Clear existing pagination
+
+        for (let i = 0; i < totalPages; i++) {
+            const pageLink = document.createElement('a');
+            pageLink.href = '#';
+            pageLink.innerText = i + 1;
+            pageLink.onclick = function () {
+                loadCampaignsWihPage(i);
+            };
+            paginationContainer.appendChild(pageLink);
+        }
+    }
+
     // Display campaigns
     function displayCampaigns(campaigns) {
         const campaignList = document.getElementById('campaignList');
         campaignList.innerHTML = ''; // Clear existing list
 
-        campaigns.forEach(function(campaign) {
+        campaigns.forEach(function (campaign) {
             const row = document.createElement('tr');
             console.log(campaign);
             row.innerHTML = `
@@ -145,20 +187,57 @@
     // 加载模板列表
     async function loadTemplates() {
         try {
-            const response = await fetch('/api/1.0/template/all?id=11'); // 获取所有模板的 API 地址
+            // const response = await fetch('/api/1.0/template/all?id=11'); // get all template api end point
+            const response = await fetch(`/api/1.0/template/all`, {
+                method: 'GET',
+                headers: headers
+            });
             const templates = await response.json();
             populateTemplateDropdown(templates);
-            displayTemplates(templates);
+            // displayTemplates(templates);
         } catch (error) {
             console.error(error);
         }
     }
+
+    async function loadTemplatesWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const templatesData = await response.json();
+            const templates = templatesData.data;
+            console.log(templates);
+            displayTemplates(templates)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    let currentPage = 0;
+
+    function nextPage() {
+        currentPage++;
+        document.getElementById('template-currentPage').innerText = currentPage + 1;
+        loadTemplatesWithPage(currentPage);
+    }
+
+    function previousPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('template-currentPage').innerText = currentPage + 1;
+            loadTemplatesWithPage(currentPage);
+        }
+    }
+
+
     // Populate template dropdown
     function populateTemplateDropdown(templates) {
         const templateDropdown = document.getElementById('templateId');
         templateDropdown.innerHTML = ''; // Clear existing options
 
-        templates.forEach(function(template) {
+        templates.forEach(function (template) {
             const option = document.createElement('option');
             option.value = template.id;
             option.innerText = template.subject;
@@ -217,7 +296,7 @@
         const templateContainer = document.getElementById('templateContainer');
         templateContainer.innerHTML = ''; // 清空容器内容
 
-        templates.forEach(function(template) {
+        templates.forEach(function (template) {
             // 创建模板卡片
             const templateCard = document.createElement('div');
             templateCard.classList.add('card', 'mb-3');
@@ -235,7 +314,7 @@
             const editButton = document.createElement('button');
             editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
             editButton.innerText = 'Edit';
-            editButton.onclick = function() {
+            editButton.onclick = function () {
                 editTemplate(template.id);
             };
 
@@ -243,7 +322,7 @@
             const deleteButton = document.createElement('button');
             deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
             deleteButton.innerText = 'Delete';
-            deleteButton.onclick = function() {
+            deleteButton.onclick = function () {
                 deleteTemplate(template.id);
             };
 
@@ -257,6 +336,7 @@
             templateContainer.appendChild(templateCard);
         });
     }
+
     // 编辑模板
     function editTemplate(templateId) {
         // 构造编辑页面的 URL
@@ -264,13 +344,15 @@
         // 在当前窗口中打开编辑页面
         window.location.href = editUrl;
     }
+
     // 删除模板
     async function deleteTemplate(templateId) {
         try {
-            const response = await fetch('/api/1.0/template/delete?id=' + templateId, { method: 'DELETE' });
+            const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
             if (response.ok) {
                 alert('Template deleted successfully');
-                await loadTemplates(); // 重新加载模板列表
+                await loadTemplatesWithPage(currentPage); // 重新載入模板列表
+                // await loadTemplates(); // 重新載入模板列表
             } else {
                 throw new Error('Failed to delete template');
             }
@@ -298,7 +380,7 @@
         const tagSelect = document.getElementById('tag_id');
         tagSelect.innerHTML = ''; // 清空選項
 
-        tags.forEach(function(tag) {
+        tags.forEach(function (tag) {
             const option = document.createElement('option');
             option.value = tag.id;
             option.innerText = tag.name;
@@ -310,7 +392,7 @@
         const tagsContainer = document.getElementById('tagList');
         tagsContainer.innerHTML = ''; // 清空容器
 
-        tags.forEach(function(tag) {
+        tags.forEach(function (tag) {
             const tagItem = document.createElement('div');
             tagItem.classList.add('tag-item');
 

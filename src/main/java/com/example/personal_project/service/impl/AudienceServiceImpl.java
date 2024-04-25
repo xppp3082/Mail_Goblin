@@ -5,6 +5,7 @@ import com.example.personal_project.model.Campaign;
 import com.example.personal_project.repository.AudienceRepo;
 import com.example.personal_project.service.AudienceService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,9 @@ import java.util.UUID;
 @Slf4j
 public class AudienceServiceImpl implements AudienceService {
     public final AudienceRepo audienceRepo;
+
+    @Value("${product.paging.size}")
+    private int pagingSize;
 
     public AudienceServiceImpl(AudienceRepo audienceRepo) {
         this.audienceRepo = audienceRepo;
@@ -31,8 +35,14 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
+    public List<Audience> getPageAudienceWithTagsByAccount(String account, int paging) {
+        int offset = paging * pagingSize;
+        return audienceRepo.getPageAudienceWithTagsByAccount(account, pagingSize + 1, offset);
+    }
+
+    @Override
     public List<Audience> searchAudiencesWithTagsByCompanyIdANDMail(Long companyId, String keyword) {
-        return audienceRepo.searchAudiencesWithTagsByCompanyIdANDMail(companyId,keyword);
+        return audienceRepo.searchAudiencesWithTagsByCompanyIdANDMail(companyId, keyword);
     }
 
     @Override
@@ -82,16 +92,16 @@ public class AudienceServiceImpl implements AudienceService {
 
     @Override
     public List<Audience> getAudienceByTag(Long tagId, String account) {
-        return audienceRepo.getAllAudienceByTagId(tagId,account);
+        return audienceRepo.getAllAudienceByTagId(tagId, account);
     }
 
     @Override
-    public Map<String, Integer> getNewAudienceCountLastWeek(String account,Integer daysCount) {
-        return audienceRepo.getNewAudienceCountLastWeek(account,daysCount);
+    public Map<String, Integer> getNewAudienceCountLastWeek(String account, Integer daysCount) {
+        return audienceRepo.getNewAudienceCountLastWeek(account, daysCount);
     }
 
     @Override
-    public Audience insertNewAudience(Audience audience){
+    public Audience insertNewAudience(Audience audience) {
         UUID uuid = UUID.randomUUID();
         audience.setAudienceUUID(uuid.toString());
         return audienceRepo.insertNewAudience(audience);

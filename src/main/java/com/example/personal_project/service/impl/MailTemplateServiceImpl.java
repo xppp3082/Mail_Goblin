@@ -5,6 +5,7 @@ import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.repository.MailTemplateRepo;
 import com.example.personal_project.service.MailTemplateService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,13 +15,17 @@ import java.util.List;
 public class MailTemplateServiceImpl implements MailTemplateService {
     public final MailTemplateRepo mailTemplateRepo;
 
+    @Value("${product.paging.size}")
+    private int pagingSize;
+
     public MailTemplateServiceImpl(MailTemplateRepo mailTemplateRepo) {
         this.mailTemplateRepo = mailTemplateRepo;
     }
 
     @Override
-    public void insertNewTemplate(MailTemplate mailTemplate) {
-        mailTemplateRepo.insertMailTemplate(mailTemplate);
+    public void insertNewTemplate(String account, MailTemplate mailTemplate) {
+//        mailTemplateRepo.insertMailTemplate(mailTemplate);
+        mailTemplateRepo.insertMailTemplateByAccount(account, mailTemplate);
     }
 
     @Override
@@ -50,6 +55,17 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
     @Override
     public List<MailTemplate> getTemplatesByCompany(Long company_id) {
-        return mailTemplateRepo.getAllMailTemplateBByCompany(company_id);
+        return mailTemplateRepo.getAllMailTemplateByCompany(company_id);
+    }
+
+    @Override
+    public List<MailTemplate> getTemplateByAccount(String account) {
+        return mailTemplateRepo.getAllMailTemplateByAccount(account);
+    }
+
+    @Override
+    public List<MailTemplate> getPageMailTemplateByCompany(String account, int paging) {
+        int offset = paging * pagingSize;
+        return mailTemplateRepo.getPageMailTemplateByCompany(account, pagingSize + 1, offset);
     }
 }

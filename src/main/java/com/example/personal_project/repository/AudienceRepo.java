@@ -2,7 +2,6 @@ package com.example.personal_project.repository;
 
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
-import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -210,6 +209,55 @@ public class AudienceRepo {
         return audiences;
     }
 
+    public List<Audience> getPageAudienceWithTagsByAccount(String account, int pageSize, int offset) {
+        String sql = """
+                SELECT au.*, tag.id as ta_id, tag.company_id as ta_cid, tag.name AS tagName
+                FROM (
+                    SELECT *
+                    FROM audience
+                    WHERE company_id = (SELECT id FROM company WHERE account = ?) 
+                    ORDER BY id DESC
+                    LIMIT ? OFFSET ?
+                ) AS au
+                LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
+                LEFT JOIN tag ON tag.id = tg.tag_id;
+                """;
+        Map<Long, Audience> audienceMap = new HashMap<>();
+        jdbcTemplate.query(sql, new Object[]{account, pageSize, offset}, rs -> {
+            Long audienceId = rs.getLong("id");
+            Audience audience;
+            if (!audienceMap.containsKey(audienceId)) {
+                audience = new Audience();
+                audience.setId(audienceId);
+                audience.setName(rs.getString("name"));
+                audience.setEmail(rs.getString("email"));
+                audience.setBirthday(rs.getString("birthday"));
+                audience.setCompanyId(rs.getLong("company_id"));
+                audience.setMailCount(rs.getInt("mailcount"));
+                audience.setOpenCount(rs.getInt("opencount"));
+                audience.setClickCount(rs.getInt("clickcount"));
+                audienceMap.put(audienceId, audience);
+            } else {
+                audience = audienceMap.get(audienceId);
+            }
+            String tagName = rs.getString("tagName");
+            Long tagId = rs.getLong("ta_id");
+            Long tag_CompanyId = rs.getLong("ta_cid");
+            if (tagName != null) {
+                Tag tag = new Tag();
+                tag.setId(tagId);
+                tag.setCompanyId(tag_CompanyId);
+                tag.setName(tagName);
+
+                if (audience.getTagList() == null) {
+                    audience.setTagList(new ArrayList<>());
+                }
+                audience.getTagList().add(tag);
+            }
+        });
+        return new ArrayList<>(audienceMap.values());
+    }
+
     public List<Audience> getAudiencesWithTagsByCompanyId(Long companyId) {
         String sql = """
                 SELECT au.*,tag.id as ta_id,tag.company_id as ta_cid, tag.name AS tagName
@@ -328,18 +376,18 @@ public class AudienceRepo {
         return audiences;
     }
 
-    public Map<String, Integer> getNewAudienceCountLastWeek(String account,Integer daysCount) {
+    public Map<String, Integer> getNewAudienceCountLastWeek(String account, Integer daysCount) {
         Map<String, Integer> newAudienceCountMap = new LinkedHashMap<>();
         for (int i = 0; i < daysCount; i++) {
             LocalDate date = LocalDate.now().minusDays(i);
             String dateString = date.toString();
-            int newAUdienceCount = getNewAudienceCountForDate(date,account);
+            int newAUdienceCount = getNewAudienceCountForDate(date, account);
             newAudienceCountMap.put(dateString, newAUdienceCount);
         }
         return newAudienceCountMap;
     }
 
-    private int getNewAudienceCountForDate(LocalDate date,String account) {
+    private int getNewAudienceCountForDate(LocalDate date, String account) {
         String sql = """
                 SELECT COUNT(*) FROM audience 
                 LEFT JOIN company 
@@ -348,10 +396,10 @@ public class AudienceRepo {
                 AND
                 company.account = ?
                 """;
-        try{
-            return jdbcTemplate.queryForObject(sql, Integer.class, date,account);
-        }catch (Exception e){
-            log.error("error on getting new added audience for past days : "+e.getMessage());
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, date, account);
+        } catch (Exception e) {
+            log.error("error on getting new added audience for past days : " + e.getMessage());
             return 0;
         }
     }

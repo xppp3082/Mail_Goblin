@@ -38,24 +38,24 @@ public class MailTemplateRepo {
         }
     }
 
-//    public void insertMailTemplateWithAcount(String account,MailTemplate mailTemplate) {
-//        String sql = """
-//                INSERT INTO template
-//                (company_id,url,subject,content,picture)
-//                VALUES
-//                ((SELECT id FROM company WHERE account =?),?,?,?,?);
-//                """;
-//        try {
-//            jdbcTemplate.update(sql,
-//                    account, mailTemplate.getUrl(),
-//                    mailTemplate.getSubject(), mailTemplate.getContent(),
-//                    mailTemplate.getPicture());
-//        } catch (Exception e) {
-//            log.error("error on insert new mailTemplate : " + e.getMessage());
-//        }
-//    }
+    public void insertMailTemplateByAccount(String account, MailTemplate mailTemplate) {
+        String sql = """
+                INSERT INTO template
+                (company_id,url,subject,content,picture)
+                VALUES
+                ((SELECT id FROM company WHERE account =?),?,?,?,?);
+                """;
+        try {
+            jdbcTemplate.update(sql,
+                    account, mailTemplate.getUrl(),
+                    mailTemplate.getSubject(), mailTemplate.getContent(),
+                    mailTemplate.getPicture());
+        } catch (Exception e) {
+            log.error("error on insert new mailTemplate : " + e.getMessage());
+        }
+    }
 
-    public MailTemplate insertMailTemplateWithAcount(String account,MailTemplate mailTemplate) {
+    public MailTemplate insertMailTemplateWithAcount(String account, MailTemplate mailTemplate) {
         String sql = """
                 INSERT INTO template 
                 (company_id,url,subject,content,picture) 
@@ -68,15 +68,15 @@ public class MailTemplateRepo {
                     new PreparedStatementCreator() {
                         @Override
                         public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                            PreparedStatement ps  = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                            ps.setString(1,account);
-                            ps.setString(2,mailTemplate.getUrl());
-                            ps.setString(3,mailTemplate.getSubject());
-                            ps.setString(4,mailTemplate.getContent());
-                            ps.setString(5,mailTemplate.getPicture());
+                            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                            ps.setString(1, account);
+                            ps.setString(2, mailTemplate.getUrl());
+                            ps.setString(3, mailTemplate.getSubject());
+                            ps.setString(4, mailTemplate.getContent());
+                            ps.setString(5, mailTemplate.getPicture());
                             return ps;
                         }
-                    },keyHolder);
+                    }, keyHolder);
             Long generateId = keyHolder.getKey().longValue();
             mailTemplate.setId(generateId);
             return mailTemplate;
@@ -86,59 +86,91 @@ public class MailTemplateRepo {
         }
     }
 
-    public void updateMailTemplate(MailTemplate mailTemplate){
+    public void updateMailTemplate(MailTemplate mailTemplate) {
         String sql = """
                 UPDATE template 
                 SET url = ?,subject = ?,content = ?, picture = ? 
                 WHERE id = ?;
                 """;
-        try{
+        try {
             jdbcTemplate.update(sql,
                     mailTemplate.getUrl(),
                     mailTemplate.getSubject(), mailTemplate.getContent(),
                     mailTemplate.getPicture(), mailTemplate.getId());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error updating mail template with ID " + mailTemplate.getId() + ": " + e.getMessage());
         }
     }
 
-    public void deleteMailTemplate(Long id){
+    public void deleteMailTemplate(Long id) {
         String sql = """
                 DELETE FROM template WHERE id = ?;
                 """;
-        try{
-            jdbcTemplate.update(sql,id);
-        }catch (Exception e){
-            log.error("Error deleting mail template with id " + id +" : " + e.getMessage());
+        try {
+            jdbcTemplate.update(sql, id);
+        } catch (Exception e) {
+            log.error("Error deleting mail template with id " + id + " : " + e.getMessage());
         }
     }
 
-    public  MailTemplate findMailTemplateById(Long templateId){
+    public MailTemplate findMailTemplateById(Long templateId) {
         String sql = """
                 SELECT * FROM template WHERE id = ?;
                 """;
-        try{
-            return jdbcTemplate.queryForObject(sql,new Object[]{templateId},originTemplateRowMapper());
-        }catch (EmptyResultDataAccessException e){
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{templateId}, originTemplateRowMapper());
+        } catch (EmptyResultDataAccessException e) {
             log.error("No mail template found with ID: " + templateId);
             return null;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error on retrieving mail template with ID " + templateId + ": " + e.getMessage());
             return null;
         }
     }
-    public List<MailTemplate> getAllMailTemplateBByCompany(Long company_id){
+
+    public List<MailTemplate> getAllMailTemplateByCompany(Long company_id) {
         String sql = """
                 SELECT * FROM template WHERE company_id = ?;
                 """;
         try {
             RowMapper<MailTemplate> mapper = originTemplateRowMapper();
-            List<MailTemplate> templates = jdbcTemplate.query(sql,mapper,company_id);
+            List<MailTemplate> templates = jdbcTemplate.query(sql, mapper, company_id);
             return templates;
-        }catch (Exception e){
-            log.error("error on catching all the template under the company with id : "+company_id);
+        } catch (Exception e) {
+            log.error("error on catching all the template under the company with id : " + company_id);
         }
-        return  null;
+        return null;
+    }
+
+    public List<MailTemplate> getAllMailTemplateByAccount(String account) {
+        String sql = """
+                SELECT * FROM template 
+                WHERE company_id = 
+                (SELECT id FROM company WHERE account = ?);
+                """;
+        try {
+            RowMapper<MailTemplate> mapper = originTemplateRowMapper();
+            return jdbcTemplate.query(sql, mapper, account);
+        } catch (Exception e) {
+            log.error("error on catching all the template under the company with account : " + account);
+            return null;
+        }
+    }
+
+    public List<MailTemplate> getPageMailTemplateByCompany(String account, int pagingSize, int offset) {
+        String sql = """
+                SELECT * FROM template 
+                WHERE company_id = (SELECT id FROM company WHERE account = ?) 
+                ORDER BY id DESC 
+                LIMIT ? OFFSET ? ;
+                """;
+        try {
+            RowMapper<MailTemplate> mapper = originTemplateRowMapper();
+            return jdbcTemplate.query(sql, mapper, account, pagingSize, offset);
+        } catch (Exception e) {
+            log.error("error on catching all the template under the company with account on repo layer : " + account);
+            return null;
+        }
     }
 
     public MailTemplate getMailTemplateByCampaign(Campaign campaign) {
