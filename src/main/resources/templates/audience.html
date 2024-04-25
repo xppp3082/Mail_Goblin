@@ -33,6 +33,11 @@
             </button>
         </li>
     </ul>
+    <div class="d-flex justify-content-center mt-4" id="tags-pagination">
+        <button onclick="previousTagPage()"> <<</button>
+        <span id="tags-currentPage">1</span>
+        <button onclick="nextTagPage()"> >></button>
+    </div>
 </div>
 <br><br>
 <div class="container">
@@ -86,6 +91,11 @@
         </tbody>
     </table>
 </div>
+<div class="d-flex justify-content-center mt-4" id="audience-pagination">
+    <button onclick="previousAudiencePage()"> <<</button>
+    <span id="audience-currentPage">1</span>
+    <button onclick="nextAudiencePage()"> >></button>
+</div>
 <div class="container" id="new-add"></div>
 <figure class="container">
     <div id="new-audience-container"></div>
@@ -110,7 +120,9 @@
     };
     window.onload = async function () {
         await loadTags();
-        await loadUsers();
+        // await loadUsers();
+        await loadUsersWithPage(0);
+        await loadTagsWithPage(0);
     }
     document.getElementById('addTagForm').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -125,6 +137,7 @@
                 if (response.ok) {
                     alert('Tag added successfully');
                     loadTags();
+                    loadTagsWithPage(currentPage);
                 } else {
                     throw new Error('Failed to add tag');
                 }
@@ -138,14 +151,45 @@
     async function loadTags() {
         try {
             const response = await fetch('/api/1.0/tag/get', {
-                method: 'GET', // 或其他请求方法
+                method: 'GET',
                 headers: headers
             });
             const tags = await response.json();
-            displayTags(tags);
+            // displayTags(tags);
             populateTagOptions(tags);
         } catch (error) {
             console.error(error);
+        }
+    }
+
+    async function loadTagsWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/tag/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            })
+            const tagsData = await response.json();
+            const tags = tagsData.data;
+            console.log(tags);
+            displayTags(tags);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    let currentPage = 0;
+
+    function nextTagPage() {
+        currentPage++;
+        document.getElementById('tags-currentPage').innerText = currentPage + 1;
+        loadTagsWithPage(currentPage);
+    }
+
+    function previousTagPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('tags-currentPage').innerText = currentPage + 1;
+            loadTagsWithPage(currentPage);
         }
     }
 
@@ -173,24 +217,46 @@
         });
     }
 
-    function deleteTag(tagId) {
+    // function deleteTag(tagId) {
+    //     if (confirm('Are you sure you want to delete this tag?')) {
+    //         fetch('/api/1.0/tag/delete?id=' + tagId, {
+    //             method: 'DELETE',
+    //             headers: headers
+    //         })
+    //             .then(response => {
+    //                 if (response.ok) {
+    //                     alert('Tag deleted successfully');
+    //                     location.reload(); // 刷新页面
+    //                 } else {
+    //                     throw new Error('Failed to delete tag');
+    //                 }
+    //             })
+    //             .catch(error => {
+    //                 console.error(error);
+    //                 alert('Failed to delete tag');
+    //             });
+    //     }
+    // }
+
+    async function deleteTag(tagId) {
         if (confirm('Are you sure you want to delete this tag?')) {
-            fetch('/api/1.0/tag/delete?id=' + tagId, {
-                method: 'DELETE',
-                headers: headers
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Tag deleted successfully');
-                        location.reload(); // 刷新页面
-                    } else {
-                        throw new Error('Failed to delete tag');
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert('Failed to delete tag');
+            try {
+                const response = await fetch('/api/1.0/tag/delete?id=' + tagId, {
+                    method: 'DELETE',
+                    headers: headers
                 });
+
+                if (response.ok) {
+                    alert('Tag deleted successfully');
+                    // location.reload(); // 刷新页面
+                    await loadTagsWithPage(currentPage);
+                } else {
+                    throw new Error('Failed to delete tag');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to delete tag');
+            }
         }
     }
 
@@ -205,6 +271,37 @@
         } catch (error) {
             console.error(error);
             alert('Failed to load users');
+        }
+    }
+
+    async function loadUsersWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/audience/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const audienceData = await response.json();
+            const audiences = audienceData.data;
+            console.log(audiences);
+            displayUsers(audiences);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    let currentAudiencePage = 0;
+
+    function nextAudiencePage() {
+        currentAudiencePage++;
+        document.getElementById('audience-currentPage').innerText = currentAudiencePage + 1;
+        loadUsersWithPage(currentAudiencePage);
+    }
+
+    function previousAudiencePage() {
+        if (currentAudiencePage >= 1) {
+            currentAudiencePage--;
+            document.getElementById('audience-currentPage').innerText = currentAudiencePage + 1;
+            loadUsersWithPage(currentAudiencePage);
         }
     }
 
@@ -246,7 +343,8 @@
             });
             if (response.ok) {
                 alert('User deleted successfully');
-                await loadUsers(); // 重新載入使用者列表
+                // await loadUsers(); // 重新載入使用者列表
+                await loadUsersWithPage(currentAudiencePage);
             } else {
                 throw new Error('Failed to delete user');
             }
@@ -333,6 +431,7 @@
                 // 清空表單
                 this.reset();
                 await loadTags(); // 重新載入標籤列表
+                await loadUsersWithPage(currentAudiencePage);
             } else {
                 throw new Error('Failed to add user');
             }
@@ -342,37 +441,37 @@
         }
     });
 
-    newAudienceCountLast7Fays();
-
-    async function newAudienceCountLast7Fays() {
-        try {
-            const response = await fetch('/api/1.0/audience/new-count?days=7', {
-                method: 'GET',
-                headers: headers
-            });
-            const data = await response.json();
-            const dates = Object.keys(data);
-            const count = Object.values(data);
-
-            const plotData = [{
-                x: dates,
-                y: count,
-                type: 'bar'
-            }];
-            const layout = {
-                title: 'New Audience Count in Last 7 Days',
-                xaxis: {
-                    title: 'Date'
-                },
-                yaxis: {
-                    title: 'New Audience Count'
-                }
-            };
-            Plotly.newPlot('new-add', plotData, layout);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
+    // newAudienceCountLast7Fays();
+    //
+    // async function newAudienceCountLast7Fays() {
+    //     try {
+    //         const response = await fetch('/api/1.0/audience/new-count?days=7', {
+    //             method: 'GET',
+    //             headers: headers
+    //         });
+    //         const data = await response.json();
+    //         const dates = Object.keys(data);
+    //         const count = Object.values(data);
+    //
+    //         const plotData = [{
+    //             x: dates,
+    //             y: count,
+    //             type: 'bar'
+    //         }];
+    //         const layout = {
+    //             title: 'New Audience Count in Last 7 Days',
+    //             xaxis: {
+    //                 title: 'Date'
+    //             },
+    //             yaxis: {
+    //                 title: 'New Audience Count'
+    //             }
+    //         };
+    //         Plotly.newPlot('new-add', plotData, layout);
+    //     } catch (error) {
+    //         console.error('Error fetching data:', error);
+    //     }
+    // }
 
     async function fetchNewAudienceData(days) {
         try {

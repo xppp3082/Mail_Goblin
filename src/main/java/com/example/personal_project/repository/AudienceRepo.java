@@ -216,13 +216,13 @@ public class AudienceRepo {
                     SELECT *
                     FROM audience
                     WHERE company_id = (SELECT id FROM company WHERE account = ?) 
-                    ORDER BY id DESC
                     LIMIT ? OFFSET ?
                 ) AS au
                 LEFT JOIN tag_audience AS tg ON tg.audience_id = au.id
-                LEFT JOIN tag ON tag.id = tg.tag_id;
+                LEFT JOIN tag ON tag.id = tg.tag_id
+                ORDER BY id DESC;
                 """;
-        Map<Long, Audience> audienceMap = new HashMap<>();
+        Map<Long, Audience> audienceMap = new LinkedHashMap<>();
         jdbcTemplate.query(sql, new Object[]{account, pageSize, offset}, rs -> {
             Long audienceId = rs.getLong("id");
             Audience audience;
