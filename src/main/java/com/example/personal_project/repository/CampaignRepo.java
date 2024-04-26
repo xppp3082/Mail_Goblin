@@ -89,6 +89,25 @@ public class CampaignRepo {
         return jdbcTemplate.query(sql, mapper, account, pagingSize, offset);
     }
 
+    public List<Campaign> getPageCampaignByAccountWithTag(String account, int pagingSize, int offset) {
+        String sql = """
+                    SELECT camp.*
+                    FROM (
+                    SELECT campaign.*,tag.name AS tag
+                    FROM campaign
+                    JOIN template ON campaign.template_id = template.id
+                    JOIN tag ON campaign.tag_id = tag.id
+                    JOIN company ON template.company_id = company.id
+                    WHERE company.account = ?
+                    ORDER BY campaign.id DESC
+                    LIMIT ? OFFSET ?
+                    ) camp
+                    LEFT JOIN template ON camp.template_id = template.id;
+                """;
+        RowMapper<Campaign> mapper = withTagCampaignRowMapper();
+        return jdbcTemplate.query(sql, mapper, account, pagingSize, offset);
+    }
+
     public Integer getTotalCampaignCountByAccount(String account) {
         String sql = """
                 SELECT COUNT(*) AS total_count
@@ -157,4 +176,26 @@ public class CampaignRepo {
             }
         };
     }
+
+    public RowMapper<Campaign> withTagCampaignRowMapper() {
+        return new RowMapper<Campaign>() {
+            @Override
+            public Campaign mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Campaign campaign = new Campaign();
+                campaign.setId(rs.getLong("id"));
+                campaign.setTemplateId(rs.getLong("template_id"));
+                campaign.setSubject(rs.getString("subject"));
+                Date senDateSQL = rs.getDate("target_date");
+                LocalDate sendDate = senDateSQL.toLocalDate();
+                campaign.setSendDate(sendDate);
+                campaign.setStatus(rs.getString("status"));
+                campaign.setTagId(rs.getLong("tag_id"));
+                campaign.setAutomationId(rs.getLong("automation_id"));
+                campaign.setExecuteStatus(rs.getString("execute_status"));
+                campaign.setTagName(rs.getString("tag"));
+                return campaign;
+            }
+        };
+    }
+
 }

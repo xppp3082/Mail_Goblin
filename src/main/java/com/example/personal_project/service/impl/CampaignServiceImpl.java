@@ -54,6 +54,12 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
+    public List<Campaign> getPageCampaignByAccountWithTag(String account, int paging) {
+        int offset = paging * pagingSize;
+        return campaignRepo.getPageCampaignByAccountWithTag(account, pagingSize + 1, offset);
+    }
+
+    @Override
     public Integer getTotalCampaignCountByAccount(String account) {
         return campaignRepo.getTotalCampaignCountByAccount(account);
     }

@@ -79,4 +79,14 @@ public class FrontController {
     public String showDashboardPage() {
         return "dashboard";
     }
+
+    @GetMapping("/tag")
+    public String showTagPage() {
+        return "tag";
+    }
+
+    @GetMapping("/template")
+    public String showTemplatePage() {
+        return "template";
+    }
 }

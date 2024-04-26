@@ -14,30 +14,6 @@
 <div class="container mt-5">
     <h1>Audience</h1>
     <hr>
-    <!-- 添加新标签的表单 -->
-    <form id="addTagForm" method="post" th:action="@{/api/1.0/tag/add}">
-        <div class="form-group">
-            <label for="tagName">New Tag Name:</label>
-            <input class="form-control" id="tagName" name="name" placeholder="Enter tag name" type="text">
-        </div>
-        <button class="btn btn-primary" type="submit">Add Tag</button>
-    </form>
-    <hr>
-    <!-- 标签列表 -->
-    <h2>Tag List</h2>
-    <ul class="list-group" id="tagList">
-        <!-- 标签项目将动态插入到这里 -->
-        <li class="list-group-item" th:each="tag : ${tags}">
-            <span th:text="${tag.name}"></span>
-            <button class="btn btn-danger btn-sm float-right" th:onclick="'deleteTag(' + ${tag.id} + ')'">Delete
-            </button>
-        </li>
-    </ul>
-    <div class="d-flex justify-content-center mt-4" id="tags-pagination">
-        <button onclick="previousTagPage()"> <<</button>
-        <span id="tags-currentPage">1</span>
-        <button onclick="nextTagPage()"> >></button>
-    </div>
 </div>
 <br><br>
 <div class="container">
@@ -120,33 +96,8 @@
     };
     window.onload = async function () {
         await loadTags();
-        // await loadUsers();
         await loadUsersWithPage(0);
-        await loadTagsWithPage(0);
     }
-    document.getElementById('addTagForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const formData = new FormData(this);
-        const requestData = Object.fromEntries(formData.entries());
-        fetch(this.getAttribute('action'), {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(requestData)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('Tag added successfully');
-                    loadTags();
-                    loadTagsWithPage(currentPage);
-                } else {
-                    throw new Error('Failed to add tag');
-                }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Failed to add tag');
-            });
-    });
 
     async function loadTags() {
         try {
@@ -162,103 +113,6 @@
         }
     }
 
-    async function loadTagsWithPage(paging) {
-        try {
-            const response = await fetch(`api/1.0/tag/paging?number=${paging}`, {
-                method: 'GET',
-                headers: headers
-            })
-            const tagsData = await response.json();
-            const tags = tagsData.data;
-            console.log(tags);
-            displayTags(tags);
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    let currentPage = 0;
-
-    function nextTagPage() {
-        currentPage++;
-        document.getElementById('tags-currentPage').innerText = currentPage + 1;
-        loadTagsWithPage(currentPage);
-    }
-
-    function previousTagPage() {
-        if (currentPage >= 1) {
-            currentPage--;
-            document.getElementById('tags-currentPage').innerText = currentPage + 1;
-            loadTagsWithPage(currentPage);
-        }
-    }
-
-    function displayTags(tags) {
-        const tagList = document.getElementById('tagList');
-        tagList.innerHTML = ''; // 清空現有列表
-
-        tags.forEach(function (tag) {
-            const li = document.createElement('li');
-            li.classList.add('list-group-item');
-
-            const span = document.createElement('span');
-            span.innerText = tag.name;
-
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-danger', 'btn-sm', 'float-right');
-            button.innerText = 'Delete';
-            button.onclick = function () {
-                deleteTag(tag.id);
-            };
-
-            li.appendChild(span);
-            li.appendChild(button);
-            tagList.appendChild(li);
-        });
-    }
-
-    // function deleteTag(tagId) {
-    //     if (confirm('Are you sure you want to delete this tag?')) {
-    //         fetch('/api/1.0/tag/delete?id=' + tagId, {
-    //             method: 'DELETE',
-    //             headers: headers
-    //         })
-    //             .then(response => {
-    //                 if (response.ok) {
-    //                     alert('Tag deleted successfully');
-    //                     location.reload(); // 刷新页面
-    //                 } else {
-    //                     throw new Error('Failed to delete tag');
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error(error);
-    //                 alert('Failed to delete tag');
-    //             });
-    //     }
-    // }
-
-    async function deleteTag(tagId) {
-        if (confirm('Are you sure you want to delete this tag?')) {
-            try {
-                const response = await fetch('/api/1.0/tag/delete?id=' + tagId, {
-                    method: 'DELETE',
-                    headers: headers
-                });
-
-                if (response.ok) {
-                    alert('Tag deleted successfully');
-                    // location.reload(); // 刷新页面
-                    await loadTagsWithPage(currentPage);
-                } else {
-                    throw new Error('Failed to delete tag');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Failed to delete tag');
-            }
-        }
-    }
 
     async function loadUsers() {
         try {
@@ -440,38 +294,6 @@
             alert('Failed to add user');
         }
     });
-
-    // newAudienceCountLast7Fays();
-    //
-    // async function newAudienceCountLast7Fays() {
-    //     try {
-    //         const response = await fetch('/api/1.0/audience/new-count?days=7', {
-    //             method: 'GET',
-    //             headers: headers
-    //         });
-    //         const data = await response.json();
-    //         const dates = Object.keys(data);
-    //         const count = Object.values(data);
-    //
-    //         const plotData = [{
-    //             x: dates,
-    //             y: count,
-    //             type: 'bar'
-    //         }];
-    //         const layout = {
-    //             title: 'New Audience Count in Last 7 Days',
-    //             xaxis: {
-    //                 title: 'Date'
-    //             },
-    //             yaxis: {
-    //                 title: 'New Audience Count'
-    //             }
-    //         };
-    //         Plotly.newPlot('new-add', plotData, layout);
-    //     } catch (error) {
-    //         console.error('Error fetching data:', error);
-    //     }
-    // }
 
     async function fetchNewAudienceData(days) {
         try {

@@ -139,7 +139,6 @@ public class AudienceController {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
             List<Audience> audiences = audienceService.getPageAudienceWithTagsByAccount(account, paging.orElse(0));
-            log.info(String.valueOf(audiences.size()));
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericResponse<>(audiences.stream().limit(pagingSize).toList(),
                             audiences.size() > pagingSize ? paging.orElse(0) + 1 : null));

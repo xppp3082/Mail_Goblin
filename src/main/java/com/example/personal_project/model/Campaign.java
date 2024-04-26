@@ -18,4 +18,6 @@ public class Campaign extends ReadObject {
     private Long automationId;
     @JsonProperty("execute_status")
     private String executeStatus;
+    @JsonProperty("tag")
+    private String tagName;
 }

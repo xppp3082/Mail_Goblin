@@ -23,6 +23,7 @@
             <tr>
                 <th>Subject</th>
                 <th>Target Date</th>
+                <th>Target Tag</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -62,20 +63,20 @@
     </div>
 </div>
 <br><br>
-<!-- Template Container -->
-<div class="container">
-    <h2>Template List</h2>
-    <div id="templateContainer"></div>
-</div>
-<div class="d-flex justify-content-center mt-4" id="template-pagination">
-    <button onclick="previousPage()"> <<</button>
-    <span id="template-currentPage">1</span>
-    <button onclick="nextPage()"> >></button>
-</div>
+<!--&lt;!&ndash; Template Container &ndash;&gt;-->
+<!--<div class="container">-->
+<!--    <h2>Template List</h2>-->
+<!--    <div id="templateContainer"></div>-->
+<!--</div>-->
+<!--<div class="d-flex justify-content-center mt-4" id="template-pagination">-->
+<!--    <button onclick="previousPage()"> <<</button>-->
+<!--    <span id="template-currentPage">1</span>-->
+<!--    <button onclick="nextPage()"> >></button>-->
+<!--</div>-->
 
-<div class="container">
-    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>
-</div>
+<!--<div class="container">-->
+<!--    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>-->
+<!--</div>-->
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -93,14 +94,14 @@
     window.onload = async function () {
         // await loadCampaigns();
         await loadTemplates();
-        await loadTemplatesWithPage(currentPage);
+        // await loadTemplatesWithPage(currentPage);
         await loadTags();
         await loadCampaignsWihPage(0);
     }
 
-    function navigateToAddTemplate() {
-        window.location.href = '/configure';
-    }
+    // function navigateToAddTemplate() {
+    //     window.location.href = '/configure';
+    // }
 
     // // Load all campaigns
     // async function loadCampaigns() {
@@ -159,8 +160,10 @@
             row.innerHTML = `
                 <td>${campaign.subject}</td>
                 <td>${campaign.send_date}</td>
+                <td>${campaign.tag}</td>
                 <td>${campaign.status}</td>
-                <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button></td>
+                <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button>
+                <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button></td>
             `;
             campaignList.appendChild(row);
         });
@@ -174,13 +177,29 @@
             });
             if (response.ok) {
                 alert('Campaign sent successfully');
-                await loadCampaigns(); // Reload campaigns
+                // await loadCampaigns(); // Reload campaigns
             } else {
                 throw new Error('Failed to send campaign');
             }
         } catch (error) {
             console.error(error);
             alert('Failed to send campaign');
+        }
+    }
+
+    async function deleteCampaign(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/campaign/delete?id=${campaignId}`, {
+                method: 'DELETE',
+                headers: headers
+            })
+            if (response.ok) {
+                alert('Campaign deleted successfully');
+                await loadCampaigns();
+            }
+        } catch (error) {
+            console.log(error);
+            alert('Failed to delete campaign');
         }
     }
 
@@ -194,42 +213,41 @@
             });
             const templates = await response.json();
             populateTemplateDropdown(templates);
-            // displayTemplates(templates);
         } catch (error) {
             console.error(error);
         }
     }
 
-    async function loadTemplatesWithPage(paging) {
-        try {
-            const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
-                method: 'GET',
-                headers: headers
-            });
-            const templatesData = await response.json();
-            const templates = templatesData.data;
-            console.log(templates);
-            displayTemplates(templates)
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    let currentPage = 0;
-
-    function nextPage() {
-        currentPage++;
-        document.getElementById('template-currentPage').innerText = currentPage + 1;
-        loadTemplatesWithPage(currentPage);
-    }
-
-    function previousPage() {
-        if (currentPage >= 1) {
-            currentPage--;
-            document.getElementById('template-currentPage').innerText = currentPage + 1;
-            loadTemplatesWithPage(currentPage);
-        }
-    }
+    // async function loadTemplatesWithPage(paging) {
+    //     try {
+    //         const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
+    //             method: 'GET',
+    //             headers: headers
+    //         });
+    //         const templatesData = await response.json();
+    //         const templates = templatesData.data;
+    //         console.log(templates);
+    //         displayTemplates(templates)
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+    //
+    // let currentPage = 0;
+    //
+    // function nextPage() {
+    //     currentPage++;
+    //     document.getElementById('template-currentPage').innerText = currentPage + 1;
+    //     loadTemplatesWithPage(currentPage);
+    // }
+    //
+    // function previousPage() {
+    //     if (currentPage >= 1) {
+    //         currentPage--;
+    //         document.getElementById('template-currentPage').innerText = currentPage + 1;
+    //         loadTemplatesWithPage(currentPage);
+    //     }
+    // }
 
 
     // Populate template dropdown
@@ -291,76 +309,76 @@
         }
     }
 
-    // 显示模板列表
-    function displayTemplates(templates) {
-        const templateContainer = document.getElementById('templateContainer');
-        templateContainer.innerHTML = ''; // 清空容器内容
-
-        templates.forEach(function (template) {
-            // 创建模板卡片
-            const templateCard = document.createElement('div');
-            templateCard.classList.add('card', 'mb-3');
-
-            // 卡片内容
-            const cardBody = document.createElement('div');
-            cardBody.classList.add('card-body');
-
-            // 主题
-            const subject = document.createElement('h5');
-            subject.classList.add('card-title');
-            subject.innerText = template.subject;
-
-            // 编辑按钮
-            const editButton = document.createElement('button');
-            editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
-            editButton.innerText = 'Edit';
-            editButton.onclick = function () {
-                editTemplate(template.id);
-            };
-
-            // 删除按钮
-            const deleteButton = document.createElement('button');
-            deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
-            deleteButton.innerText = 'Delete';
-            deleteButton.onclick = function () {
-                deleteTemplate(template.id);
-            };
-
-            // 组装卡片内容
-            cardBody.appendChild(subject);
-            cardBody.appendChild(editButton);
-            cardBody.appendChild(deleteButton);
-            templateCard.appendChild(cardBody);
-
-            // 添加到模板容器中
-            templateContainer.appendChild(templateCard);
-        });
-    }
-
-    // 编辑模板
-    function editTemplate(templateId) {
-        // 构造编辑页面的 URL
-        const editUrl = '/templateEditor?id=' + templateId;
-        // 在当前窗口中打开编辑页面
-        window.location.href = editUrl;
-    }
-
-    // 删除模板
-    async function deleteTemplate(templateId) {
-        try {
-            const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
-            if (response.ok) {
-                alert('Template deleted successfully');
-                await loadTemplatesWithPage(currentPage); // 重新載入模板列表
-                // await loadTemplates(); // 重新載入模板列表
-            } else {
-                throw new Error('Failed to delete template');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Failed to delete template');
-        }
-    }
+    // // 显示模板列表
+    // function displayTemplates(templates) {
+    //     const templateContainer = document.getElementById('templateContainer');
+    //     templateContainer.innerHTML = ''; // 清空容器内容
+    //
+    //     templates.forEach(function (template) {
+    //         // 创建模板卡片
+    //         const templateCard = document.createElement('div');
+    //         templateCard.classList.add('card', 'mb-3');
+    //
+    //         // 卡片内容
+    //         const cardBody = document.createElement('div');
+    //         cardBody.classList.add('card-body');
+    //
+    //         // 主题
+    //         const subject = document.createElement('h5');
+    //         subject.classList.add('card-title');
+    //         subject.innerText = template.subject;
+    //
+    //         // 编辑按钮
+    //         const editButton = document.createElement('button');
+    //         editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
+    //         editButton.innerText = 'Edit';
+    //         editButton.onclick = function () {
+    //             editTemplate(template.id);
+    //         };
+    //
+    //         // 删除按钮
+    //         const deleteButton = document.createElement('button');
+    //         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+    //         deleteButton.innerText = 'Delete';
+    //         deleteButton.onclick = function () {
+    //             deleteTemplate(template.id);
+    //         };
+    //
+    //         // 组装卡片内容
+    //         cardBody.appendChild(subject);
+    //         cardBody.appendChild(editButton);
+    //         cardBody.appendChild(deleteButton);
+    //         templateCard.appendChild(cardBody);
+    //
+    //         // 添加到模板容器中
+    //         templateContainer.appendChild(templateCard);
+    //     });
+    // }
+    //
+    // // 编辑模板
+    // function editTemplate(templateId) {
+    //     // 构造编辑页面的 URL
+    //     const editUrl = '/templateEditor?id=' + templateId;
+    //     // 在当前窗口中打开编辑页面
+    //     window.location.href = editUrl;
+    // }
+    //
+    // // 删除模板
+    // async function deleteTemplate(templateId) {
+    //     try {
+    //         const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
+    //         if (response.ok) {
+    //             alert('Template deleted successfully');
+    //             await loadTemplatesWithPage(currentPage); // 重新載入模板列表
+    //             // await loadTemplates(); // 重新載入模板列表
+    //         } else {
+    //             throw new Error('Failed to delete template');
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         alert('Failed to delete template');
+    //     }
+    // }
 
     async function loadTags() {
         try {

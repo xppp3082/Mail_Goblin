@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Templates</title>
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<div class="container mt-5">
+    <h1>Template</h1>
+    <hr>
+    <br><br>
+    <h2>Template List</h2>
+    <div id="templateContainer"></div>
+    <div class="d-flex justify-content-center mt-4" id="template-pagination">
+        <button onclick="previousPage()"> <<</button>
+        <span id="template-currentPage">1</span>
+        <button onclick="nextPage()"> >></button>
+    </div>
+    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let currentPage = 0;
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const token = localStorage.getItem('token');
+    // 构建请求头
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+    };
+    window.onload = async function () {
+        await loadTemplatesWithPage(currentPage);
+    }
+
+    function navigateToAddTemplate() {
+        window.location.href = '/configure';
+    }
+
+    async function loadTemplatesWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const templatesData = await response.json();
+            const templates = templatesData.data;
+            console.log(templates);
+            displayTemplates(templates)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function nextPage() {
+        currentPage++;
+        document.getElementById('template-currentPage').innerText = currentPage + 1;
+        loadTemplatesWithPage(currentPage);
+    }
+
+    function previousPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('template-currentPage').innerText = currentPage + 1;
+            loadTemplatesWithPage(currentPage);
+        }
+    }
+
+    function displayTemplates(templates) {
+        const templateContainer = document.getElementById('templateContainer');
+        templateContainer.innerHTML = ''; // 清空容器内容
+
+        templates.forEach(function (template) {
+            // 创建模板卡片
+            const templateCard = document.createElement('div');
+            templateCard.classList.add('card', 'mb-3');
+
+            // 卡片内容
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+
+            // 主题
+            const subject = document.createElement('h5');
+            subject.classList.add('card-title');
+            subject.innerText = template.subject;
+
+            // 编辑按钮
+            const editButton = document.createElement('button');
+            editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
+            editButton.innerText = 'Edit';
+            editButton.onclick = function () {
+                editTemplate(template.id);
+            };
+
+            // 删除按钮
+            const deleteButton = document.createElement('button');
+            deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = function () {
+                deleteTemplate(template.id);
+            };
+
+            // 组装卡片内容
+            cardBody.appendChild(subject);
+            cardBody.appendChild(editButton);
+            cardBody.appendChild(deleteButton);
+            templateCard.appendChild(cardBody);
+
+            // 添加到模板容器中
+            templateContainer.appendChild(templateCard);
+        });
+    }
+
+    // 编辑模板
+    function editTemplate(templateId) {
+        // 构造编辑页面的 URL
+        const editUrl = '/templateEditor?id=' + templateId;
+        // 在当前窗口中打开编辑页面
+        window.location.href = editUrl;
+    }
+
+    // 删除模板
+    async function deleteTemplate(templateId) {
+        try {
+            const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
+            if (response.ok) {
+                alert('Template deleted successfully');
+                await loadTemplatesWithPage(currentPage); // 重新載入模板列表
+                // await loadTemplates(); // 重新載入模板列表
+            } else {
+                throw new Error('Failed to delete template');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete template');
+        }
+    }
+
+</script>
+</body>
+</html>

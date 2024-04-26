@@ -13,6 +13,8 @@ public interface CampaignService {
 
     List<Campaign> getPageCampaignByAccount(String account, int paging);
 
+    List<Campaign> getPageCampaignByAccountWithTag(String account, int paging);
+
     Integer getTotalCampaignCountByAccount(String account);
 
     List<Campaign> getAllCompletedCampaigns();

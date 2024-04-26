@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Tags</title>
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="/_css/highchart.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<div class="container mt-5">
+    <h1>Tags</h1>
+    <hr>
+    <br><br>
+    <h2>Tag List</h2>
+    <form id="addTagForm" method="post" th:action="@{/api/1.0/tag/add}">
+        <div class="form-group">
+            <label for="tagName">New Tag Name:</label>
+            <input class="form-control" id="tagName" name="name" placeholder="Enter tag name" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Add Tag</button>
+    </form>
+    <br>
+    <ul class="list-group" id="tagList">
+        <!-- 标签项目将动态插入到这里 -->
+        <li class="list-group-item" th:each="tag : ${tags}">
+            <span th:text="${tag.name}"></span>
+            <button class="btn btn-danger btn-sm float-right" th:onclick="'deleteTag(' + ${tag.id} + ')'">Delete
+            </button>
+        </li>
+    </ul>
+    <div class="d-flex justify-content-center mt-4" id="tags-pagination">
+        <button onclick="previousTagPage()"> <<</button>
+        <span id="tags-currentPage">1</span>
+        <button onclick="nextTagPage()"> >></button>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let currentPage = 0;
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+
+    window.onload = async function () {
+        await loadTagsWithPage(0);
+    }
+
+    document.getElementById('addTagForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const requestData = Object.fromEntries(formData.entries());
+        fetch(this.getAttribute('action'), {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Tag added successfully');
+                    loadTagsWithPage(currentPage);
+                } else {
+                    throw new Error('Failed to add tag');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Failed to add tag');
+            });
+    });
+
+    async function loadTagsWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/tag/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            })
+            const tagsData = await response.json();
+            const tags = tagsData.data;
+            console.log(tags);
+            displayTags(tags);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function nextTagPage() {
+        currentPage++;
+        document.getElementById('tags-currentPage').innerText = currentPage + 1;
+        loadTagsWithPage(currentPage);
+    }
+
+    function previousTagPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('tags-currentPage').innerText = currentPage + 1;
+            loadTagsWithPage(currentPage);
+        }
+    }
+
+    function displayTags(tags) {
+        const tagList = document.getElementById('tagList');
+        tagList.innerHTML = ''; // 清空現有列表
+
+        tags.forEach(function (tag) {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item');
+
+            const span = document.createElement('span');
+            span.innerText = tag.name;
+
+            const button = document.createElement('button');
+            button.classList.add('btn', 'btn-danger', 'btn-sm', 'float-right');
+            button.innerText = 'Delete';
+            button.onclick = function () {
+                deleteTag(tag.id);
+            };
+
+            li.appendChild(span);
+            li.appendChild(button);
+            tagList.appendChild(li);
+        });
+    }
+
+    // function deleteTag(tagId) {
+    //     if (confirm('Are you sure you want to delete this tag?')) {
+    //         fetch('/api/1.0/tag/delete?id=' + tagId, {
+    //             method: 'DELETE',
+    //             headers: headers
+    //         })
+    //             .then(response => {
+    //                 if (response.ok) {
+    //                     alert('Tag deleted successfully');
+    //                     location.reload(); // 刷新页面
+    //                 } else {
+    //                     throw new Error('Failed to delete tag');
+    //                 }
+    //             })
+    //             .catch(error => {
+    //                 console.error(error);
+    //                 alert('Failed to delete tag');
+    //             });
+    //     }
+    // }
+    async function deleteTag(tagId) {
+        if (confirm('Are you sure you want to delete this tag?')) {
+            try {
+                const response = await fetch('/api/1.0/tag/delete?id=' + tagId, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                if (response.ok) {
+                    alert('Tag deleted successfully');
+                    // location.reload(); // 刷新页面
+                    await loadTagsWithPage(currentPage);
+                } else {
+                    throw new Error('Failed to delete tag');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to delete tag');
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -50,7 +50,8 @@ public class CampaignController {
     public ResponseEntity<?> getPageCampaignByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
-            List<Campaign> campaigns = campaignService.getPageCampaignByAccount(account, paging.orElse(0));
+//            List<Campaign> campaigns = campaignService.getPageCampaignByAccount(account, paging.orElse(0));
+            List<Campaign> campaigns = campaignService.getPageCampaignByAccountWithTag(account, paging.orElse(0));
             int totalCount = campaignService.getTotalCampaignCountByAccount(account);
             int totalPaging = (int) Math.ceil((double) totalCount / pagingSize);
             return ResponseEntity.status(HttpStatus.OK)
@@ -97,6 +98,18 @@ public class CampaignController {
             return new ResponseEntity<>(successResponse, HttpStatus.OK);
         } catch (Exception e) {
             String errorResponse = "Error on sending campaign with id : " + campaignId;
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteCampaignById(@RequestParam("id") Long campaignId) {
+        try {
+            campaignService.deleteCampaign(campaignId);
+            String successResponse = "Successfully delete campaign with id : " + campaignId;
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on deleting campaign with id : " + campaignId;
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
