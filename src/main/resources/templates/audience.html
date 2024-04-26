@@ -68,9 +68,9 @@
     </table>
 </div>
 <div class="d-flex justify-content-center mt-4" id="audience-pagination">
-    <button onclick="previousAudiencePage()"> <<</button>
+    <button id="prevAudienceButton" onclick="previousAudiencePage()"> <<</button>
     <span id="audience-currentPage">1</span>
-    <button onclick="nextAudiencePage()"> >></button>
+    <button id="nextAudienceButton" onclick="nextAudiencePage()"> >></button>
 </div>
 <div class="container" id="new-add"></div>
 <figure class="container">
@@ -136,8 +136,23 @@
             });
             const audienceData = await response.json();
             const audiences = audienceData.data;
+            const nextPage = audienceData.next_paging;
             console.log(audiences);
             displayUsers(audiences);
+
+            const prevButton = document.getElementById('prevAudienceButton');
+            const nextButton = document.getElementById('nextAudienceButton');
+            if (paging <= 0) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+            } else {
+                nextButton.disabled = false;
+            }
+
         } catch (error) {
             console.log(error);
         }

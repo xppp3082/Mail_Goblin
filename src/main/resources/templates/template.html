@@ -18,9 +18,9 @@
     <h2>Template List</h2>
     <div id="templateContainer"></div>
     <div class="d-flex justify-content-center mt-4" id="template-pagination">
-        <button onclick="previousPage()"> <<</button>
+        <button id="prevTemplateButton" onclick="previousPage()"> <<</button>
         <span id="template-currentPage">1</span>
-        <button onclick="nextPage()"> >></button>
+        <button id="nextTemplateButton" onclick="nextPage()"> >></button>
     </div>
     <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>
 </div>
@@ -52,8 +52,22 @@
             });
             const templatesData = await response.json();
             const templates = templatesData.data;
+            const nextPage = templatesData.next_paging;
             console.log(templates);
             displayTemplates(templates)
+            //enable or disable the next page button base on next_paging key is exist or not
+            const prevButton = document.getElementById('prevTemplateButton');
+            const nextButton = document.getElementById('nextTemplateButton');
+            if (paging <= 0) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+            } else {
+                nextButton.disabled = false;
+            }
         } catch (error) {
             console.error(error);
         }

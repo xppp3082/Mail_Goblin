@@ -34,9 +34,9 @@
         </li>
     </ul>
     <div class="d-flex justify-content-center mt-4" id="tags-pagination">
-        <button onclick="previousTagPage()"> <<</button>
+        <button id="prevTagButton" onclick="previousTagPage()"> <<</button>
         <span id="tags-currentPage">1</span>
-        <button onclick="nextTagPage()"> >></button>
+        <button id="nextTagButton" onclick="nextTagPage()"> >></button>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -86,8 +86,24 @@
             })
             const tagsData = await response.json();
             const tags = tagsData.data;
-            console.log(tags);
+            const nextPage = tagsData.next_paging;
+            console.log(nextPage);
+            // console.log(tags);
             displayTags(tags);
+
+            //enable or disable the next page button base on next_paging key is exist or not
+            const prevButton = document.getElementById('prevTagButton');
+            const nextButton = document.getElementById('nextTagButton');
+            if (paging <= 0) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+            } else {
+                nextButton.disabled = false;
+            }
         } catch (error) {
             console.error(error);
         }
@@ -131,26 +147,6 @@
         });
     }
 
-    // function deleteTag(tagId) {
-    //     if (confirm('Are you sure you want to delete this tag?')) {
-    //         fetch('/api/1.0/tag/delete?id=' + tagId, {
-    //             method: 'DELETE',
-    //             headers: headers
-    //         })
-    //             .then(response => {
-    //                 if (response.ok) {
-    //                     alert('Tag deleted successfully');
-    //                     location.reload(); // 刷新页面
-    //                 } else {
-    //                     throw new Error('Failed to delete tag');
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error(error);
-    //                 alert('Failed to delete tag');
-    //             });
-    //     }
-    // }
     async function deleteTag(tagId) {
         if (confirm('Are you sure you want to delete this tag?')) {
             try {
@@ -172,6 +168,27 @@
             }
         }
     }
+
+    // function deleteTag(tagId) {
+    //     if (confirm('Are you sure you want to delete this tag?')) {
+    //         fetch('/api/1.0/tag/delete?id=' + tagId, {
+    //             method: 'DELETE',
+    //             headers: headers
+    //         })
+    //             .then(response => {
+    //                 if (response.ok) {
+    //                     alert('Tag deleted successfully');
+    //                     location.reload(); // 刷新页面
+    //                 } else {
+    //                     throw new Error('Failed to delete tag');
+    //                 }
+    //             })
+    //             .catch(error => {
+    //                 console.error(error);
+    //                 alert('Failed to delete tag');
+    //             });
+    //     }
+    // }
 </script>
 </body>
 </html>
