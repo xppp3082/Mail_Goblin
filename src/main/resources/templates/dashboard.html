@@ -28,10 +28,18 @@
         <div id="conversion-container"></div>
         <div id="daily-delivery-container"></div>
     </figure>
-    <div class="container" id="conversion-rate"></div>
-    <div class="container" id="delivery-rate"></div>
-    <div class="container" id="daily-delivery"></div>
-    <div class="container" id="daily-event"></div>
+    <div class="age-container">
+        <label for="campaignId">Campaign</label>
+        <select class="form-control" id="campaignId" name="campaign_id">
+        </select>
+        <br><br>
+        <div class="container" id="campaign-age"></div>
+        <div id="age-cards"></div>
+    </div>
+    <!--    <div class="container" id="conversion-rate"></div>-->
+    <!--    <div class="container" id="delivery-rate"></div>-->
+    <!--    <div class="container" id="daily-delivery"></div>-->
+    <!--    <div class="container" id="daily-event"></div>-->
 </div>
 <!--<div id = "new-add" class="container"></div>-->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -41,6 +49,8 @@
 
 <!--high chart import test-->
 <script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/drilldown.js"></script>
 <script src="https://code.highcharts.com/modules/series-label.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
@@ -88,6 +98,9 @@
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
     };
     // call function for drawing highchart
+    loadCampaigns();
+    // fetchAndDrawPieChart();
+
     fetchDataAndDrawChart();
     fetchAndDrawConversionChart();
     fetchAndDrawDeliveryChart();
@@ -196,18 +209,6 @@
     // 使用async/await等待數據獲取完成並繪製Highchart
     async function fetchDataAndDrawChart() {
         try {
-            // const data = await fetchEventCountData(30);
-            // console.log(startTime.getDate().toString() + " : " + endTime.getDate().toString());
-            //Turn time format from YYYY-MM-DDTHH:mm:ss.sssZ(ISO 8601) to only date.
-            // if (typeof startTime === 'string' && typeof endTime === 'string') {
-            //     startDate = startTime;
-            //     endDate = endTime;
-            // } else if (typeof startTime === 'object' && typeof endTime === 'object') {
-            //     startDate = startTime.toISOString().slice(0, 10);
-            //     endDate = endTime.toISOString().slice(0, 10);
-            // } else {
-            //     throw new Error('Invalid startTime or endTime type.');
-            // }
             const startDate = transTimeToDateString(startTime);
             const endDate = transTimeToDateString(endTime);
             const data = await fetchEventCountDataByDate(startDate, endDate);
@@ -402,6 +403,211 @@
             console.log(error);
         }
     }
+
+    async function fetchCampaignAgeById(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/track/campaign-age?id=${campaignId}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    function reorganizeDataForPieChart(data) {
+        const pieData = [];
+        data.forEach(item => {
+            const age = item.age;
+            const openRatio = item.type.OPEN;
+            const clickRatio = item.type.CLICK;
+            pieData.push({
+                name: age,
+                y: openRatio + clickRatio,
+                drilldown: {
+                    name: age,
+                    categories: ['Open', 'Click'],
+                    data: [openRatio, clickRatio]
+                }
+            });
+        });
+        return pieData;
+    }
+
+    async function fetchAndDrawPieChart(campaignId) {
+        const data = await fetchCampaignAgeById(campaignId);
+        drawCampaignPieChart(data, 'campaign-age');
+        generateAgeCards(data);
+    }
+
+    function generateAgeCards(data) {
+        // const campaignId = 15; // Replace with your campaign ID
+        // const data = await fetchCampaignAgeById(campaignId);
+        const ageCardsContainer = document.getElementById('age-cards');
+        ageCardsContainer.innerHTML = "";
+        data.forEach(ageData => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+
+            const ageTitle = document.createElement('h3');
+            ageTitle.textContent = `Age: ${ageData.age}`;
+            card.appendChild(ageTitle);
+
+            const openRatePara = document.createElement('p');
+            openRatePara.textContent = `Open Rate: ${ageData.open_rate}`;
+            card.appendChild(openRatePara);
+
+            const clickRatePara = document.createElement('p');
+            clickRatePara.textContent = `Click Rate: ${ageData.click_rate}`;
+            card.appendChild(clickRatePara);
+
+            ageCardsContainer.appendChild(card);
+        });
+    }
+
+    // async function drawCampaignPieChart(data,elementId)
+    function drawCampaignPieChart(data, elementId) {
+        try {
+            // const data = await fetchCampaignAgeById(15);
+            const ageCategories = data.map(item => item.age);
+            const seriesData = data.map(item => {
+                return {
+                    name: item.age,
+                    y: item.ratio,
+                    drilldown: item.age
+                };
+            });
+
+            const drilldownData = data.map(item => {
+                return {
+                    name: item.age,
+                    id: item.age,
+                    data: [
+                        ['OPEN', item.type.OPEN],
+                        ['CLICK', item.type.CLICK]
+                    ]
+                };
+            });
+
+            Highcharts.chart(elementId, {
+                chart: {
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Campaign Age Distribution',
+                    align: 'left'
+                },
+                subtitle: {
+                    text: 'Click the slices to view event types.',
+                    align: 'left'
+                },
+                plotOptions: {
+                    series: {
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}: {point.percentage:.1f}%'
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                },
+                series: [{
+                    name: 'Age',
+                    colorByPoint: true,
+                    data: seriesData
+                }],
+                drilldown: {
+                    series: drilldownData
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function loadCampaigns() {
+        try {
+            const response = await fetch(`/api/1.0/campaign/all`, {
+                method: 'GET',
+                headers: headers
+            });
+            const campaigns = await response.json();
+            populateCampaignDropdown(campaigns);
+
+            const firstCampaignId = campaigns[0].id;
+            await fetchAndDrawPieChart(firstCampaignId);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function populateCampaignDropdown(campaigns) {
+        const campaignDropdown = document.getElementById('campaignId');
+        campaignDropdown.innerHTML = ''; // Clear existing options
+
+        campaigns.forEach(function (campaign) {
+            const option = document.createElement('option');
+            option.value = campaign.id;
+            option.innerText = campaign.subject;
+            campaignDropdown.appendChild(option);
+        });
+        campaignDropdown.addEventListener('change', function () {
+            const selectedCampaignId = parseInt(this.value); // Get the selected campaignId
+            fetchAndDrawPieChart(selectedCampaignId); // Fetch data and draw pie chart for the selected campaign
+        });
+    }
+
+    // async function fetchAndDrawPieChart() {
+    //     try {
+    //         const campaignId = 15;
+    //         const data = await fetchCampaignAgeById(campaignId);
+    //         const pieData = reorganizeDataForPieChart(data);
+    //
+    //         Highcharts.chart('campaign-age', {
+    //             chart: {
+    //                 type: 'pie'
+    //             },
+    //             title: {
+    //                 text: 'Campaign Age Distribution',
+    //                 align: 'left'
+    //             },
+    //             plotOptions: {
+    //                 pie: {
+    //                     shadow: false,
+    //                     center: ['50%', '50%']
+    //                 }
+    //             },
+    //             tooltip: {
+    //                 valueSuffix: '%'
+    //             },
+    //             series: [{
+    //                 name: 'Age',
+    //                 colorByPoint: true,
+    //                 data: pieData,
+    //                 size: '80%',
+    //                 dataLabels: {
+    //                     format: '<b>{point.name}:</b> <span style="opacity: 0.5">{point.y:.1f}%</span>',
+    //                     filter: {
+    //                         property: 'y',
+    //                         operator: '>',
+    //                         value: 1
+    //                     },
+    //                     style: {
+    //                         fontWeight: 'normal'
+    //                     }
+    //                 }
+    //             }]
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 </script>
 <!--<script src="/_js/dashboard_plotly.js"></script>-->
 

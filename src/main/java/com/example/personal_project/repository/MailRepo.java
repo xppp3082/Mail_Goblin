@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,5 +341,60 @@ public class MailRepo {
             eventAnalysis.get(status).put(sendDate, count);
         }, account, startDate, endDate);
         return eventAnalysis;
+    }
+
+    public List<Map<String, Object>> analyzeCampaignAudienceByAge(Long campaignId) {
+        String sql = """
+                SELECT 
+                age_group,
+                COUNT(*) AS total_engagement,
+                SUM(CASE WHEN mail_status = 'OPEN' THEN 1 ELSE 0 END) AS open_count,
+                SUM(CASE WHEN mail_status = 'CLICK' THEN 1 ELSE 0 END) AS click_count,
+                SUM(CASE WHEN mail_status = 'OPEN' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE', 'OPEN', 'CLICK') THEN 1 END) AS open_rate,
+                SUM(CASE WHEN mail_status = 'CLICK' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE', 'OPEN', 'CLICK') THEN 1 END) AS click_rate
+                FROM (
+                SELECT 
+                a.id AS audience_id,
+                TIMESTAMPDIFF(YEAR, STR_TO_DATE(a.birthday, '%Y-%m-%d'), CURDATE()) AS age,
+                CASE 
+                WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(a.birthday, '%Y-%m-%d'), CURDATE()) BETWEEN 0 AND 19 THEN '0-19'
+                WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(a.birthday, '%Y-%m-%d'), CURDATE()) BETWEEN 20 AND 39 THEN '20-39'
+                WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(a.birthday, '%Y-%m-%d'), CURDATE()) BETWEEN 40 AND 59 THEN '40-59'
+                ELSE '60+'
+                END AS age_group,
+                m.status AS mail_status
+                FROM audience a
+                JOIN mail m ON a.id = m.audience_id
+                WHERE m.campaign_id = ?
+                ) AS age_data
+                GROUP BY age_group;             
+                """;
+        List<Map<String, Object>> result = jdbcTemplate.query(sql, new Object[]{campaignId}, (rs, rowNum) -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("age", rs.getString("age_group"));
+            map.put("total_engagement", rs.getInt("total_engagement"));
+            map.put("open_count", rs.getInt("open_count"));
+            map.put("click_count", rs.getInt("click_count"));
+            map.put("open_rate", rs.getDouble("open_rate"));
+            map.put("click_rate", rs.getDouble("click_rate"));
+            return map;
+        });
+        int totalEngagement = result.stream().mapToInt(m -> (int) m.get("total_engagement")).sum();
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (Map<String, Object> map : result) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("age", map.get("age"));
+            entry.put("ratio", ((int) map.get("total_engagement") / (double) totalEngagement) * 100);
+            Map<String, Double> type = new LinkedHashMap<>();
+            type.put("OPEN", (((int) map.get("open_count")) / (double) totalEngagement) * 100);
+            type.put("CLICK", (((int) map.get("click_count")) / (double) totalEngagement) * 100);
+            entry.put("type", type);
+
+            entry.put("open_rate", map.get("open_rate"));
+            entry.put("click_rate", map.get("click_rate"));
+            response.add(entry);
+        }
+        return response;
     }
 }

@@ -27,4 +27,6 @@ public interface MailService {
 
     //    void insertBatch(List<Mail> mails,Long companyId);
     Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate);
+
+    List<Map<String, Object>> analyzeCampaignAudienceByAge(Long campaignId);
 }

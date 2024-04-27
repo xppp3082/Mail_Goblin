@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -174,6 +175,18 @@ public class MailTrackController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             String errorResponse = "Error on getting daily event count of company.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/campaign-age")
+    public ResponseEntity<?> analyzeCampaignAudienceByAge(@RequestParam("id") Long campaignId) {
+        try {
+            List<Map<String, Object>> resultList = mailService.analyzeCampaignAudienceByAge(campaignId);
+            return new ResponseEntity<>(resultList, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on analyzing audience age of this campaign.";
             log.error(errorResponse + " : " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }

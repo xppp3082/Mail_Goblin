@@ -23,3 +23,25 @@
     color: #fff;
     margin-top: 10px;
 }
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    display: inline-block;
+}
+
+.age-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#campaign-age {
+    flex: 0 0 70%;
+}
+
+#age-cards {
+    flex: 0 0 30%;
+}

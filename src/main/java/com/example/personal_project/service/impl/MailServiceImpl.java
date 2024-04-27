@@ -71,4 +71,9 @@ public class MailServiceImpl implements MailService {
     public Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate) {
         return mailRepo.analyzeEventPastByDate(account, startDate, endDate);
     }
+
+    @Override
+    public List<Map<String, Object>> analyzeCampaignAudienceByAge(Long campaignId) {
+        return mailRepo.analyzeCampaignAudienceByAge(campaignId);
+    }
 }
