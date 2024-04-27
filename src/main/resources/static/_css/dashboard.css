@@ -1,0 +1,25 @@
+.time-picker-container {
+    display: flex;
+    align-items: center;
+}
+
+.time-picker {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-right: 10px;
+}
+
+.apply-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    margin-top: 10px;
+}

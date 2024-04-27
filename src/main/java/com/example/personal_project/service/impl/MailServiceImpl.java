@@ -28,8 +28,8 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void insertOpenRecord(String campaignId, String eventType,String audienceUUID) {
-        mailRepo.insertEventRecord(campaignId, eventType,audienceUUID);
+    public void insertOpenRecord(String campaignId, String eventType, String audienceUUID, String recipientMail, String subject) {
+        mailRepo.insertEventRecord(campaignId, eventType, audienceUUID, recipientMail, subject);
     }
 
     @Override
@@ -48,12 +48,27 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    public Map<LocalDate, Double> trackDailyMailDeliveryRateByDate(String account, LocalDate startDate, LocalDate endDate) {
+        return mailRepo.trackDailyMailDeliveryRateByDate(account, startDate, endDate);
+    }
+
+    @Override
     public Map<String, Integer> calculateMailConversionRate(String account) {
         return mailRepo.calculateMailConversionRate(account);
     }
 
     @Override
-    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account,Integer days) {
-        return mailRepo.analyzeEventPastDays(account,days);
+    public Map<String, Integer> calculateMailConversionRateByDate(String account, LocalDate startDate, LocalDate endDate) {
+        return mailRepo.calculateMailConversionRateByDate(account, startDate, endDate);
+    }
+
+    @Override
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account, Integer days) {
+        return mailRepo.analyzeEventPastDays(account, days);
+    }
+
+    @Override
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate) {
+        return mailRepo.analyzeEventPastByDate(account, startDate, endDate);
     }
 }

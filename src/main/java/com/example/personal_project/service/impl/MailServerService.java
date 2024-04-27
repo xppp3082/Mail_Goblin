@@ -5,7 +5,6 @@ import com.example.personal_project.model.EmailCampaign;
 import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.MailTemplate;
 import com.example.personal_project.model.status.DeliveryStatus;
-import com.example.personal_project.repository.AudienceRepo;
 import com.example.personal_project.service.AudienceService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
@@ -69,8 +68,8 @@ public class MailServerService {
             ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
             ctx.setVariable("url", confirmationUrl);
 //            ctx.setVariable("endpoint","https://traviss.beauty/api/1.0/user/test.png?category=XX");
-            ctx.setVariable("url2","http://3.24.104.209/api/1.0/track/click?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244&cusWeb=https://traviss.beauty/index.html?category=all");
-            ctx.setVariable("endpoint","http://3.24.104.209/api/1.0/track/open?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244");
+            ctx.setVariable("url2", "http://3.24.104.209/api/1.0/track/click?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244&cusWeb=https://traviss.beauty/index.html?category=all");
+            ctx.setVariable("endpoint", "http://3.24.104.209/api/1.0/track/open?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244");
 //            ctx.setVariable("testPNG","http://3.24.104.209/docker1.png");
             final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
             email.setText(htmlContent, true);
@@ -83,14 +82,15 @@ public class MailServerService {
             return "User created failed";
         }
     }
-//    public String sendBatchMails(List<Mail>mails)
+
+    //    public String sendBatchMails(List<Mail>mails)
     public String sendBatchMails(EmailCampaign emailCampaign)
             throws MessagingException, UnsupportedEncodingException {
         try {
-            for(Audience audience: emailCampaign.getAudiences()){
+            for (Audience audience : emailCampaign.getAudiences()) {
                 String confirmationUrl = "https://traviss.beauty/index.html?category=all";
-                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S",audience.getAudienceUUID());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all",audience.getAudienceUUID());
+                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S", audience.getAudienceUUID());
+                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all", audience.getAudienceUUID());
                 log.info(openTrackUrl);
                 log.info(clickTrackUrl);
                 String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
@@ -105,11 +105,11 @@ public class MailServerService {
 
                 final Context ctx = new Context(LocaleContextHolder.getLocale());
                 ctx.setVariable("email", audience.getEmail());
-                ctx.setVariable("name",audience.getName());
+                ctx.setVariable("name", audience.getName());
                 ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
                 ctx.setVariable("url", confirmationUrl);
-                ctx.setVariable("url2",clickTrackUrl);
-                ctx.setVariable("endpoint",openTrackUrl);
+                ctx.setVariable("url2", clickTrackUrl);
+                ctx.setVariable("endpoint", openTrackUrl);
                 final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
                 email.setText(htmlContent, true);
 
@@ -128,10 +128,20 @@ public class MailServerService {
         List<Mail> mails = new ArrayList<>();
         try {
             MailTemplate mailTemplate = emailCampaign.getMailTemplate();
-            for(Audience audience: emailCampaign.getAudiences()){
+            for (Audience audience : emailCampaign.getAudiences()) {
                 String confirmationUrl = mailTemplate.getUrl();
-                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S&CID=%S",audience.getAudienceUUID(),emailCampaign.getCampaign().getId());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&CID=%S&cusWeb=%S",audience.getAudienceUUID(),emailCampaign.getCampaign().getId(),confirmationUrl);
+                log.info(audience.getEmail());
+                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
+                        audience.getAudienceUUID(),
+                        emailCampaign.getCampaign().getId(),
+                        audience.getEmail(),
+                        emailCampaign.getCampaign().getSubject());
+                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
+                        audience.getAudienceUUID(),
+                        emailCampaign.getCampaign().getId(),
+                        confirmationUrl,
+                        audience.getEmail(),
+                        emailCampaign.getCampaign().getSubject());
                 log.info(openTrackUrl);
                 log.info(clickTrackUrl);
                 String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
@@ -144,13 +154,13 @@ public class MailServerService {
                 email.setFrom(new InternetAddress(mailFrom, mailFromName));
 
                 final Context ctx = new Context(LocaleContextHolder.getLocale());
-                ctx.setVariable("subject",mailTemplate.getSubject());
+                ctx.setVariable("subject", mailTemplate.getSubject());
                 ctx.setVariable("email", audience.getEmail());
-                ctx.setVariable("content",mailTemplate.getContent());
-                ctx.setVariable("name",audience.getName());
+                ctx.setVariable("content", mailTemplate.getContent());
+                ctx.setVariable("name", audience.getName());
                 ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
                 ctx.setVariable("url", clickTrackUrl);
-                ctx.setVariable("endpoint",openTrackUrl);
+                ctx.setVariable("endpoint", openTrackUrl);
                 final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
                 email.setText(htmlContent, true);
 
@@ -162,16 +172,16 @@ public class MailServerService {
                 mail.setSendDate(LocalDate.now());
                 mail.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
                 mail.setCheckTimes(0);
-                try{
+                try {
                     mailSender.send(mimeMessage);
                     mail.setStatus(DeliveryStatus.RECEIVE.name());
                     mails.add(mail);
                     //update mail count when email been sent successfully.
                     audienceService.updateMailCount(audience.getAudienceUUID());
                     log.info("update mail count successfully!");
-                }catch (MailException e){
+                } catch (MailException e) {
                     Long audienceId = audience.getId();
-                    switch (getMialExceptionType(e)){
+                    switch (getMialExceptionType(e)) {
                         case AUTHENTICATION:
                             log.warn("Error on sending email due to authentication issue: " + e.getMessage());
                             break;
@@ -179,7 +189,7 @@ public class MailServerService {
                             log.warn("Error on parsing email content: " + e.getMessage());
                             break;
                         case PREPARATION:
-                            log.warn("Error on sending email to audience with id : "+audienceId+ ": " + e.getMessage());
+                            log.warn("Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
                             break;
                         default:
                             // 其他MailException的處理邏輯
@@ -195,25 +205,25 @@ public class MailServerService {
         }
     }
 
-    private enum MailExceptionType{
-        AUTHENTICATION,
-        PARSE,
-        PREPARATION,
-        SEND
-    }
-
-    private MailExceptionType getMialExceptionType(MailException e){
+    private MailExceptionType getMialExceptionType(MailException e) {
         if (e instanceof MailAuthenticationException) {
             return MailExceptionType.AUTHENTICATION;
         } else if (e instanceof MailParseException) {
             return MailExceptionType.PARSE;
-        }else if(e instanceof MailPreparationException){
+        } else if (e instanceof MailPreparationException) {
             return MailExceptionType.PREPARATION;
         } else if (e instanceof MailSendException) {
             return MailExceptionType.SEND;
-        }else {
+        } else {
             return null;
         }
+    }
+
+    private enum MailExceptionType {
+        AUTHENTICATION,
+        PARSE,
+        PREPARATION,
+        SEND
     }
 
 }

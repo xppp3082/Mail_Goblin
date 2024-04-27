@@ -6,12 +6,21 @@
     <title>Dashboard</title>
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
+    <link href="/_css/dashboard.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!--    flatpicker test-->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
 <div class="container mt-5">
     <h1>Dashboard</h1>
+    <label for="timeRange">Date range</label>
+    <div class="time-picker-container">
+        <input class="time-picker" id="timeRange" placeholder="點擊選擇時間區間" type="text">
+        <button class="apply-btn" id="applyBtn" style="display: none;">Apply</button>
+    </div>
     <hr>
     <figure class="container">
         <div id="event-container"></div>
@@ -36,7 +45,41 @@
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<!--flatpicker script import-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    let startTime = new Date();
+    startTime.setDate(startTime.getDate() - 7);
+    let endTime = new Date();
+    flatpickr("#timeRange", {
+        mode: "range",
+        // minDate: "today",
+        dateFormat: "Y-m-d",
+        defaultDate: [startTime, endTime],
+        onClose: function (selectedDates, dateStr, instance) {
+            let selectedTimes = dateStr.split(" to ");
+            startTime = selectedTimes[0];
+            endTime = selectedTimes[1];
+            document.getElementById("applyBtn").style.display = "block";
+        }
+    });
+
+    document.getElementById("applyBtn").addEventListener("click", function () {
+        if (startTime && endTime) {
+            console.log(endTime);
+            console.log(typeof endTime);
+            // 在這裡可以將 startTime 和 endTime 送到後端處理
+            // alert("已選擇時間區間: " + startTime + " 到 " + endTime + "，將提交至後端處理。");
+            fetchDataAndDrawChart();
+            fetchAndDrawConversionChart();
+            fetchAndDrawDeliveryChart();
+        } else {
+            alert("請選擇有效的時間區間。");
+        }
+    });
+
+
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     // 构建请求头
@@ -52,6 +95,21 @@
     async function fetchEventCountData(days) {
         try {
             const response = await fetch('api/1.0/track/daily-event?days=' + days, {
+                method: 'GET',
+                headers: headers
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error)
+        }
+    }
+
+    async function fetchEventCountDataByDate(start, end) {
+        try {
+            const response = await fetch(`api/1.0/track/date-event?start=${start}&end=${end}`, {
                 method: 'GET',
                 headers: headers
             })
@@ -138,7 +196,21 @@
     // 使用async/await等待數據獲取完成並繪製Highchart
     async function fetchDataAndDrawChart() {
         try {
-            const data = await fetchEventCountData(30);
+            // const data = await fetchEventCountData(30);
+            // console.log(startTime.getDate().toString() + " : " + endTime.getDate().toString());
+            //Turn time format from YYYY-MM-DDTHH:mm:ss.sssZ(ISO 8601) to only date.
+            // if (typeof startTime === 'string' && typeof endTime === 'string') {
+            //     startDate = startTime;
+            //     endDate = endTime;
+            // } else if (typeof startTime === 'object' && typeof endTime === 'object') {
+            //     startDate = startTime.toISOString().slice(0, 10);
+            //     endDate = endTime.toISOString().slice(0, 10);
+            // } else {
+            //     throw new Error('Invalid startTime or endTime type.');
+            // }
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchEventCountDataByDate(startDate, endDate);
             console.log(data);
             drawLineChart(data, 'event-container');
         } catch (error) {
@@ -146,9 +218,36 @@
         }
     }
 
+    function transTimeToDateString(time) {
+        let date;
+        if (typeof time === 'string') {
+            date = time;
+        } else if (typeof time === 'object') {
+            date = time.toISOString().slice(0, 10);
+        } else {
+            throw new Error('Invalid startTime or endTime type.');
+        }
+        return date;
+    }
+
     async function fetchConversionData() {
         try {
             const response = await fetch('api/1.0/track/conversion', {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    async function fetchConversionDataByDate(start, end) {
+        try {
+            const response = await fetch(`api/1.0/track/date-conversion?start=${start}&end=${end}`, {
                 method: 'GET',
                 headers: headers
             });
@@ -213,7 +312,10 @@
 
     async function fetchAndDrawConversionChart() {
         try {
-            const data = await fetchConversionData();
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchConversionDataByDate(startDate, endDate);
+            console.log(data);
             drawConversionChart(data, 'conversion-container');
         } catch (error) {
             console.log(error);
@@ -232,7 +334,21 @@
             return await response.json();
         } catch (error) {
             throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
 
+    async function fetchDeliveryDataByDate(start, end) {
+        try {
+            const response = await fetch(`/api/1.0/track/date-delivery?start=${start}&end=${end}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
         }
     }
 
@@ -277,7 +393,10 @@
 
     async function fetchAndDrawDeliveryChart() {
         try {
-            const data = await fetchDeliveryData();
+            // const data = await fetchDeliveryData();
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchDeliveryDataByDate(startDate, endDate);
             drawDailyDeliveryChart(data, 'daily-delivery-container')
         } catch (error) {
             console.log(error);

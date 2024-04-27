@@ -8,11 +8,23 @@ import java.util.Map;
 
 public interface MailService {
     void insertBatch(List<Mail> mails);
-    void insertOpenRecord(String campaignId,String eventType,String audienceUUID);
+
+    void insertOpenRecord(String campaignId, String eventType, String audienceUUID, String recipientMail, String subject);
+
     Double getMailDeliveryRateForCompany(String account);
-    Map<LocalDate,Double>getDailyMailDeliveryRate(Long companyId);
-    Map<LocalDate,Double>trackDailyMailDeliveryRate(String account);
-    Map<String,Integer> calculateMailConversionRate(String account);
-    Map<String,Map<LocalDate,Integer>>analyzeEventPastDays(String account,Integer days);
-//    void insertBatch(List<Mail> mails,Long companyId);
+
+    Map<LocalDate, Double> getDailyMailDeliveryRate(Long companyId);
+
+    Map<LocalDate, Double> trackDailyMailDeliveryRate(String account);
+
+    Map<LocalDate, Double> trackDailyMailDeliveryRateByDate(String account, LocalDate startDate, LocalDate endDate);
+
+    Map<String, Integer> calculateMailConversionRate(String account);
+
+    Map<String, Integer> calculateMailConversionRateByDate(String account, LocalDate startDate, LocalDate endDate);
+
+    Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account, Integer days);
+
+    //    void insertBatch(List<Mail> mails,Long companyId);
+    Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate);
 }

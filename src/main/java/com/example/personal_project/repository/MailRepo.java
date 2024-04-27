@@ -1,7 +1,7 @@
 package com.example.personal_project.repository;
 
-import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.status.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -13,11 +13,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.DoubleToLongFunction;
 
 @Slf4j
 @Repository
@@ -54,16 +52,17 @@ public class MailRepo {
         });
     }
 
-    public void insertEventRecord(String campaignId, String eventType, String audienceUUId) {
+    public void insertEventRecord(String campaignId, String eventType, String audienceUUId, String recipientMail, String subject) {
         String sql = """
                 INSERT INTO 
-                mail (campaign_id,status,send_date,timestamp,audience_id)
-                VALUES (?,?,?,?,(select id from audience where audience.audience_uuid =?));
+                mail (campaign_id,status,send_date,timestamp,audience_id,recipient_mail,subject)
+                VALUES (?,?,?,?,(select id from audience where audience.audience_uuid =?),?,?);
                 """;
         try {
             jdbcTemplate.update(sql,
                     campaignId, eventType,
-                    LocalDate.now(), Timestamp.valueOf(LocalDateTime.now()), audienceUUId);
+                    LocalDate.now(), Timestamp.valueOf(LocalDateTime.now()), audienceUUId,
+                    recipientMail, subject);
         } catch (Exception e) {
             log.error("error on insert open record with userId : " + audienceUUId + " : " + e.getMessage());
         }
@@ -181,6 +180,41 @@ public class MailRepo {
         return dailyDeliveryRates;
     }
 
+    public Map<LocalDate, Double> trackDailyMailDeliveryRateByDate(String account, LocalDate startDate, LocalDate endDate) {
+        Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
+        // 初始化所有日期的成功率為 0.0
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            dailyDeliveryRates.put(date, 0.0);
+        }
+        String sql = """
+                SELECT DATE(m.send_date) AS send_date,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS successful_mails,
+                SUM(CASE WHEN m.status = ? OR m.status = ? THEN 1 ELSE 0 END) AS total_mails
+                FROM mail m
+                LEFT JOIN campaign c ON m.campaign_id = c.id
+                LEFT JOIN template t ON c.template_id = t.id
+                WHERE t.company_id = (SELECT id FROM company WHERE account = ? )
+                AND m.send_date BETWEEN ? AND ?
+                GROUP BY DATE(m.send_date)
+                """;
+        // 執行 SQL 查詢
+        jdbcTemplate.query(sql, rs -> {
+                    LocalDate sendDate = rs.getDate("send_date").toLocalDate();
+                    int successfulMailsCount = rs.getInt("successful_mails");
+                    int totalMailsCount = rs.getInt("total_mails");
+
+                    // 計算郵件送達率
+                    double deliveryRate = totalMailsCount > 0 ?
+                            (double) successfulMailsCount / totalMailsCount : 0.0;
+
+                    // 將日期和對應的郵件送達率存儲在 Map 中
+                    dailyDeliveryRates.put(sendDate, deliveryRate);
+                }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
+                account, startDate, endDate);
+
+        return dailyDeliveryRates;
+    }
+
     public Map<String, Integer> calculateMailConversionRate(String account) {
         Map<String, Integer> conversionRates = new LinkedHashMap<>();
         String sql = """
@@ -212,7 +246,35 @@ public class MailRepo {
         return conversionRates;
     }
 
-    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account,Integer days) {
+    public Map<String, Integer> calculateMailConversionRateByDate(String account, LocalDate startDate, LocalDate endDate) {
+        Map<String, Integer> conversionRates = new LinkedHashMap<>();
+        String sql = """
+                SELECT
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS RECEIVE,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS FAILED,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS OPEN,
+                SUM(CASE WHEN m.status = ? THEN 1 ELSE 0 END) AS CLICK
+                FROM mail m
+                LEFT JOIN campaign c ON m.campaign_id = c.id
+                LEFT JOIN template t ON c.template_id = t.id
+                LEFT JOIN company comp ON t.company_id = comp.id
+                WHERE comp.account = ?
+                AND m.send_date >= ?
+                AND m.send_date <= ?
+                """;
+
+        jdbcTemplate.query(sql, rs -> {
+            conversionRates.put("RECEIVE", rs.getInt("RECEIVE"));
+            conversionRates.put("FAILED", rs.getInt("FAILED"));
+            conversionRates.put("OPEN", rs.getInt("OPEN"));
+            conversionRates.put("CLICK", rs.getInt("CLICK"));
+        }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(), DeliveryStatus.OPEN.name(), DeliveryStatus.CLICK.name(), account, startDate, endDate);
+        int totalReceivedAndFailed = conversionRates.getOrDefault("RECEIVE", 0) + conversionRates.getOrDefault("FAILED", 0);
+        conversionRates.put("ALL", totalReceivedAndFailed);
+        return conversionRates;
+    }
+
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastDays(String account, Integer days) {
         Map<String, Map<LocalDate, Integer>> eventAnalysis = new LinkedHashMap<>();
 
         LocalDate startDate = LocalDate.now().minusDays(days);
@@ -244,6 +306,37 @@ public class MailRepo {
 
 //            //generate a new map once the event type is not exist in eventAnalysis.
 //            eventAnalysis.computeIfAbsent(status,k->new LinkedHashMap<>()).put(sendDate,count);
+            eventAnalysis.get(status).put(sendDate, count);
+        }, account, startDate, endDate);
+        return eventAnalysis;
+    }
+
+    public Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate) {
+        Map<String, Map<LocalDate, Integer>> eventAnalysis = new LinkedHashMap<>();
+
+        for (String event : new String[]{"RECEIVE", "FAILED", "OPEN", "CLICK"}) {
+            eventAnalysis.put(event, new LinkedHashMap<>());
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                eventAnalysis.get(event).put(date, 0);
+            }
+        }
+        String sql = """
+                SELECT 
+                m.status,
+                DATE(m.send_date) AS send_date,
+                COUNT(*) AS count 
+                FROM mail m
+                LEFT JOIN campaign c ON m.campaign_id = c.id
+                LEFT JOIN template t ON c.template_id = t.id
+                LEFT JOIN company comp ON t.company_id = comp.id
+                WHERE comp.account = ?
+                AND send_date BETWEEN ? AND ?
+                GROUP BY status, DATE(send_date)
+                """;
+        jdbcTemplate.query(sql, rs -> {
+            String status = rs.getString("status");
+            LocalDate sendDate = rs.getDate("send_date").toLocalDate();
+            int count = rs.getInt("count");
             eventAnalysis.get(status).put(sendDate, count);
         }, account, startDate, endDate);
         return eventAnalysis;
