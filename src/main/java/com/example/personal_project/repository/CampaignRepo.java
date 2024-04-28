@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -142,15 +143,15 @@ public class CampaignRepo {
     public Campaign insertNewCampaign(Campaign campaign) {
         String sql = """
                 INSERT INTO campaign 
-                (template_id,subject,target_date,status,tag_id,execute_status)
+                (template_id,subject,target_date,status,tag_id,execute_status,target_datetime)
                 VALUES
-                (?,?,?,?,?,?);
+                (?,?,?,?,?,?,?);
                 """;
         try {
             jdbcTemplate.update(sql,
                     campaign.getTemplateId(), campaign.getSubject(),
                     campaign.getSendDate(), campaign.getStatus(),
-                    campaign.getTagId(), campaign.getExecuteStatus());
+                    campaign.getTagId(), campaign.getExecuteStatus(), campaign.getSendDateTime());
         } catch (Exception e) {
             log.error("Error on inserting new campaign with templateId : " + campaign.getTemplateId());
         }
@@ -172,6 +173,9 @@ public class CampaignRepo {
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));
                 campaign.setExecuteStatus(rs.getString("execute_status"));
+                Timestamp sendDateTime = rs.getTimestamp("target_datetime");
+                campaign.setSendDateTime(sendDateTime.toString().replace(' ', 'T'));
+//                campaign.setSendDateTime(sendDateTime.toString());
                 return campaign;
             }
         };
