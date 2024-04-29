@@ -94,6 +94,20 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public Campaign insertNewCampaign(Campaign campaign, String status) {
+//        //將前端設定的時區轉換為UTC+0的時區
+//        assert campaign.getSendDateTime() != null;
+//        String sendDateTimeString = campaign.getSendDateTime().replace(' ', 'T');
+//
+//        // 使用 DateTimeFormatter 將字符串解析為 LocalDateTime 對象
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        LocalDateTime localDateTime = LocalDateTime.parse(sendDateTimeString);
+//
+//        // 將 LocalDateTime 對象轉換為 UTC+0 時間
+//        LocalDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC).toLocalDateTime();
+//
+//        // 將轉換後的 UTC+0 時間格式化為字符串，並設置回 campaign 中
+//        campaign.setSendDateTime(utcDateTime.format(formatter));
+
         campaign.setStatus(status);
         campaign.setExecuteStatus(ExecuteStatus.PENDING.name());
         return campaignRepo.insertNewCampaign(campaign);

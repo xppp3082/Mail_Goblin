@@ -1,31 +1,112 @@
 <!-- navbar.html -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <img alt="Mail Goblin Logo" class="logo" src="/images/goblin.png">
-    <a class="navbar-brand" href="#">Mail Goblin</a>
-    <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-            class="navbar-toggler"
-            data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light navigator">-->
+<!--    <img alt="Mail Goblin Logo" class="logo" src="/images/goblin.png">-->
+<!--    <a class="navbar-brand" href="#">Mail Goblin</a>-->
+<!--    <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"-->
+<!--            class="navbar-toggler"-->
+<!--            data-target="#navbarSupportedContent" data-toggle="collapse" type="button">-->
+<!--        <span class="navbar-toggler-icon"></span>-->
+<!--    </button>-->
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/template">Template</a>
-            </li>
-            <!--            <li class="nav-item active">-->
-            <li class="nav-item">
-                <a class="nav-link" href="/homePage">Campaign</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/tag">Tags</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/audience">Audience</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/dashboard">Dashboard</a>
-            </li>
-        </ul>
+<!--    <div class="collapse navbar-collapse" id="navbarSupportedContent">-->
+<!--        <ul class="navbar-nav mr-auto">-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/template">Template</a>-->
+<!--            </li>-->
+<!--            &lt;!&ndash;            <li class="nav-item active">&ndash;&gt;-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/homePage">Campaign</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/tag">Tags</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/audience">Audience</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/dashboard">Dashboard</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <img class="icon-image" src="/images/user.png">-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<!--==============version 2================-->
+<!--<div class="navbar-container">-->
+<!--    <nav class="navbar">-->
+<!--        <img alt="Mail Goblin Logo" class="logo" src="/images/goblin.png">-->
+<!--        <a class="navbar-brand" href="#">Mail Goblin</a>-->
+<!--        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"-->
+<!--                class="navbar-toggler"-->
+<!--                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">-->
+<!--            <span class="navbar-toggler-icon"></span>-->
+<!--        </button>-->
+
+<!--        <ul class="navbar-nav">-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/template">Template</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/homePage">Campaign</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/tag">Tags</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/audience">Audience</a>-->
+<!--            </li>-->
+<!--            <li class="nav-item">-->
+<!--                <a class="nav-link" href="/dashboard">Dashboard</a>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--        <ul class="navbar-nav">-->
+<!--            <li class="nav-item">-->
+<!--                <img class="icon-image" src="/images/user.png">-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </nav>-->
+<!--</div>-->
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light navigator">-->
+<!--</nav>-->
+<div class="sidebar">
+    <div class="title-container">
+        <img alt="Mail Goblin Logo" class="logo" src="/images/goblin.png">
+        <h1>Mail</h1>
+        <h1 class="color">Goblin</h1>
     </div>
-</nav>
+    <hr>
+    <ul class="function-list">
+        <li><a href="/template"><span class="icon"><img alt="Icon" src="/images/email.png"></span><i
+                class="fa fa-dashboard push"></i>Template<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span>
+        </li>
+        <li><a href="/homePage"><span class="icon"><img alt="Icon" src="/images/campaign.png"></span><i
+                class="fa fa-user push"></i>Campaign<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span>
+            <!--            <ul class="sub-menu">-->
+            <!--                <li><a href="/homePage">Campaign List<i class="fa fa-angle-right"></i></a><span class="hover"></span>-->
+            <!--                </li>-->
+            <!--            </ul>-->
+        </li>
+        <li><a href="/tag"><span class="icon"><img alt="Icon" src="/images/tag.png"></span><i
+                class="fa fa-cog push"></i>Tag<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span>
+        </li>
+        <li><a href="/audience"><span class="icon"><img alt="Icon" src="/images/audience.png"></span><i
+                class="fa fa-picture-o push"></i>Audience<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span>
+        </li>
+        <li><a href="/dashboard"><span class="icon"><img alt="Icon" src="/images/dashboard.png"></span><i
+                class="fa fa-file push"></i>Dashboard<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span>
+        </li>
+        <li><a href="#"><span class="icon"><img alt="Icon" src="/images/user.png"></span><i
+                class="fa fa-plane push"></i>Login<i class="fa fa-angle-right"></i></a><span
+                class="hover"></span></li>
+    </ul>
+</div>

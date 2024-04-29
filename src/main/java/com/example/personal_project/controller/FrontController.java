@@ -67,7 +67,7 @@ public class FrontController {
 
     @GetMapping("/homePage")
     public String showHomePage() {
-        return "home";
+        return "campaign";
     }
 
     @GetMapping("/audience")

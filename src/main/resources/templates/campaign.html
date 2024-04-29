@@ -5,8 +5,9 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Home Page</title>
     <!-- Bootstrap CSS -->
-    <link href="/_css/navbar.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <script src="/_js/navbar.js"></script>
 
     <!--    flatpickr test-->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
@@ -50,10 +51,10 @@
                     <!-- Populate with existing templates -->
                 </select>
             </div>
-            <div class="form-group">
-                <label for="send_date">Send Date:</label>
-                <input class="form-control" id="send_date" name="send_date" type="date">
-            </div>
+            <!--            <div class="form-group">-->
+            <!--                <label for="send_date">Send Date:</label>-->
+            <!--                <input class="form-control" id="send_date" name="send_date" type="date">-->
+            <!--            </div>-->
             <div class="form-group">
                 <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
                 <input class="form-control" id="send_datetime" name="send_datetime" type="text">
@@ -98,7 +99,8 @@
         dateFormat: "Y-m-d H:00", // 設置日期和時間的顯示格式，僅顯示到小時
         enableTime: true, // 啟用時間選擇功能
         minDate: "today", // 只允許選擇當天之後的日期
-        maxDate: new Date().fp_incr(365) // 只允許選擇一年之內的日期
+        maxDate: new Date().fp_incr(365), // 只允許選擇一年之內的日期
+        utc: true//將選擇時間轉換為UTC+0時間
     });
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
@@ -108,12 +110,13 @@
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
     };
     // Load all template after windows loading completed
+    let currentPage = 0;
     window.onload = async function () {
         // await loadCampaigns();
         await loadTemplates();
         // await loadTemplatesWithPage(currentPage);
         await loadTags();
-        await loadCampaignsWihPage(0);
+        await loadCampaignsWihPage(currentPage);
     }
 
     // function navigateToAddTemplate() {
@@ -161,6 +164,7 @@
             pageLink.innerText = i + 1;
             pageLink.onclick = function () {
                 loadCampaignsWihPage(i);
+                currentPage = i;
             };
             paginationContainer.appendChild(pageLink);
         }
@@ -176,7 +180,7 @@
             console.log(campaign);
             row.innerHTML = `
                 <td>${campaign.subject}</td>
-                <td>${campaign.send_date}</td>
+                <td>${campaign.send_datetime}</td>
                 <td>${campaign.tag}</td>
                 <td>${campaign.status}</td>
                 <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button>
@@ -212,7 +216,8 @@
             })
             if (response.ok) {
                 alert('Campaign deleted successfully');
-                await loadCampaigns();
+                // await loadCampaigns();
+                await loadCampaignsWihPage(currentPage)
             }
         } catch (error) {
             console.log(error);
@@ -293,7 +298,8 @@
             });
             if (response.ok) {
                 alert('Draft saved successfully');
-                await loadCampaigns(); // Reload campaigns
+                // await loadCampaigns(); // Reload campaigns
+                await loadCampaignsWihPage(currentPage)
             } else {
                 throw new Error('Failed to save draft');
             }
@@ -316,7 +322,8 @@
             });
             if (response.ok) {
                 alert('Complete campaign saved successfully');
-                await loadCampaigns(); // Reload campaigns
+                // await loadCampaigns(); // Reload campaigns
+                await loadCampaignsWihPage(currentPage)
             } else {
                 throw new Error('Failed to save complete campaign');
             }

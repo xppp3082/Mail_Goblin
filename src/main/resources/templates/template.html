@@ -6,13 +6,15 @@
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Templates</title>
-    <link href="/_css/navbar.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="/_css/template.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
-<div class="container mt-5">
-    <h1>Template</h1>
+<!--<div class="container mt-5">-->
+<div class="container">
+    <h1>TEMPLATE</h1>
     <hr>
     <br><br>
     <h2>Template List</h2>
@@ -22,7 +24,8 @@
         <span id="template-currentPage">1</span>
         <button id="nextTemplateButton" onclick="nextPage()"> >></button>
     </div>
-    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>
+    <!--    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>-->
+    <button class="add-template-btn" onclick="navigateToAddTemplate()">Add New Template</button>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -87,6 +90,51 @@
         }
     }
 
+    // function displayTemplates(templates) {
+    //     const templateContainer = document.getElementById('templateContainer');
+    //     templateContainer.innerHTML = ''; // 清空容器内容
+    //
+    //     templates.forEach(function (template) {
+    //         // 创建模板卡片
+    //         const templateCard = document.createElement('div');
+    //         templateCard.classList.add('card', 'mb-3');
+    //
+    //         // 卡片内容
+    //         const cardBody = document.createElement('div');
+    //         cardBody.classList.add('card-body');
+    //
+    //         // 主题
+    //         const subject = document.createElement('h5');
+    //         subject.classList.add('card-title');
+    //         subject.innerText = template.subject;
+    //
+    //         // 编辑按钮
+    //         const editButton = document.createElement('button');
+    //         editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
+    //         editButton.innerText = 'Edit';
+    //         editButton.onclick = function () {
+    //             editTemplate(template.id);
+    //         };
+    //
+    //         // 删除按钮
+    //         const deleteButton = document.createElement('button');
+    //         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+    //         deleteButton.innerText = 'Delete';
+    //         deleteButton.onclick = function () {
+    //             deleteTemplate(template.id);
+    //         };
+    //
+    //         // 组装卡片内容
+    //         cardBody.appendChild(subject);
+    //         cardBody.appendChild(editButton);
+    //         cardBody.appendChild(deleteButton);
+    //         templateCard.appendChild(cardBody);
+    //
+    //         // 添加到模板容器中
+    //         templateContainer.appendChild(templateCard);
+    //     });
+    // }
+
     function displayTemplates(templates) {
         const templateContainer = document.getElementById('templateContainer');
         templateContainer.innerHTML = ''; // 清空容器内容
@@ -94,38 +142,38 @@
         templates.forEach(function (template) {
             // 创建模板卡片
             const templateCard = document.createElement('div');
-            templateCard.classList.add('card', 'mb-3');
+            templateCard.classList.add('card');
 
             // 卡片内容
-            const cardBody = document.createElement('div');
-            cardBody.classList.add('card-body');
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
+            const titleSpan = document.createElement('span');
+            titleSpan.classList.add('title');
+            titleSpan.innerText = template.subject;
 
-            // 主题
-            const subject = document.createElement('h5');
-            subject.classList.add('card-title');
-            subject.innerText = template.subject;
-
-            // 编辑按钮
+            const actionsDiv = document.createElement('div');
+            actionsDiv.classList.add('actions');
             const editButton = document.createElement('button');
-            editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
+            editButton.setAttribute('type', 'button');
+            editButton.classList.add('history');
             editButton.innerText = 'Edit';
             editButton.onclick = function () {
                 editTemplate(template.id);
             };
-
-            // 删除按钮
             const deleteButton = document.createElement('button');
-            deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+            deleteButton.setAttribute('type', 'button');
+            deleteButton.classList.add('track');
             deleteButton.innerText = 'Delete';
             deleteButton.onclick = function () {
                 deleteTemplate(template.id);
             };
+            actionsDiv.appendChild(editButton);
+            actionsDiv.appendChild(deleteButton);
 
-            // 组装卡片内容
-            cardBody.appendChild(subject);
-            cardBody.appendChild(editButton);
-            cardBody.appendChild(deleteButton);
-            templateCard.appendChild(cardBody);
+            // contentDiv.appendChild(titleSpan);
+            contentDiv.appendChild(actionsDiv);
+            templateCard.appendChild(titleSpan);
+            templateCard.appendChild(contentDiv);
 
             // 添加到模板容器中
             templateContainer.appendChild(templateCard);

@@ -11,11 +11,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -166,9 +164,9 @@ public class CampaignRepo {
                 campaign.setId(rs.getLong("id"));
                 campaign.setTemplateId(rs.getLong("template_id"));
                 campaign.setSubject(rs.getString("subject"));
-                Date senDateSQL = rs.getDate("target_date");
-                LocalDate sendDate = senDateSQL.toLocalDate();
-                campaign.setSendDate(sendDate);
+//                Date senDateSQL = rs.getDate("target_date");
+//                LocalDate sendDate = senDateSQL.toLocalDate();
+//                campaign.setSendDate(sendDate);
                 campaign.setStatus(rs.getString("status"));
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));
@@ -189,14 +187,16 @@ public class CampaignRepo {
                 campaign.setId(rs.getLong("id"));
                 campaign.setTemplateId(rs.getLong("template_id"));
                 campaign.setSubject(rs.getString("subject"));
-                Date senDateSQL = rs.getDate("target_date");
-                LocalDate sendDate = senDateSQL.toLocalDate();
-                campaign.setSendDate(sendDate);
+//                Date senDateSQL = rs.getDate("target_date");
+//                LocalDate sendDate = senDateSQL.toLocalDate();
+//                campaign.setSendDate(sendDate);
                 campaign.setStatus(rs.getString("status"));
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));
                 campaign.setExecuteStatus(rs.getString("execute_status"));
                 campaign.setTagName(rs.getString("tag"));
+                Timestamp sendDateTime = rs.getTimestamp("target_datetime");
+                campaign.setSendDateTime(sendDateTime.toString());
                 return campaign;
             }
         };
