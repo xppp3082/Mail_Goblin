@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding-left: 240px;
+}
+
+.container {
+    padding-top: 3rem;
+}
+
+#audience-title {
+    display: flex;
+    align-items: flex-end;
+}
+
+#audience-picture {
+    height: 4rem;
+    margin-right: 1rem;
+}
+
+
+.tagify {
+    width: 100%;
+    max-width: 700px;
+}
+
+.customSuggestionsList > div {
+    max-height: 300px;
+    border: 2px solid pink;
+    overflow: auto;
+}
+
+.tagList-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#audience-btn-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 3rem;
+    justify-content: center;
+}
+
+.add-template-btn {
+    /*padding: 1.3em 3em;*/
+    height: 100%;
+    width: 8rem;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    color: #000;
+    background-color: #ccfccb;
+    border: none;
+    border-radius: 45px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+}
+
+.add-template-btn:hover {
+    background-color: #23c483;
+    box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+    color: #fff;
+    transform: translateY(-7px);
+}
+
+.add-template-btn:active {
+    transform: translateY(-1px);
+}

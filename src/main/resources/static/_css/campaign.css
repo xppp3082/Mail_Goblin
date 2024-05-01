@@ -1,0 +1,56 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding-left: 240px;
+}
+
+.container {
+    padding-top: 3rem;
+}
+
+#campaign-title {
+    display: flex;
+    align-items: flex-end;
+}
+
+#campaign-picture {
+    height: 4rem;
+    margin-right: 1rem;
+}
+
+.badge-warning {
+    color: #1f2d3d;
+    background-color: #ffc107;
+}
+
+.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+
+.badge-info {
+    color: #fff;
+    background-color: #17a2b8;
+}
+
+.badge {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}

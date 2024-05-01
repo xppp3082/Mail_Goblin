@@ -7,7 +7,8 @@
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="/_css/navbar.css" rel="stylesheet">
-    <script src="/_js/navbar.js"></script>
+    <link href="/_css/campaign.css" rel="stylesheet">
+    <!--    <script src="/_js/navbar.js"></script>-->
 
     <!--    flatpickr test-->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
@@ -15,11 +16,14 @@
 <body>
 <div th:insert="_components/navbar.html"></div>
 <!-- Campaign Container -->
-<div class="container mt-5">
-    <h1>Campaign</h1>
+<!--<div class="container mt-5">-->
+<div class="container">
+    <div id="campaign-title">
+        <img alt="campaign icon" id="campaign-picture" src="/images/campaign.png">
+        <h1>CAMPAIGN</h1>
+    </div>
     <hr>
-    <br><br>
-    <!-- Campaign List -->
+    <br>
     <div>
         <h2>All Campaigns</h2>
         <table class="table">
@@ -29,6 +33,7 @@
                 <th>Target Date</th>
                 <th>Target Tag</th>
                 <th>Status</th>
+                <th>Execute Status</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -111,13 +116,18 @@
     };
     // Load all template after windows loading completed
     let currentPage = 0;
-    window.onload = async function () {
-        // await loadCampaigns();
-        await loadTemplates();
-        // await loadTemplatesWithPage(currentPage);
-        await loadTags();
-        await loadCampaignsWihPage(currentPage);
-    }
+    
+    // window.onload = async function () {
+    //     // await loadCampaigns();
+    //     await loadTemplates();
+    //     // await loadTemplatesWithPage(currentPage);
+    //     await loadTags();
+    //     await loadCampaignsWihPage(currentPage);
+    // }
+
+    loadTemplates();
+    loadTags();
+    loadCampaignsWihPage(currentPage);
 
     // function navigateToAddTemplate() {
     //     window.location.href = '/configure';
@@ -178,11 +188,37 @@
         campaigns.forEach(function (campaign) {
             const row = document.createElement('tr');
             console.log(campaign);
+            let statusColorClass = '';
+            switch (campaign.status) {
+                case 'COMPLETED':
+                    statusColorClass = 'badge-success';
+                    break;
+                case 'DRAFT':
+                    statusColorClass = 'badge-info';
+                    break;
+                default:
+                    statusColorClass = '';
+            }
+
+            let executeColorClass = '';
+            switch (campaign.execute_status) {
+                case 'COMPLETE':
+                    executeColorClass = 'badge-success';
+                    break;
+                case 'PENDING':
+                    executeColorClass = 'badge-warning';
+                    break;
+                default:
+                    executeColorClass = '';
+            }
+
+
             row.innerHTML = `
                 <td>${campaign.subject}</td>
                 <td>${campaign.send_datetime}</td>
                 <td>${campaign.tag}</td>
-                <td>${campaign.status}</td>
+                <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
+                <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>
                 <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button>
                 <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button></td>
             `;

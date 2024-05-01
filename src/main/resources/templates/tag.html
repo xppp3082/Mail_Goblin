@@ -7,15 +7,19 @@
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Tags</title>
     <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="/_css/tag.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
-<div class="container mt-5">
-    <h1>Tags</h1>
+<!--<div class="container mt-5">-->
+<div class="container">
+    <div id="tag-title">
+        <img alt="tag icon" id="tag-picture" src="/images/tag.png">
+        <h1>TAGS</h1>
+    </div>
     <hr>
-    <br><br>
     <h2>Tag List</h2>
     <form id="addTagForm" method="post" th:action="@{/api/1.0/tag/add}">
         <div class="form-group">
@@ -51,9 +55,10 @@
         'Authorization': `Bearer ${token}`
     };
 
-    window.onload = async function () {
-        await loadTagsWithPage(0);
-    }
+    // window.onload = async function () {
+    //     await loadTagsWithPage(0);
+    // }
+    loadTagsWithPage(0);
 
     document.getElementById('addTagForm').addEventListener('submit', function (event) {
         event.preventDefault();

@@ -65,7 +65,7 @@ public class FrontController {
         return "templateEditor";
     }
 
-    @GetMapping("/homePage")
+    @GetMapping("/campaign")
     public String showHomePage() {
         return "campaign";
     }

@@ -6,19 +6,21 @@
     <title>Audience</title>
     <!-- Bootstrap CSS -->
     <link href="/_css/navbar.css" rel="stylesheet">
+    <link href="/_css/audience.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
-<div class="container mt-5">
-    <h1>Audience</h1>
-    <hr>
-</div>
-<br><br>
+<!--<div class="container mt-5">-->
 <div class="container">
-    <h1>Add User</h1>
-    <br><br>
+    <div id="audience-title">
+        <img alt="audience icon" id="audience-picture" src="/images/audience.png">
+        <h1>AUDIENCE</h1>
+    </div>
+    <hr>
+    <br>
+    <h2>Add User</h2>
     <!-- Add User Form -->
     <form id="addUserForm">
         <div class="form-group">
@@ -39,10 +41,18 @@
         <!--                &lt;!&ndash; Tags options will be populated here &ndash;&gt;-->
         <!--            </select>-->
         <!--        </div>-->
-        <div class="form-group" id="tagOptions">
-            <!-- Tags options will be populated here -->
+        <!--        <div class="form-group" id="tagOptions">-->
+        <!--            &lt;!&ndash; Tags options will be populated here &ndash;&gt;-->
+        <!--        </div>-->
+        <div class="form-group tagList-container">
+            <label for="tagsList">Select Tags:</label>
+            <input class="form-control" id='tagsList' name='tagsList' placeholder='write some tags'>
         </div>
-        <button class="btn btn-primary" type="submit">Add User</button>
+        <br>
+        <div id="audience-btn-container">
+            <!--            <button class="btn btn-primary add-template-btn" type="submit">Add User</button>-->
+            <button class="add-template-btn" type="submit">Add User</button>
+        </div>
     </form>
 </div>
 <br><br>
@@ -87,6 +97,11 @@
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<!--tagify import test-->
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
 <script>
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
@@ -94,10 +109,12 @@
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     };
-    window.onload = async function () {
-        await loadTags();
-        await loadUsersWithPage(0);
-    }
+    // window.onload = async function () {
+    //     await loadTags();
+    //     await loadUsersWithPage(0);
+    // }
+    loadTags();
+    loadUsersWithPage(0);
 
     async function loadTags() {
         try {
@@ -107,7 +124,11 @@
             });
             const tags = await response.json();
             // displayTags(tags);
-            populateTagOptions(tags);
+            // populateTagOptions(tags);
+            // console.log(tags);
+            const newArray = tags.map(obj => ({...obj, value: obj.name}))
+            console.log(newArray);
+            drawTagListWithTagify(newArray);
         } catch (error) {
             console.error(error);
         }
@@ -272,13 +293,23 @@
         };
 
         // 遍歷選中的標籤，將其添加到 tags 數組中
-        document.querySelectorAll('input[name="tags"]:checked').forEach(function (checkbox) {
+        // document.querySelectorAll('input[name="tags"]:checked').forEach(function (checkbox) {
+        //     user.tags.push({
+        //         id: parseInt(checkbox.value), // 將值轉換為整數
+        //         company_id: 11, // 假設 company_id 固定為 1，你可以根據實際情況調整
+        //         name: checkbox.dataset.name // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+        //     });
+        // });
+
+        // 遍歷選中的標籤，將其添加到 tags 數組中
+        document.querySelectorAll('.tagify__tag ').forEach(function (tagElement) {
             user.tags.push({
-                id: parseInt(checkbox.value), // 將值轉換為整數
+                id: parseInt(tagElement.id), // 將值轉換為整數
                 company_id: 11, // 假設 company_id 固定為 1，你可以根據實際情況調整
-                name: checkbox.dataset.name // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+                name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
             });
         });
+
 
         // 將 user 對象轉換為 JSON 字符串並添加到 FormData 中
         const formData = new FormData();
@@ -371,6 +402,72 @@
     }
 
     fetchAndDrawNewAudienceChart();
+
+    function drawTagListWithTagify(tags) {
+        let whitelist = tags;
+        console.log(tags);
+        let input = document.querySelector('input[name=tagsList]')
+
+        let tagify = new Tagify(input, {
+            whitelist: whitelist,
+            tagTextProp: "name",
+            dropdown: {
+                position: "manual",
+                maxItems: Infinity,
+                enabled: 0,
+                classname: "customSuggestionsList"
+            },
+            enforceWhitelist: true
+        })
+
+        tagify.on("dropdown:show", onSuggestionsListUpdate)
+            .on("dropdown:hide", onSuggestionsListHide)
+            .on('dropdown:scroll', onDropdownScroll)
+        renderSuggestionsList(tagify)
+    }
+
+    // var whitelist = ["A# .NET", "A# (Axiom)", "A-0 System", "A+", "A++", "ABAP", "ABC", "ABC ALGOL", "ABSET", "ABSYS", "ACC", "Accent", "Ace DASL", "ACL2", "Avicsoft", "ACT-III", "Action!", "ActionScript", "Ada", "Adenine", "Agda", "Agilent VEE", "Agora", "AIMMS", "Alef", "ALF", "ALGOL 58", "ALGOL 60", "ALGOL 68", "ALGOL W", "Alice", "Alma-0", "AmbientTalk", "Amiga E", "AMOS", "AMPL", "Apex (Salesforce.com)", "APL", "AppleScript", "Arc", "ARexx", "Argus", "AspectJ", "Assembly language", "ATS", "Ateji PX", "AutoHotkey", "Autocoder", "AutoIt", "AutoLISP / Visual LISP", "Averest", "AWK", "Axum", "Active Server Pages", "ASP.NET", "B", "Babbage", "Bash", "BASIC", "bc", "BCPL", "BeanShell", "Batch (Windows/Dos)", "Bertrand", "BETA", "Bigwig", "Bistro", "BitC", "BLISS", "Blockly", "BlooP", "Blue", "Boo", "Boomerang", "Bourne shell (including bash and ksh)", "BREW", "BPEL", "B", "C--", "C++ – ISO/IEC 14882", "C# – ISO/IEC 23270", "C/AL", "Caché ObjectScript", "C Shell", "Caml", "Cayenne", "CDuce", "Cecil", "Cesil", "Céu", "Ceylon", "CFEngine", "CFML", "Cg", "Ch", "Chapel", "Charity", "Charm", "Chef", "CHILL", "CHIP-8", "chomski", "ChucK", "CICS", "Cilk", "Citrine (programming language)", "CL (IBM)", "Claire", "Clarion", "Clean", "Clipper", "CLIPS", "CLIST", "Clojure", "CLU", "CMS-2", "COBOL – ISO/IEC 1989", "CobolScript – COBOL Scripting language", "Cobra", "CODE", "CoffeeScript", "ColdFusion", "COMAL", "Combined Programming Language (CPL)", "COMIT", "Common Intermediate Language (CIL)", "Common Lisp (also known as CL)", "COMPASS", "Component Pascal", "Constraint Handling Rules (CHR)", "COMTRAN", "Converge", "Cool", "Coq", "Coral 66", "Corn", "CorVision", "COWSEL", "CPL", "CPL", "Cryptol", "csh", "Csound", "CSP", "CUDA", "Curl", "Curry", "Cybil", "Cyclone", "Cython", "Java", "Javascript", "M2001", "M4", "M#", "Machine code", "MAD (Michigan Algorithm Decoder)", "MAD/I", "Magik", "Magma", "make", "Maple", "MAPPER now part of BIS", "MARK-IV now VISION:BUILDER", "Mary", "MASM Microsoft Assembly x86", "MATH-MATIC", "Mathematica", "MATLAB", "Maxima (see also Macsyma)", "Max (Max Msp – Graphical Programming Environment)", "Maya (MEL)", "MDL", "Mercury", "Mesa", "Metafont", "Microcode", "MicroScript", "MIIS", "Milk (programming language)", "MIMIC", "Mirah", "Miranda", "MIVA Script", "ML", "Model 204", "Modelica", "Modula", "Modula-2", "Modula-3", "Mohol", "MOO", "Mortran", "Mouse", "MPD", "Mathcad", "MSIL – deprecated name for CIL", "MSL", "MUMPS", "Mystic Programming L"]
+    //
+    // var input = document.querySelector('input[name=tags]');
+    //
+    // // init Tagify script on the above inputs
+    // var tagify = new Tagify(input, {
+    //     whitelist: whitelist,
+    //     dropdown: {
+    //         position: "manual",
+    //         maxItems: Infinity,
+    //         enabled: 0,
+    //         classname: "customSuggestionsList"
+    //     },
+    //     enforceWhitelist: true
+    // })
+    //
+    // tagify.on("dropdown:show", onSuggestionsListUpdate)
+    //     .on("dropdown:hide", onSuggestionsListHide)
+    //     .on('dropdown:scroll', onDropdownScroll)
+    //
+    // renderSuggestionsList()
+
+    // ES2015 argument destructuring
+    function onSuggestionsListUpdate({detail: suggestionsElm}) {
+        console.log(suggestionsElm)
+    }
+
+    function onSuggestionsListHide() {
+        console.log("hide dropdown")
+    }
+
+    function onDropdownScroll(e) {
+        console.log(e.detail)
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+    function renderSuggestionsList(tagify) {
+        tagify.dropdown.show.call(tagify) // load the list
+        tagify.DOM.scope.parentNode.appendChild(tagify.DOM.dropdown)
+    }
+
+
 </script>
 </body>
 </html>
