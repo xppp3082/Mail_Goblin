@@ -105,7 +105,11 @@
         enableTime: true, // 啟用時間選擇功能
         minDate: "today", // 只允許選擇當天之後的日期
         maxDate: new Date().fp_incr(365), // 只允許選擇一年之內的日期
-        utc: true//將選擇時間轉換為UTC+0時間
+        utc: true,//將選擇時間轉換為UTC+0時間
+        onClose: function (selectedDates, dataStr, instance) {
+            console.log(selectedDates[0]);
+            console.log(selectedDates[0].toISOString());
+        }
     });
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
@@ -116,7 +120,7 @@
     };
     // Load all template after windows loading completed
     let currentPage = 0;
-    
+
     // window.onload = async function () {
     //     // await loadCampaigns();
     //     await loadTemplates();
@@ -133,7 +137,6 @@
     //     window.location.href = '/configure';
     // }
 
-    // // Load all campaigns
     async function loadCampaigns() {
         try {
             const response = await fetch('/api/1.0/campaign/all', {
@@ -254,6 +257,8 @@
                 alert('Campaign deleted successfully');
                 // await loadCampaigns();
                 await loadCampaignsWihPage(currentPage)
+            } else {
+                alert('Failed to delete campaign')
             }
         } catch (error) {
             console.log(error);

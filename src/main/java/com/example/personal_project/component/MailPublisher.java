@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -32,7 +31,7 @@ public class MailPublisher {
     }
 
     //    @Scheduled(cron = "0 0 8 * * ?")
-    @Scheduled(cron = "0 0 * * * *")
+//    @Scheduled(cron = "0 0 * * * *")
     public void publishCampaign() {
         try {
             GetQueueUrlResult queueUrlResult = amazonSQSClient.getQueueUrl(queueName);

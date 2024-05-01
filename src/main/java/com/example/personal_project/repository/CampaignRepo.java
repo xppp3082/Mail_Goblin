@@ -44,6 +44,7 @@ public class CampaignRepo {
             jdbcTemplate.update(sql, id);
         } catch (Exception e) {
             log.error("error on deleting the campaign.");
+            throw e;
         }
     }
 

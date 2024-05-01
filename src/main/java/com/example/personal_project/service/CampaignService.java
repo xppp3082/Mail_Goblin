@@ -23,7 +23,7 @@ public interface CampaignService {
 
     Campaign insertNewCampaign(Campaign campaign, String status);
 
-    void deleteCampaign(Long id);
+    void deleteCampaign(Long id) throws Exception;
 
     void sendCampaign(Campaign campaign) throws MessagingException, UnsupportedEncodingException;
 

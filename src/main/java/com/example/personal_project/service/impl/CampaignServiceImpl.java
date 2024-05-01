@@ -114,7 +114,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public void deleteCampaign(Long id) {
+    public void deleteCampaign(Long id) throws Exception {
         campaignRepo.deleteCampaign(id);
     }
 

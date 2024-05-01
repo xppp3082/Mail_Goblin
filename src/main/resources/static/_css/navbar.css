@@ -45,6 +45,12 @@
 /*    background: #202838;*/
 /*}*/
 
+.jersey-25-regular {
+    font-family: "Jersey 25", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
 
 .sidebar {
     width: 250px;
@@ -61,6 +67,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        font-family: "Jersey 25", sans-serif;
     }
 
     .logo {
