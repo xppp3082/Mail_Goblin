@@ -61,9 +61,10 @@
             <!--                <input class="form-control" id="send_date" name="send_date" type="date">-->
             <!--            </div>-->
             <div class="form-group">
+                <input class="form-control" id="send_datetime_UTC" name="send_datetime" style="display: none"
+                       type="text">
                 <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
-                <input class="form-control" id="send_datetime" name="send_datetime" type="text">
-                <!--                <input class="form-control" id="send_datetime" name="send_datetime" step="3600" type="datetime-local">-->
+                <input class="form-control" id="send_datetime" name="send_datetime2" type="text">
             </div>
             <div class="form-group">
                 <label for="tag_id">Tag:</label>
@@ -107,11 +108,24 @@
         maxDate: new Date().fp_incr(365), // 只允許選擇一年之內的日期
         utc: true,//將選擇時間轉換為UTC+0時間
         onClose: function (selectedDates, dataStr, instance) {
+            const selectedDate = selectedDates[0];
+            selectedDate.setMinutes(0);
+            selectedDate.setSeconds(0);
             console.log(selectedDates[0]);
+            console.log(selectedDate);
             console.log(selectedDates[0].toISOString());
+            console.log(selectedDates[0].getTime());
+            const utcDate = selectedDates[0].toISOString().slice(0, 16).replace("T", " ");
+            document.getElementById('send_datetime_UTC').value = utcDate;
+
+            // 將選擇的日期轉換為UTC+0時間
+            // const utcDate = new Date(selectedDates[0].getTime() - (selectedDates[0].getTimezoneOffset() * 60000));
+            // console.log("UTC時間為: " + utcDate);
+            // // 將UTC+0時間設置到表單中
+            // document.getElementById('send_datetime').value = utcDate.toISOString().slice(0, 16).replace("T", " ");
         }
     });
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     // 构建请求头
     const headers = {
@@ -215,10 +229,14 @@
                     executeColorClass = '';
             }
 
+            // Convert UTC time to local time
+            const sendDatetimeUTC = new Date(campaign.send_datetime);
+            const sendDatetimeLocal = new Date(sendDatetimeUTC.getTime() - sendDatetimeUTC.getTimezoneOffset() * 60000);
+            const sendDatetimeString = sendDatetimeLocal.toLocaleString(); // Convert to local string format
 
             row.innerHTML = `
                 <td>${campaign.subject}</td>
-                <td>${campaign.send_datetime}</td>
+                <td>${sendDatetimeString}</td>
                 <td>${campaign.tag}</td>
                 <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
                 <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>

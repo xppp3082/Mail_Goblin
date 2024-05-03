@@ -89,4 +89,19 @@ public class FrontController {
     public String showTemplatePage() {
         return "template";
     }
+
+    @GetMapping("/sign-up")
+    public String showSignUpPage() {
+        return "sign-up";
+    }
+
+    @GetMapping("/sign-in")
+    public String showSignInPage() {
+        return "sign-in";
+    }
+
+    @GetMapping("/profile")
+    public String showProfilePage() {
+        return "profile";
+    }
 }

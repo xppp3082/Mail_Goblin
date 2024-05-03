@@ -350,8 +350,8 @@ public class MailRepo {
                 COUNT(*) AS total_engagement,
                 SUM(CASE WHEN mail_status = 'OPEN' THEN 1 ELSE 0 END) AS open_count,
                 SUM(CASE WHEN mail_status = 'CLICK' THEN 1 ELSE 0 END) AS click_count,
-                SUM(CASE WHEN mail_status = 'OPEN' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE', 'OPEN', 'CLICK') THEN 1 END) AS open_rate,
-                SUM(CASE WHEN mail_status = 'CLICK' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE', 'OPEN', 'CLICK') THEN 1 END) AS click_rate
+                SUM(CASE WHEN mail_status = 'OPEN' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE') THEN 1 END) AS open_rate,
+                SUM(CASE WHEN mail_status = 'CLICK' THEN 1 ELSE 0 END) / COUNT(CASE WHEN mail_status IN ('RECEIVE') THEN 1 END) AS click_rate
                 FROM (
                 SELECT 
                 a.id AS audience_id,
