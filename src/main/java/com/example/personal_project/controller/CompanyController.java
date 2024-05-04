@@ -1,5 +1,6 @@
 package com.example.personal_project.controller;
 
+import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.middleware.JwtTokenUtil;
 import com.example.personal_project.model.Company;
 import com.example.personal_project.model.form.SignInForm;
@@ -12,16 +13,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("api/1.0/company")
 public class CompanyController {
     private final CompanyService companyService;
     private final JwtTokenUtil jwtTokenUtil;
+    private final AuthenticationComponent authenticationComponent;
 
-    public CompanyController(CompanyService companyService, JwtTokenUtil jwtTokenUtil) {
+    public CompanyController(CompanyService companyService, JwtTokenUtil jwtTokenUtil, AuthenticationComponent authenticationComponent) {
         this.companyService = companyService;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.authenticationComponent = authenticationComponent;
     }
 
     @PostMapping("/sign-up")
@@ -60,6 +65,19 @@ public class CompanyController {
             return new ResponseEntity<>(claims, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Wrong token error", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/profile-data")
+    public ResponseEntity<?> companyDateFromToken() {
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+            Map<String, Integer> resultMap = companyService.getCompanyProfileData(account);
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorMessage = "error on getting company profile data :" + e.getMessage();
+            log.error(errorMessage);
+            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
         }
     }
 }

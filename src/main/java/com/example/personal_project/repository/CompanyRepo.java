@@ -1,6 +1,7 @@
 package com.example.personal_project.repository;
 
 import com.example.personal_project.model.Company;
+import com.example.personal_project.model.status.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
-import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 @Repository
@@ -23,36 +25,35 @@ public class CompanyRepo {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    public Company insertNewCompany(Company company){
+    public Company insertNewCompany(Company company) {
         String sql = """
                 INSERT INTO company 
                 (title, description, industry, company_uuid, anniversary, account, password) 
                 VALUES 
                 (?,?,?,?,?,?,?);
                 """;
-        try{
-            KeyHolder keyHolder =new GeneratedKeyHolder();
-            jdbcTemplate.update(connection ->{
+        try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1,company.getTitle());
-                ps.setString(2,company.getDescription());
-                ps.setString(3,company.getIndustry());
-                ps.setString(4,company.getCompanyUUID());
+                ps.setString(1, company.getTitle());
+                ps.setString(2, company.getDescription());
+                ps.setString(3, company.getIndustry());
+                ps.setString(4, company.getCompanyUUID());
                 ps.setDate(5, new Date(company.getAnniversary().getTime()));
-                ps.setString(6,company.getAccount());
-                ps.setString(7,company.getPassword());
+                ps.setString(6, company.getAccount());
+                ps.setString(7, company.getPassword());
                 return ps;
-            },keyHolder);
+            }, keyHolder);
             Long generatedId = keyHolder.getKey().longValue();
             company.setId(generatedId);
             return company;
-        }catch (DuplicateKeyException e){
+        } catch (DuplicateKeyException e) {
             log.error("Duplicate account error on creating new company in Repo layer: " + e.getMessage());
             throw new DuplicateKeyException("Account already exists.");
-        }
-        catch (RuntimeException e){
+        } catch (RuntimeException e) {
             log.error("Error on creating new company in Repo layer : " + e.getMessage());
-            throw  new RuntimeException("Failed to create company.");
+            throw new RuntimeException("Failed to create company.");
         }
     }
 
@@ -80,9 +81,41 @@ public class CompanyRepo {
         }
     }
 
+    public Map<String, Integer> getCompanyProfileData(String account) {
+        Map<String, Integer> profileData = new LinkedHashMap<>();
+        String sql = """
+                SELECT
+                c.id AS company_id,
+                c.title AS company_title,
+                COUNT(DISTINCT CASE WHEN m.status = ? OR m.status = ? THEN m.id END) AS total_emails_sent,
+                COUNT(distinct a.id) AS total_audience,
+                COUNT(distinct t.id) AS total_tags
+                FROM
+                company c
+                LEFT JOIN
+                audience a ON c.id = a.company_id
+                LEFT JOIN
+                mail m ON a.id = m.audience_id
+                LEFT JOIN
+                tag t on c.id = t.company_id
+                WHERE c.account = ?;
+                """;
+        try {
+            jdbcTemplate.query(sql, rs -> {
+                profileData.put("total_emails_count", rs.getInt("total_emails_sent"));
+                profileData.put("total_audience", rs.getInt("total_audience"));
+                profileData.put("total_tags", rs.getInt("total_tags"));
+            }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(), account);
+            return profileData;
+        } catch (Exception e) {
+            log.error("Error on getting company profile : " + e.getMessage());
+            return null;
+        }
+    }
 
-    public RowMapper<Company> originCompanyRowMapper(){
-        return  new RowMapper<Company>() {
+
+    public RowMapper<Company> originCompanyRowMapper() {
+        return new RowMapper<Company>() {
             @Override
             public Company mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Company company = new Company();

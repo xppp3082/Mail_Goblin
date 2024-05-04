@@ -94,9 +94,10 @@ body {
     background-color: #fff;
     max-height: 200px;
     /*max-width: 400px;*/
-    border-radius: 20px;
-    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    /*border: 1px solid #ccc;*/
     margin: 1rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2)
 }
 
 .title {
