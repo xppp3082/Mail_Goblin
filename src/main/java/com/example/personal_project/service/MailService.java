@@ -29,4 +29,8 @@ public interface MailService {
     Map<String, Map<LocalDate, Integer>> analyzeEventPastByDate(String account, LocalDate startDate, LocalDate endDate);
 
     List<Map<String, Object>> analyzeCampaignAudienceByAge(Long campaignId);
+
+    List<Mail> trackFailedMailsByCampaignId(Long campaignId);
+
+    List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int paging);
 }

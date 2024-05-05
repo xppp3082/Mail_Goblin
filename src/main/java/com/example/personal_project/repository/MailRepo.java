@@ -4,13 +4,13 @@ import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.status.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -398,15 +398,57 @@ public class MailRepo {
         return response;
     }
 
-//    public RowMapper<Mail> originMailRowMapper(){
-//        return new RowMapper<Mail>() {
-//            @Override
-//            public Mail mapRow(ResultSet rs, int rowNum) throws SQLException {
-//                Mail mail = new Mail();
-//                mail.setId(rs.getLong("id"));
-//                mail.set
-//                return null;
-//            }
-//        }
-//    }
+    public List<Mail> trackFailedMailsByCampaignId(Long campaignId) {
+        String sql = """
+                SELECT * FROM mail WHERE status = ? AND campaign_id = ?;
+                """;
+        RowMapper<Mail> mapper = originMailRowMapper();
+        try {
+            return jdbcTemplate.query(sql, mapper, DeliveryStatus.FAILED.name(), campaignId);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("error on getting failed mail of this campaign : " + e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int pageSize, int offset) {
+//        String sql = """
+//                SELECT * FROM mail
+//                WHERE status = ? AND campaign_id = ?
+//                LIMIT ? OFFSET ?;
+//                """;
+        String sql = """
+                SELECT * FROM mail
+                WHERE campaign_id = ?
+                LIMIT ? OFFSET ?;
+                """;
+        RowMapper<Mail> mapper = originMailRowMapper();
+        try {
+//            return jdbcTemplate.query(sql, mapper, DeliveryStatus.FAILED.name(), campaignId, pageSize, offset);
+            return jdbcTemplate.query(sql, mapper, campaignId, pageSize, offset);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("error on getting failed mail of this campaign : " + e.getMessage());
+            return null;
+        }
+    }
+
+    public RowMapper<Mail> originMailRowMapper() {
+        return new RowMapper<Mail>() {
+            @Override
+            public Mail mapRow(ResultSet rs, int rowNum) throws SQLException {
+                Mail mail = new Mail();
+                mail.setId(rs.getLong("id"));
+                mail.setCampaignID(rs.getLong("campaign_id"));
+                mail.setRecipientMail(rs.getString("recipient_mail"));
+                mail.setSubject(rs.getString("subject"));
+                mail.setStatus(rs.getString("status"));
+                Date sendDateSQL = rs.getDate("send_date");
+                LocalDate sendDate = sendDateSQL.toLocalDate();
+                mail.setSendDate(sendDate);
+                Timestamp timestamp = rs.getTimestamp("timestamp");
+                mail.setTimestamp(timestamp);
+                return mail;
+            }
+        };
+    }
 }

@@ -48,7 +48,7 @@ body {
 }
 
 .dashboard-card {
-    margin-top: 2rem;
+    margin-top: 1rem;
     padding: 1rem;
     box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
     /*margin-bottom: 1rem;*/
@@ -241,4 +241,48 @@ body {
 
 .age-image {
     max-width: 10rem;
+}
+
+#failList-pagination {
+    margin: auto;
+}
+
+.badge-warning {
+    color: #1f2d3d;
+    background-color: #ffc107;
+}
+
+.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+
+.badge-info {
+    color: #fff;
+    background-color: #17a2b8;
+}
+
+.fail-list-container {
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+    /*margin-bottom: 1rem;*/
+
+    position: relative;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 0 solid rgba(0, 0, 0, .125);
+    border-radius: .25rem;
 }

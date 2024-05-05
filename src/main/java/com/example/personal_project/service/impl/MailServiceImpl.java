@@ -4,6 +4,7 @@ import com.example.personal_project.model.Mail;
 import com.example.personal_project.repository.MailRepo;
 import com.example.personal_project.service.MailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,8 @@ public class MailServiceImpl implements MailService {
 
     public final MailRepo mailRepo;
     public final MailServerService mailServerService;
+    @Value("${product.paging.size}")
+    private int pagingSize;
 
     public MailServiceImpl(MailRepo mailRepo, MailServerService mailServerService) {
         this.mailRepo = mailRepo;
@@ -75,5 +78,16 @@ public class MailServiceImpl implements MailService {
     @Override
     public List<Map<String, Object>> analyzeCampaignAudienceByAge(Long campaignId) {
         return mailRepo.analyzeCampaignAudienceByAge(campaignId);
+    }
+
+    @Override
+    public List<Mail> trackFailedMailsByCampaignId(Long campaignId) {
+        return mailRepo.trackFailedMailsByCampaignId(campaignId);
+    }
+
+    @Override
+    public List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int paging) {
+        int offset = paging * pagingSize;
+        return mailRepo.trackFailedMailsByCampaignIdWithPage(campaignId, pagingSize + 1, offset);
     }
 }

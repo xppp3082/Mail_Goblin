@@ -1,6 +1,8 @@
 package com.example.personal_project.controller;
 
 import com.example.personal_project.component.AuthenticationComponent;
+import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.response.GenericResponse;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.service.AudienceService;
 import com.example.personal_project.service.CompanyService;
@@ -8,6 +10,7 @@ import com.example.personal_project.service.MailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -31,6 +35,9 @@ public class MailTrackController {
     private final MailService mailService;
     private final CompanyService companyService;
     private final AuthenticationComponent authenticationComponent;
+
+    @Value("${product.paging.size}")
+    private int pagingSize;
 
 
     public MailTrackController(AudienceService audienceService, ObjectMapper objectMapper, MailService mailService, CompanyService companyService, AuthenticationComponent authenticationComponent) {
@@ -187,6 +194,34 @@ public class MailTrackController {
             return new ResponseEntity<>(resultList, HttpStatus.OK);
         } catch (Exception e) {
             String errorResponse = "Error on analyzing audience age of this campaign.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/failed")
+    public ResponseEntity<?> trackFailedMailsByCampaign(@RequestParam("id") Long campaignId) {
+        try {
+            List<Mail> failMails = mailService.trackFailedMailsByCampaignId(campaignId);
+            return new ResponseEntity<>(failMails, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on getting failed mails by campaign.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/failed-paging")
+    public ResponseEntity<?> trackPageFailedMailsByCampaign(@RequestParam("id") Long campaignId,
+                                                            @RequestParam("number") Optional<Integer> paging) {
+        try {
+            List<Mail> failMails = mailService.trackFailedMailsByCampaignIdWithPage(campaignId, paging.orElse(0));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new GenericResponse<>(failMails.stream().limit(pagingSize).toList(),
+                            failMails.size() > pagingSize ? paging.orElse(0) + 1 : null
+                    ));
+        } catch (Exception e) {
+            String errorResponse = "Error on getting failed mails by campaign.";
             log.error(errorResponse + " : " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
