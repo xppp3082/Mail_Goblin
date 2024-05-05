@@ -2,6 +2,7 @@ package com.example.personal_project.controller;
 
 import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.Audience;
+import com.example.personal_project.model.form.AudienceUpdateForm;
 import com.example.personal_project.model.response.GenericResponse;
 import com.example.personal_project.service.AudienceService;
 import com.example.personal_project.service.CompanyService;
@@ -112,11 +113,25 @@ public class AudienceController {
         }
     }
 
-    @PatchMapping("/update")
-    public ResponseEntity<?> updateAudience(@RequestBody Audience audience) {
+    @GetMapping("/get")
+    public ResponseEntity<?> getAudienceWithId(@RequestParam("id") Long id) {
         try {
-            audience = audienceService.updateAudience(audience);
+            Audience audience = audienceService.findAudienceWithTagsById(id);
             return new ResponseEntity<>(audience, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on getting audience with tags : " + e.getMessage();
+            log.error(errorResponse);
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateAudience(@RequestParam("id") Long id, @RequestBody AudienceUpdateForm audience) {
+        try {
+//            audience = audienceService.updateAudience(audience);
+            audienceService.updateAudienceWithTags(id, audience);
+            String successResponse = "Successfully updated this audience";
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error on updating audience in controller layer : " + e.getMessage());
             return new ResponseEntity<>("Error on updating audience.", HttpStatus.BAD_REQUEST);

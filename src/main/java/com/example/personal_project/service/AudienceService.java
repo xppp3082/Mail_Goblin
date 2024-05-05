@@ -2,6 +2,7 @@ package com.example.personal_project.service;
 
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
+import com.example.personal_project.model.form.AudienceUpdateForm;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ public interface AudienceService {
 
     Audience findAudienceByEmail(String email);
 
+    Audience findAudienceWithTagsById(Long audienceId);
+
     List<Audience> getAllAudienceByCampaign(Campaign campaign);
 
     List<Audience> getAudienceByTag(Long tagId, String acount);
@@ -42,4 +45,6 @@ public interface AudienceService {
     void deleteAudience(Long id);
 
     Audience updateAudience(Audience audience);
+
+    void updateAudienceWithTags(Long audienceId, AudienceUpdateForm audienceUpdateForm);
 }

@@ -3,6 +3,7 @@ package com.example.personal_project.repository;
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
 import com.example.personal_project.model.Tag;
+import com.example.personal_project.model.form.AudienceUpdateForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -409,6 +410,71 @@ public class AudienceRepo {
         String sql = "SELECT * FROM audience WHERE email = ?";
         RowMapper<Audience> mapper = orginAudienceRowMapper();
         return jdbcTemplate.queryForObject(sql, mapper, email);
+    }
+
+    public Audience findAudienceWithTagsById(Long audienceId) {
+        String sql = "SELECT a.id, a.name, a.email, a.birthday, a.audience_uuid, a.mailcount, a.opencount, " +
+                "a.clickcount, a.create_time, a.company_id, t.id AS tag_id, t.name AS tag_name,t.company_id AS tag_companyId " +
+                "FROM audience a " +
+                "LEFT JOIN tag_audience ta ON a.id = ta.audience_id " +
+                "LEFT JOIN tag t ON ta.tag_id = t.id " +
+                "WHERE a.id = ?";
+
+        return jdbcTemplate.query(sql, new Object[]{audienceId}, resultSet -> {
+            Audience audience = null;
+            while (resultSet.next()) {
+                if (audience == null) {
+                    audience = mapAudience(resultSet);
+                }
+                assert audience.getTagList() != null;
+                audience.getTagList().add(mapTag(resultSet));
+            }
+            return audience;
+        });
+    }
+
+    public void updateAudienceWithTags(Long audienceId, AudienceUpdateForm audienceUpdateForm) {
+        String updateAudienceSql = "UPDATE audience " +
+                "SET name = ?, email = ?, birthday = ?" +
+                "WHERE id = ?";
+        jdbcTemplate.update(updateAudienceSql, audienceUpdateForm.getName(), audienceUpdateForm.getEmail(), audienceUpdateForm.getBirthday(),
+                audienceId);
+
+        // delete all tag of original audience from tag_audience table
+        String deleteTagsSql = "DELETE FROM tag_audience WHERE audience_id = ?";
+        jdbcTemplate.update(deleteTagsSql, audienceId);
+
+        // insert all tag fo audience update
+        if (audienceUpdateForm.getTagList() != null && !audienceUpdateForm.getTagList().isEmpty()) {
+            String insertTagSql = "INSERT INTO tag_audience (tag_id, audience_id) VALUES (?, ?)";
+            for (Tag tag : audienceUpdateForm.getTagList()) {
+                jdbcTemplate.update(insertTagSql, tag.getId(), audienceId);
+            }
+        }
+    }
+
+    private Audience mapAudience(ResultSet resultSet) throws SQLException {
+        Audience audience = new Audience();
+        audience.setId(resultSet.getLong("id"));
+        audience.setName(resultSet.getString("name"));
+        audience.setEmail(resultSet.getString("email"));
+        audience.setBirthday(resultSet.getString("birthday"));
+        audience.setAudienceUUID(resultSet.getString("audience_uuid"));
+        audience.setMailCount(resultSet.getInt("mailcount"));
+        audience.setOpenCount(resultSet.getInt("opencount"));
+        audience.setClickCount(resultSet.getInt("clickcount"));
+        audience.setCreateTime(resultSet.getTimestamp("create_time"));
+        audience.setCompanyId(resultSet.getLong("company_id"));
+        audience.setTagList(new ArrayList<>());
+        return audience;
+    }
+
+    private Tag mapTag(ResultSet resultSet) throws SQLException {
+        Tag tag = new Tag();
+        tag.setId(resultSet.getLong("tag_id"));
+        tag.setName(resultSet.getString("tag_name"));
+        tag.setCompanyId(resultSet.getLong("tag_companyId"));
+        return tag;
     }
 
     public RowMapper<Audience> orginAudienceRowMapper() {

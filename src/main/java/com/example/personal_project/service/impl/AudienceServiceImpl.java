@@ -2,6 +2,7 @@ package com.example.personal_project.service.impl;
 
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
+import com.example.personal_project.model.form.AudienceUpdateForm;
 import com.example.personal_project.repository.AudienceRepo;
 import com.example.personal_project.service.AudienceService;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +47,18 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
+    public Audience findAudienceWithTagsById(Long audienceId) {
+        return audienceRepo.findAudienceWithTagsById(audienceId);
+    }
+
+    @Override
     public Audience updateAudience(Audience audience) {
         return audienceRepo.updateAudience(audience);
+    }
+
+    @Override
+    public void updateAudienceWithTags(Long audienceId, AudienceUpdateForm audienceUpdateForm) {
+        audienceRepo.updateAudienceWithTags(audienceId, audienceUpdateForm);
     }
 
     @Override

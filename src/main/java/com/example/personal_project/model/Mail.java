@@ -8,8 +8,10 @@ import java.sql.Timestamp;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Mail extends ReadObject{
+public class Mail extends ReadObject {
     private Long id;
+    @JsonProperty("campaign_id")
+    private Long campaignID;
     @JsonProperty("company_id")
     private Long companyID;
     @JsonProperty("audience_id")

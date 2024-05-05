@@ -397,4 +397,16 @@ public class MailRepo {
         }
         return response;
     }
+
+//    public RowMapper<Mail> originMailRowMapper(){
+//        return new RowMapper<Mail>() {
+//            @Override
+//            public Mail mapRow(ResultSet rs, int rowNum) throws SQLException {
+//                Mail mail = new Mail();
+//                mail.setId(rs.getLong("id"));
+//                mail.set
+//                return null;
+//            }
+//        }
+//    }
 }

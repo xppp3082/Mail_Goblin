@@ -57,7 +57,7 @@
 </div>
 <br><br>
 <div class="container">
-    <h2>User List</h2>
+    <h2>Audience List</h2>
     <!-- User Table -->
     <table class="table">
         <thead>
@@ -77,6 +77,46 @@
         </tbody>
     </table>
 </div>
+<!-- 使用者修改表單的動態視窗-->
+<div aria-hidden="true" aria-labelledby="modifyUserModalLabel" class="modal fade" id="modifyUserModal" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modifyUserModalLabel">Modify User</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modifyUserModalBody">
+                <form id="modifyUserForm">
+                    <div class="form-group">
+                        <label for="modifyName">Name:</label>
+                        <input class="form-control" id="modifyName" name="name" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyEmail">Email:</label>
+                        <input class="form-control" id="modifyEmail" name="email" type="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyBirthday">Birthday:</label>
+                        <input class="form-control" id="modifyBirthday" name="birthday" type="date">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyTags">Tags:</label>
+                        <input class="form-control" id="modifyTags" name="tags" placeholder="Enter tags">
+                    </div>
+                </form>
+            </div>
+            <!--            <div class="modal-footer">-->
+            <!--                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>-->
+            <!--                &lt;!&ndash; 添加一个用于触发更新用户信息的按钮 &ndash;&gt;-->
+            <!--                <button class="btn btn-primary" onclick="updateUser()" type="button">Update</button>-->
+            <!--            </div>-->
+        </div>
+    </div>
+</div>
+
 <div class="d-flex justify-content-center mt-4" id="audience-pagination">
     <button id="prevAudienceButton" onclick="previousAudiencePage()"> <<</button>
     <span id="audience-currentPage">1</span>
@@ -104,6 +144,7 @@
 <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
 <script>
     // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const companyId = localStorage.getItem('companyId');
     const token = localStorage.getItem('token');
     const headers = {
         'Content-Type': 'application/json',
@@ -113,10 +154,10 @@
     //     await loadTags();
     //     await loadUsersWithPage(0);
     // }
-    loadTags();
+    loadTags('input[name=tagsList]');
     loadUsersWithPage(0);
 
-    async function loadTags() {
+    async function loadTags(elementName) {
         try {
             const response = await fetch('/api/1.0/tag/get', {
                 method: 'GET',
@@ -128,7 +169,7 @@
             // console.log(tags);
             const newArray = tags.map(obj => ({...obj, value: obj.name}))
             console.log(newArray);
-            drawTagListWithTagify(newArray);
+            drawTagListWithTagify(newArray, elementName);
         } catch (error) {
             console.error(error);
         }
@@ -210,7 +251,10 @@
                 <td>${user.opencount}</td>
                 <td>${user.clickcount}</td>
                 <td>${getTagsAsString(user.tags)}</td>
-                <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button></td>
+                <td>
+                <button class="btn btn-primary btn-sm" onclick="modifyUser(${user.id})">Modify</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
+                </td>
             `;
             userList.appendChild(row);
         });
@@ -222,6 +266,120 @@
             return 'No tags';
         }
         return tags.map(tag => tag.name).join(', ');
+    }
+
+    //修改使用者
+    async function modifyUser(userId) {
+        try {
+            const response = await fetch(`/api/1.0/audience/get?id=${userId}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (response.ok) {
+                const userData = await response.json();
+                // 填充用户信息到模态框中
+                populateModifyUserModal(userData);
+                // 显示模态框
+                $('#modifyUserModal').modal('show');
+            } else {
+                throw new Error('Failed to get user data');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to get user data');
+        }
+    }
+
+    // function populateModifyUserModal(userData) {
+    //     const modalBody = document.getElementById('modifyUserModalBody');
+    //     modalBody.innerHTML = `
+    //     <p>ID: ${userData.id}</p>
+    //     <p>Name: ${userData.name}</p>
+    //     <p>Email: ${userData.email}</p>
+    //     <p>Birthday: ${userData.birthday}</p>
+    //     <p>Tags: ${getTagsAsString(userData.tags)}</p>
+    // `;
+    // }
+
+    function populateModifyUserModal(userData) {
+        const modalBody = document.getElementById('modifyUserModalBody');
+        modalBody.innerHTML = `
+        <div class="form-group">
+            <label for="modifyName">Name:</label>
+            <input class="form-control" id="modifyName" name="modifyName" type="text" value="${userData.name}">
+        </div>
+        <div class="form-group">
+            <label for="modifyEmail">Email:</label>
+            <input class="form-control" id="modifyEmail" name="modifyEmail" type="email" value="${userData.email}">
+        </div>
+        <div class="form-group">
+            <label for="modifyBirthday">Birthday:</label>
+            <input class="form-control" id="modifyBirthday" name="modifyBirthday" type="date" value="${userData.birthday}">
+        </div>
+        <div id="modify-tag-list" class="form-group">
+            <label for="modifyTags">Tags:</label>
+            <input class="form-control" id="modifyTags" name="modifyTags" type="text" value="${getTagsAsString(userData.tags)}">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+            <!-- 添加一个用于触发更新用户信息的按钮 -->
+            <button class="btn btn-primary" onclick="updateUser(${userData.id})" type="button">Update</button>
+        </div>
+    `;
+        loadTags('#modifyTags');
+    }
+
+    // function populateModifyUserModal(userData) {
+    //     document.getElementById('modifyName').value = userData.name;
+    //     document.getElementById('modifyEmail').value = userData.email;
+    //     document.getElementById('modifyBirthday').value = userData.birthday;
+    //     document.getElementById('modifyTags').value = getTagsAsString(userData.tags);
+    // }
+
+    async function updateUser(userID) {
+        try {
+            // 获取表单中的值
+            // const id =userID /* 获取用户ID */;
+            const name = document.getElementById('modifyName').value;
+            const email = document.getElementById('modifyEmail').value;
+            const birthday = document.getElementById('modifyBirthday').value;
+            // const tags = document.getElementById('modifyTags').value.split(','); // 将标签字符串转换为数组
+
+            // 构建请求体
+            const requestBody = {
+                name: name,
+                email: email,
+                birthday: birthday,
+                tags: []
+                // tags: tags.map(tag => ({ id: /* 根据标签名称从后端获取对应的ID */, name: tag }))
+            };
+
+            document.querySelectorAll('#modify-tag-list .tagify .tagify__tag ').forEach(function (tagElement) {
+                requestBody.tags.push({
+                    id: parseInt(tagElement.id), // 將值轉換為整數
+                    company_id: companyId, // 假設 company_id 固定為 1，你可以根據實際情況調整
+                    name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+                });
+            });
+
+            // 发送 PATCH 请求到后端
+            const response = await fetch(`/api/1.0/audience/update?id=${userID}`, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+                alert('User updated successfully');
+                $('#modifyUserModal').modal('hide');
+                await loadUsersWithPage(currentAudiencePage);
+            } else {
+                throw new Error('Failed to update user');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update user');
+        }
     }
 
     // 刪除使用者
@@ -305,7 +463,7 @@
         document.querySelectorAll('.tagify__tag ').forEach(function (tagElement) {
             user.tags.push({
                 id: parseInt(tagElement.id), // 將值轉換為整數
-                company_id: 11, // 假設 company_id 固定為 1，你可以根據實際情況調整
+                company_id: companyId, // 假設 company_id 固定為 1，你可以根據實際情況調整
                 name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
             });
         });
@@ -330,7 +488,7 @@
                 alert('User added successfully');
                 // 清空表單
                 this.reset();
-                await loadTags(); // 重新載入標籤列表
+                await loadTags('input[name=tagsList]'); // 重新載入標籤列表
                 await loadUsersWithPage(currentAudiencePage);
             } else {
                 throw new Error('Failed to add user');
@@ -403,10 +561,10 @@
 
     fetchAndDrawNewAudienceChart();
 
-    function drawTagListWithTagify(tags) {
+    function drawTagListWithTagify(tags, elementName) {
         let whitelist = tags;
         console.log(tags);
-        let input = document.querySelector('input[name=tagsList]')
+        let input = document.querySelector(elementName)
 
         let tagify = new Tagify(input, {
             whitelist: whitelist,
