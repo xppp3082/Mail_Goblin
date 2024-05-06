@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Dashboard</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="/_css/dashboard.css" rel="stylesheet">
@@ -66,10 +67,10 @@
                     <tbody id="failListBody"></tbody>
                 </table>
                 <!--            <div class="d-flex justify-content-center mt-4" id="failList-pagination">-->
-                <div id="failList-pagination">
-                    <button id="prevFailListButton" onclick="previousPage()"> <<</button>
-                    <span id="failList-currentPage">1</span>
-                    <button id="nextFailListButton" onclick="nextPage()"> >></button>
+                <div id="failList-pagination" class="p8">
+                    <button id="prevFailListButton" onclick="previousPage()">❮ Prev</button>
+                    <span id="failList-currentPage" style="display: none">1</span>
+                    <button id="nextFailListButton" onclick="nextPage()">Next ❯</button>
                 </div>
             </div>
         </div>
@@ -738,13 +739,17 @@
             const nextButton = document.getElementById('nextFailListButton');
             if (currentPage <= 0) {
                 prevButton.disabled = true;
+                prevButton.classList.add("is-active")
             } else {
                 prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
             }
             if (typeof nextPage === 'undefined') {
                 nextButton.disabled = true;
+                nextButton.classList.add("is-active")
             } else {
                 nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
             }
             return data.data;
         } catch (error) {

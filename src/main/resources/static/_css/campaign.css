@@ -54,3 +54,46 @@ body {
     border-radius: .25rem;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
+
+#pagination {
+    width: 5%;
+    display: flex;
+    margin: auto;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#pagination a.is-active {
+    /*background-color: #2ecc71;*/
+    background-color: #1aa06d;
+    color: #fff;
+}
+
+#pagination a {
+    color: #ccc;
+}
+
+.page-btn {
+    padding: 0.2rem 0.5rem;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.delete-image {
+    height: 1.2rem;
+    width: 1.2rem;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #ffffff;
+    border: 0 solid #b0b0b0;
+}
+
+.btn-danger:hover {
+    color: #fff;
+    background-color: #ccc;
+    border: 1px solid #000000;
+}

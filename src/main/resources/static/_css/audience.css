@@ -8,8 +8,13 @@ body {
     padding-left: 240px;
 }
 
+
 .container {
     padding-top: 3rem;
+}
+
+#audience-table td {
+    vertical-align: middle;
 }
 
 #audience-title {
@@ -58,7 +63,7 @@ body {
     color: #000;
     background-color: #ccfccb;
     border: none;
-    border-radius: 45px;
+    border-radius: 0.375rem;
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease 0s;
     cursor: pointer;
@@ -74,4 +79,62 @@ body {
 
 .add-template-btn:active {
     transform: translateY(-1px);
+}
+
+.p8 button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1aa06d;
+    /*margin: auto 5px;*/
+    color: #fff;
+    font-weight: bold;
+    border: 3px solid #1aa06d;
+    margin: 0.5rem;
+    height: 2.2rem;
+    width: 5rem;
+}
+
+.p8 .is-active {
+    background-color: #fff;
+    color: #1aa06d;
+}
+
+#audience-pagination {
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
+#audience-currentPage {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    text-align: center;
+    background-color: #1aa06d;
+    border-radius: 100%;
+    color: #fff;
+}
+
+.action-container {
+    display: flex;
+
+}
+
+.delete-image {
+    height: 1.2rem;
+    width: 1.2rem;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #ffffff;
+    border: 0 solid #b0b0b0;
+}
+
+.btn-danger:hover {
+    color: #fff;
+    background-color: #ccc;
+    border: 1px solid #000000;
 }

@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Audience</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="/_css/navbar.css" rel="stylesheet">
-    <link href="/_css/audience.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/audience.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
@@ -59,7 +60,7 @@
 <div class="container">
     <h2>Audience List</h2>
     <!-- User Table -->
-    <table class="table">
+    <table class="table" id="audience-table">
         <thead>
         <tr>
             <th>Name</th>
@@ -117,10 +118,10 @@
     </div>
 </div>
 
-<div class="d-flex justify-content-center mt-4" id="audience-pagination">
-    <button id="prevAudienceButton" onclick="previousAudiencePage()"> <<</button>
-    <span id="audience-currentPage">1</span>
-    <button id="nextAudienceButton" onclick="nextAudiencePage()"> >></button>
+<div class="d-flex justify-content-center mt-4 p8" id="audience-pagination">
+    <button id="prevAudienceButton" onclick="previousAudiencePage()">❮ Prev</button>
+    <span id="audience-currentPage" style="display: none">1</span>
+    <button id="nextAudienceButton" onclick="nextAudiencePage()">Next ❯</button>
 </div>
 <div class="container" id="new-add"></div>
 <figure class="container">
@@ -206,13 +207,17 @@
             const nextButton = document.getElementById('nextAudienceButton');
             if (paging <= 0) {
                 prevButton.disabled = true;
+                prevButton.classList.add("is-active")
             } else {
                 prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
             }
             if (typeof nextPage === 'undefined') {
                 nextButton.disabled = true;
+                nextButton.classList.add("is-active")
             } else {
                 nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
             }
 
         } catch (error) {
@@ -251,14 +256,17 @@
                 <td>${user.opencount}</td>
                 <td>${user.clickcount}</td>
                 <td>${getTagsAsString(user.tags)}</td>
-                <td>
+                <td class="action-container">
                 <button class="btn btn-primary btn-sm" onclick="modifyUser(${user.id})">Modify</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button>
                 </td>
             `;
             userList.appendChild(row);
         });
     }
+
+    // <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
+    // </td>
 
     // 將標籤轉換為字串
     function getTagsAsString(tags) {

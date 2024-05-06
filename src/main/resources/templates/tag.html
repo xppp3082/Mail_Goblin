@@ -6,10 +6,11 @@
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Tags</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <link href="/_css/navbar.css" rel="stylesheet">
-    <link href="/_css/tag.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/tag.css" rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
@@ -37,10 +38,10 @@
             </button>
         </li>
     </ul>
-    <div class="d-flex justify-content-center mt-4" id="tags-pagination">
-        <button id="prevTagButton" onclick="previousTagPage()"> <<</button>
-        <span id="tags-currentPage">1</span>
-        <button id="nextTagButton" onclick="nextTagPage()"> >></button>
+    <div class="d-flex justify-content-center mt-4 p8" id="tags-pagination">
+        <button id="prevTagButton" onclick="previousTagPage()">❮ Prev</button>
+        <span id="tags-currentPage" style="display: none">1</span>
+        <button id="nextTagButton" onclick="nextTagPage()">Next ❯</button>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -71,9 +72,10 @@
         })
             .then(response => {
                 if (response.ok) {
-                    alert('Tag added successfully');
+                    // alert('Tag added successfully');
                     loadTagsWithPage(currentPage);
                 } else {
+                    alert('Failed to add tag');
                     throw new Error('Failed to add tag');
                 }
             })
@@ -101,13 +103,17 @@
             const nextButton = document.getElementById('nextTagButton');
             if (paging <= 0) {
                 prevButton.disabled = true;
+                prevButton.classList.add("is-active")
             } else {
                 prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
             }
             if (typeof nextPage === 'undefined') {
                 nextButton.disabled = true;
+                nextButton.classList.add("is-active")
             } else {
                 nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
             }
         } catch (error) {
             console.error(error);
@@ -142,6 +148,9 @@
             const button = document.createElement('button');
             button.classList.add('btn', 'btn-danger', 'btn-sm', 'float-right');
             button.innerText = 'Delete';
+            button.innerHTML = `
+            <img class="delete-image" src="/images/trash_can.png" alt="delete image">`
+
             button.onclick = function () {
                 deleteTag(tag.id);
             };
@@ -161,10 +170,11 @@
                 });
 
                 if (response.ok) {
-                    alert('Tag deleted successfully');
+                    // alert('Tag deleted successfully');
                     // location.reload(); // 刷新页面
                     await loadTagsWithPage(currentPage);
                 } else {
+                    alert('Failed to delete tag');
                     throw new Error('Failed to delete tag');
                 }
             } catch (error) {

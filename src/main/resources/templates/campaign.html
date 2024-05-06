@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Home Page</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="/_css/navbar.css" rel="stylesheet">
@@ -40,7 +41,7 @@
             <tbody id="campaignList"></tbody>
         </table>
         <!-- Pagination -->
-        <div class="d-flex justify-content-center mt-4" id="pagination"></div>
+        <div class="d-flex mt-4" id="pagination"></div>
     </div>
     <!-- Create New Campaign Form -->
     <div>
@@ -175,13 +176,53 @@
             const totalPages = campaignData.total_paging;
             console.log(totalPages);
             displayCampaigns(campaigns);
-            createPagination(totalPages);
+            createPagination(totalPages, pageNumber);
         } catch (error) {
             console.error(error);
         }
     }
 
-    function createPagination(totalPages) {
+    // function createPagination(totalPages) {
+    //     const paginationContainer = document.getElementById('pagination');
+    //     paginationContainer.innerHTML = ''; // Clear existing pagination
+    //
+    //     for (let i = 0; i < totalPages; i++) {
+    //         const pageLink = document.createElement('a');
+    //         pageLink.href = '#';
+    //         pageLink.innerText = i + 1;
+    //         pageLink.onclick = function () {
+    //             loadCampaignsWihPage(i);
+    //             currentPage = i;
+    //         };
+    //         paginationContainer.appendChild(pageLink);
+    //     }
+    // }
+
+    // function createPagination(totalPages) {
+    //     const paginationContainer = document.getElementById('pagination');
+    //     paginationContainer.innerHTML = ''; // Clear existing pagination
+    //
+    //     for (let i = 0; i < totalPages; i++) {
+    //         const pageLink = document.createElement('a');
+    //         pageLink.href = '#';
+    //         pageLink.innerText = i + 1;
+    //         pageLink.onclick = function () {
+    //             // Remove 'active' class from all page links
+    //             const allPageLinks = paginationContainer.getElementsByTagName('a');
+    //             for (let j = 0; j < allPageLinks.length; j++) {
+    //                 allPageLinks[j].classList.remove('is-active');
+    //             }
+    //             // Add 'active' class to the clicked page link
+    //             pageLink.classList.add('is-active');
+    //             // Load campaigns for the clicked page
+    //             loadCampaignsWihPage(i);
+    //             currentPage = i;
+    //         };
+    //         paginationContainer.appendChild(pageLink);
+    //     }
+    // }
+
+    function createPagination(totalPages, currentPageNumber) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = ''; // Clear existing pagination
 
@@ -189,12 +230,31 @@
             const pageLink = document.createElement('a');
             pageLink.href = '#';
             pageLink.innerText = i + 1;
-            pageLink.onclick = function () {
-                loadCampaignsWihPage(i);
-                currentPage = i;
-            };
+            pageLink.classList.add('page-btn');
+            // Check if the current page is the active page
+            if (i === currentPageNumber) {
+                pageLink.classList.add('is-active'); // Add 'is-active' class to the current page
+            }
+
+            pageLink.addEventListener('click', function () {
+                handlePageClick(i);
+            });
+
             paginationContainer.appendChild(pageLink);
         }
+    }
+
+    function handlePageClick(pageNumber) {
+        // Remove 'is-active' class from all page links
+        const allPageLinks = document.querySelectorAll('#pagination a');
+        allPageLinks.forEach(link => link.classList.remove('is-active'));
+
+        // Add 'is-active' class to the clicked page link
+        allPageLinks[pageNumber].classList.add('is-active');
+
+        // Load campaigns for the clicked page
+        loadCampaignsWihPage(pageNumber);
+        currentPage = pageNumber;
     }
 
     // Display campaigns
@@ -241,11 +301,14 @@
                 <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
                 <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>
                 <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button>
-                <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button></td>
+                <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button></td>
             `;
             campaignList.appendChild(row);
         });
     }
+
+    // <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button>
+    // </td>
 
     async function sendCampaign(campaignId) {
         try {
