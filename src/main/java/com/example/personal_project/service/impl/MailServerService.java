@@ -116,6 +116,8 @@ public class MailServerService {
                 ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
                 email.addInline("springLogo", clr, PNG_MIME);
                 mailSender.send(mimeMessage);
+                String messageId = mimeMessage.getMessageID();
+                log.info(mimeMessage.getMessageID());
             }
             return "User created successfully";
         } catch (Exception e) {
@@ -131,12 +133,14 @@ public class MailServerService {
             for (Audience audience : emailCampaign.getAudiences()) {
                 String confirmationUrl = mailTemplate.getUrl();
                 log.info(audience.getEmail());
-                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
+//                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
+                String openTrackUrl = String.format("https://mailgoblin.site/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
                         audience.getAudienceUUID(),
                         emailCampaign.getCampaign().getId(),
                         audience.getEmail(),
                         emailCampaign.getCampaign().getSubject());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
+//                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
+                String clickTrackUrl = String.format("https://mailgoblin.site/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
                         audience.getAudienceUUID(),
                         emailCampaign.getCampaign().getId(),
                         confirmationUrl,
@@ -165,6 +169,7 @@ public class MailServerService {
                 email.setText(htmlContent, true);
 
                 Mail mail = new Mail();
+                mail.setCampaignID(emailCampaign.getCampaign().getId());
                 mail.setCompanyID(emailCampaign.getCampaign().getId());
                 mail.setAudienceID(audience.getId());
                 mail.setRecipientMail(audience.getEmail());
@@ -174,6 +179,10 @@ public class MailServerService {
                 mail.setCheckTimes(0);
                 try {
                     mailSender.send(mimeMessage);
+                    String messageId = mimeMessage.getMessageID();
+                    messageId = messageId.substring(1, messageId.length() - 1);
+                    log.info(messageId);
+                    mail.setMimeID(messageId);
                     mail.setStatus(DeliveryStatus.RECEIVE.name());
                     mails.add(mail);
                     //update mail count when email been sent successfully.
@@ -183,17 +192,17 @@ public class MailServerService {
                     Long audienceId = audience.getId();
                     switch (getMialExceptionType(e)) {
                         case AUTHENTICATION:
-                            log.warn("Error on sending email due to authentication issue: " + e.getMessage());
+                            log.warn("Mail Error: Error on sending email due to authentication issue: " + e.getMessage());
                             break;
                         case PARSE:
-                            log.warn("Error on parsing email content: " + e.getMessage());
+                            log.warn("Mail Error: Error on parsing email content: " + e.getMessage());
                             break;
                         case PREPARATION:
-                            log.warn("Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
+                            log.warn("Mail Error: Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
                             break;
                         default:
                             // 其他MailException的處理邏輯
-                            log.warn("Generic mail exception: " + e.getMessage());
+                            log.warn("Mail Error: Generic mail exception: " + e.getMessage());
                     }
                     mail.setStatus(DeliveryStatus.FAILED.name());
                     mails.add(mail);

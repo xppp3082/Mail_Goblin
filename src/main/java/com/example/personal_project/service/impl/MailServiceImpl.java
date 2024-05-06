@@ -1,6 +1,7 @@
 package com.example.personal_project.service.impl;
 
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.MailHook;
 import com.example.personal_project.repository.MailRepo;
 import com.example.personal_project.service.MailService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,11 @@ public class MailServiceImpl implements MailService {
     @Override
     public void insertBatch(List<Mail> mails) {
         mailRepo.insertBatch(mails);
+    }
+
+    @Override
+    public void updateBatchByMimeId(List<Mail> mails) {
+        mailRepo.updateBatchByMimeId(mails);
     }
 
     @Override
@@ -89,5 +95,10 @@ public class MailServiceImpl implements MailService {
     public List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int paging) {
         int offset = paging * pagingSize;
         return mailRepo.trackFailedMailsByCampaignIdWithPage(campaignId, pagingSize + 1, offset);
+    }
+
+    @Override
+    public void insertReceiveRecordWithMailHook(MailHook mailHook) {
+        mailRepo.insertReiveRecordWithMailHook(mailHook);
     }
 }

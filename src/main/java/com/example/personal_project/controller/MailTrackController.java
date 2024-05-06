@@ -2,11 +2,14 @@ package com.example.personal_project.controller;
 
 import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.MailHook;
 import com.example.personal_project.model.response.GenericResponse;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.service.AudienceService;
 import com.example.personal_project.service.CompanyService;
 import com.example.personal_project.service.MailService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -227,13 +227,36 @@ public class MailTrackController {
         }
     }
 
-//    @PostMapping("/mailgun/webhook")
-//    public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
-//        JsonNode rootNode = objectMapper.readTree(payload);
-//        String eventType = rootNode.path("event-data").path("event").asText();
-//        String recipientEmail = rootNode.path("event-data").path("recipient").asText();
-//        log.info(recipientEmail);
-//        log.info(eventType);
+    @PostMapping("/mailgun/webhook")
+    public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
+        JsonNode rootNode = objectMapper.readTree(payload);
+        log.info(rootNode.toString());
+        String eventType = rootNode.path("event-data").path("event").asText();
+        String recipientEmail = rootNode.path("event-data").path("recipient").asText();
+        String subject = rootNode.path("event-data").path("message").path("headers").path("subject").asText();
+        String mimeId = rootNode.path("event-data").path("message").path("headers").path("message-id").asText();
+        log.info(recipientEmail);
+        log.info(eventType);
+        log.info(mimeId);
+        String status = "";
+        if (eventType.equals("failed")) {
+            status = DeliveryStatus.FAILED.name();
+            log.error("Mail Error : Failed to send mail to : " + recipientEmail +
+                    "with campaign subject : " + subject);
+        } else {
+            status = DeliveryStatus.RECEIVE.name();
+        }
+        MailHook mailHook = new MailHook(recipientEmail, subject, mimeId, status);
+        mailHook.setMimeID(mimeId);
+        System.out.println(mailHook.getMimeID());
+        try {
+            mailService.insertReceiveRecordWithMailHook(mailHook);
+            return new ResponseEntity<>(mailHook, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "error on insert record with mailgun webhook";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
 //        if(eventType.equals("delivered")){
 //            //update user delivery
 //            try{
@@ -246,6 +269,6 @@ public class MailTrackController {
 //                log.error("Error on tracking mail count" +e.getMessage());
 //            }
 //        }
-//        return  new ResponseEntity<>("Email send to "+recipientEmail+ "failed.",HttpStatus.OK);
-//    }
+//        return new ResponseEntity<>("Email send to " + recipientEmail + "failed.", HttpStatus.OK);
+    }
 }

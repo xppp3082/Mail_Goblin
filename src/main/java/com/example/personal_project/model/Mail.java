@@ -22,5 +22,7 @@ public class Mail extends ReadObject {
     private Timestamp timestamp;
     @JsonProperty("checktimes")
     private Integer checkTimes;
+    @JsonProperty("mime_id")
+    private String mimeID;
 }
 

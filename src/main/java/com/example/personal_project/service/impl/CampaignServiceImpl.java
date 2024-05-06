@@ -79,7 +79,8 @@ public class CampaignServiceImpl implements CampaignService {
         EmailCampaign emailCampaign = new EmailCampaign(campaign, mailTemplate, audiences);
         try {
             List<Mail> mails = mailServerService.sendBatchMails2(emailCampaign);
-            mailService.insertBatch(mails);
+//            mailService.insertBatch(mails);
+            mailService.updateBatchByMimeId(mails);
             log.info("batch insert mail record successfully");
         } catch (Exception e) {
             log.error("batch insert email record fail : " + e.getMessage());

@@ -1,6 +1,7 @@
 package com.example.personal_project.repository;
 
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.MailHook;
 import com.example.personal_project.model.status.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class MailRepo {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Mail mail = mails.get(i);
                 //Set values for prepareStatement
-                ps.setLong(1, mail.getCompanyID());
+                ps.setLong(1, mail.getCampaignID());
                 ps.setString(2, mail.getRecipientMail());
                 ps.setString(3, mail.getSubject());
                 ps.setString(4, mail.getStatus());
@@ -51,6 +52,54 @@ public class MailRepo {
                 return mails.size();
             }
         });
+    }
+
+    public void updateBatchByMimeId(List<Mail> mails) {
+        String sql = """
+                UPDATE mail 
+                SET 
+                    campaign_id = ?,
+                    send_date = ?,
+                    timestamp = ?,
+                    checktimes = ?,
+                    audience_id = ?
+                WHERE 
+                    mime_id = ?;
+                """;
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Mail mail = mails.get(i);
+                // Set values for PreparedStatement
+                ps.setLong(1, mail.getCampaignID());
+                ps.setString(2, mail.getSendDate().toString());
+                ps.setString(3, mail.getTimestamp().toString());
+                ps.setInt(4, mail.getCheckTimes());
+                ps.setLong(5, mail.getAudienceID());
+                ps.setString(6, mail.getMimeID());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return mails.size();
+            }
+        });
+    }
+
+    public void insertReiveRecordWithMailHook(MailHook mailHook) {
+        String sql = """
+                INSERT INTO
+                mail (recipient_mail,subject,status,mime_id)
+                VALUES(?,?,?,?);
+                """;
+        try {
+            jdbcTemplate.update(sql,
+                    mailHook.getRecipientMail(), mailHook.getSubject(),
+                    mailHook.getDeliveryStatus(), mailHook.getMimeID());
+            log.info("successfully insert delivery info by mailgun webhook :" + mailHook.getMimeID());
+        } catch (Exception e) {
+            log.error("error on insert delivery record by mailgun webhook : " + e.getMessage());
+        }
     }
 
     public void insertEventRecord(String campaignId, String eventType, String audienceUUId, String recipientMail, String subject) {

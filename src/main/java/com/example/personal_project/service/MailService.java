@@ -1,6 +1,7 @@
 package com.example.personal_project.service;
 
 import com.example.personal_project.model.Mail;
+import com.example.personal_project.model.MailHook;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.Map;
 
 public interface MailService {
     void insertBatch(List<Mail> mails);
+
+    void updateBatchByMimeId(List<Mail> mails);
 
     void insertOpenRecord(String campaignId, String eventType, String audienceUUID, String recipientMail, String subject);
 
@@ -33,4 +36,7 @@ public interface MailService {
     List<Mail> trackFailedMailsByCampaignId(Long campaignId);
 
     List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int paging);
+
+    void insertReceiveRecordWithMailHook(MailHook mailHook);
 }
+
