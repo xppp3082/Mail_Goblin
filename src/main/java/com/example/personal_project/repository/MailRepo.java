@@ -481,6 +481,7 @@ public class MailRepo {
         }
     }
 
+    
     public RowMapper<Mail> originMailRowMapper() {
         return new RowMapper<Mail>() {
             @Override

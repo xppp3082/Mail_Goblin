@@ -10,7 +10,7 @@ public interface MailTemplateService {
 
     MailTemplate insertNewTemplateWithAccount(String account, MailTemplate mailTemplate);
 
-    void deleteTemplate(Long id);
+    void deleteTemplate(Long id) throws Exception;
 
     void updateTemplate(MailTemplate mailTemplate);
 

@@ -102,7 +102,7 @@ public class MailTemplateRepo {
         }
     }
 
-    public void deleteMailTemplate(Long id) {
+    public void deleteMailTemplate(Long id) throws Exception {
         String sql = """
                 DELETE FROM template WHERE id = ?;
                 """;
@@ -110,6 +110,7 @@ public class MailTemplateRepo {
             jdbcTemplate.update(sql, id);
         } catch (Exception e) {
             log.error("Error deleting mail template with id " + id + " : " + e.getMessage());
+            throw new Exception("Error deleting mail template with id " + id + " : " + e.getMessage());
         }
     }
 

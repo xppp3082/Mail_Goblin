@@ -160,6 +160,16 @@
             titleSpan.classList.add('title');
             titleSpan.innerText = template.subject;
 
+            const previewDiv = document.createElement('div');
+            previewDiv.classList.add('preview');
+            let htmlContent = template.content;
+            let pattern = /<.*?>/g;
+            let cleanedContent = htmlContent.replace(pattern, '');
+            if (cleanedContent.length > 50) {
+                cleanedContent = cleanedContent.substring(0, 50) + '...';
+            }
+            previewDiv.innerText = cleanedContent;
+
             const actionsDiv = document.createElement('div');
             actionsDiv.classList.add('actions');
             const editButton = document.createElement('button');
@@ -182,6 +192,7 @@
             // contentDiv.appendChild(titleSpan);
             contentDiv.appendChild(actionsDiv);
             templateCard.appendChild(titleSpan);
+            templateCard.appendChild(previewDiv);
             templateCard.appendChild(contentDiv);
 
             // 添加到模板容器中

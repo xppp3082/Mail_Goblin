@@ -5,7 +5,8 @@
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
-    <title>Edit Mail Template</title>
+    <title>Templates</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">-->
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/templateEditor.css" rel="stylesheet">
@@ -37,7 +38,7 @@
     </div>
     <br>
     <!-- 提交按钮 -->
-    <button id="updateTemplateBtn">Update Template</button>
+    <button class="btn btn-success" id="updateTemplateBtn">Update Template</button>
 </div>
 
 
@@ -118,8 +119,11 @@
                 });
                 if (response.ok) {
                     alert('Template updated successfully');
+                    window.location.href = '/template';
                 } else {
-                    throw new Error('Failed to update template');
+                    const error = 'Failed to update template'
+                    alert(error);
+                    throw new Error(error);
                 }
             } catch (error) {
                 console.error(error);

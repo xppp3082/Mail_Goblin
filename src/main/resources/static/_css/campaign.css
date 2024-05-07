@@ -97,3 +97,35 @@ body {
     background-color: #ccc;
     border: 1px solid #000000;
 }
+
+/*.btn-complete {*/
+/*    color: #fff;*/
+/*    background-color: #28a745;*/
+/*    border-color: #28a745;*/
+/*}*/
+
+/*.btn-complete {*/
+/*    color: #fff;*/
+/*    background-color: #1aa06d;*/
+/*    !*border-color: #1aa06d;*!*/
+/*}*/
+
+/*.btn-complete:hover {*/
+/*    color: #fff;*/
+/*    background-color: #568259;*/
+/*    !*border-color: #1aa06d;*!*/
+/*}*/
+
+.btn-draft {
+    color: #000000;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    /*border-color: #1aa06d;*/
+}
+
+.btn-draft:hover {
+    color: #000000;
+    background-color: #ccc;
+    border: 1px solid #000000;
+    /*border-color: #1aa06d;*/
+}

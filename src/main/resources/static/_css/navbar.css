@@ -53,6 +53,7 @@
 
 
 .sidebar {
+    margin-top: -4rem;
     width: 250px;
     height: 100%;
     position: fixed;
@@ -208,6 +209,25 @@
         transform: rotate(-36deg);
         background: rgba(255, 255, 255, 0.1);
     }
+}
+
+.top-banner {
+    /*position: fixed;*/
+    /*z-index: 2100;*/
+    margin-left: -240px;
+    height: 4rem;
+    background-color: #464E47;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    font-family: "Jersey 25", sans-serif;
+}
+
+.top-banner-text {
+    font-size: 1.8rem;
+    color: white;
+    margin-right: 2rem;
 }
 
 /*.caption {*/

@@ -34,8 +34,12 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
-    public void deleteTemplate(Long id) {
-        mailTemplateRepo.deleteMailTemplate(id);
+    public void deleteTemplate(Long id) throws Exception {
+        try {
+            mailTemplateRepo.deleteMailTemplate(id);
+        } catch (Exception e) {
+            throw new Exception("Error deleting mail template with id " + id, e);
+        }
     }
 
     @Override

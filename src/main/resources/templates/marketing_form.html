@@ -2,7 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>行銷設定</title>
+    <title>Templates</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <!-- include libraries(jQuery, bootstrap) -->
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/marketing_form.css" rel="stylesheet">
@@ -52,7 +53,7 @@
         <div>
             <!--        <p>上傳圖片</p>-->
             <!--        <input type="file" value="上傳照片" name="file" th:required="false"><br><br>-->
-            <button type="submit">新增Email Template</button>
+            <button class="btn btn-success" type="submit">Add Email Template</button>
         </div>
     </form>
 </div>
@@ -113,8 +114,11 @@
             });
             if (reponse.ok) {
                 alert('Template add successfully')
+                window.location.href = '/template'
             } else {
-                throw new Error('Failed to add template')
+                const error = 'Failed to add template'
+                alert(error);
+                throw new Error(error);
             }
         } catch (error) {
             console.error(error);

@@ -49,7 +49,7 @@
         <form id="newCampaignForm">
             <div class="form-group">
                 <label for="subject">Subject:</label>
-                <input class="form-control" id="subject" name="subject" type="text">
+                <input class="form-control" id="subject" name="subject" required="required" type="text">
             </div>
             <div class="form-group">
                 <label for="templateId">Template:</label>
@@ -65,7 +65,7 @@
                 <input class="form-control" id="send_datetime_UTC" name="send_datetime" style="display: none"
                        type="text">
                 <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
-                <input class="form-control" id="send_datetime" name="send_datetime2" type="text">
+                <input class="form-control" id="send_datetime" name="send_datetime2" required="required" type="text">
             </div>
             <div class="form-group">
                 <label for="tag_id">Tag:</label>
@@ -73,7 +73,9 @@
                     <!-- Populate with available tags -->
                 </select>
             </div>
-            <button class="btn btn-primary" onclick="saveDraft()" type="button">Save Draft</button>
+            <!--            <button class="btn btn-primary-->
+            <!--            <button class="btn btn-success"-->
+            <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>
             <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>
         </form>
     </div>

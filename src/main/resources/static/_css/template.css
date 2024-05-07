@@ -13,6 +13,10 @@ body {
     text-align: center;
 }
 
+.preview {
+    padding: 1rem;
+}
+
 .card {
     width: calc((100% - 120px) / 3);
     height: 300px;
@@ -164,7 +168,9 @@ body {
     letter-spacing: 1px;
     font-weight: 500;
     color: #000;
+    /*background-color: #F1FFFA;*/
     background-color: #ccfccb;
+    /*border: 0.5px solid #464E47;*/
     border: none;
     /*border-radius: 45px;*/
     border-radius: 0.375rem;
@@ -175,6 +181,7 @@ body {
 }
 
 .add-template-btn:hover {
+    /*background-color: #1aa06d;*/
     background-color: #23c483;
     box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
     color: #fff;
