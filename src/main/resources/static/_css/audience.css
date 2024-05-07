@@ -125,6 +125,10 @@ body {
 .delete-image {
     height: 1.2rem;
     width: 1.2rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .btn-danger {
@@ -137,4 +141,41 @@ body {
     color: #fff;
     background-color: #ccc;
     border: 1px solid #000000;
+}
+
+.tagify__input {
+    width: 100%;
+}
+
+.customSuggestionsList {
+    margin-top: 1rem;
+}
+
+.customSuggestionsList > div {
+    max-height: 300px;
+    min-height: 50px;
+    border: 0.5px solid #cccccc;
+    overflow: auto;
+}
+
+.customSuggestionsList .empty {
+    color: #999;
+    font-size: 20px;
+    text-align: center;
+    padding: 1em;
+}
+
+/*.tagify__dropdown__item--active {*/
+/*    color: #96E6B3;*/
+/*}*/
+:root {
+    --tagify-dd-color-primary: #568259;
+    /*--tagify-dd-color-primary: #96E6B3;*/
+}
+
+.btn-action {
+    height: 1.7rem;
+    width: 2rem;
+    position: relative;
+    overflow: hidden;
 }

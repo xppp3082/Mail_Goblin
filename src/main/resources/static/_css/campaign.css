@@ -84,6 +84,10 @@ body {
 .delete-image {
     height: 1.2rem;
     width: 1.2rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .btn-danger {
@@ -128,4 +132,12 @@ body {
     background-color: #ccc;
     border: 1px solid #000000;
     /*border-color: #1aa06d;*/
+}
+
+
+.btn-action {
+    height: 1.7rem;
+    width: 2rem;
+    position: relative;
+    overflow: hidden;
 }

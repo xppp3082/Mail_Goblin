@@ -9,6 +9,7 @@
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
     <link href="/_css/audience.css" rel="stylesheet">
 </head>
 <body>
@@ -142,7 +143,6 @@
 <!--tagify import test-->
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
 <script>
     // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const companyId = localStorage.getItem('companyId');
@@ -257,15 +257,17 @@
                 <td>${user.clickcount}</td>
                 <td>${getTagsAsString(user.tags)}</td>
                 <td class="action-container">
-                <button class="btn btn-success btn-sm" onclick="modifyUser(${user.id})">Modify</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button>
+                <button class="btn btn-success btn-action" onclick="modifyUser(${user.id})"><img class="delete-image" src="/images/edit.png" alt="edit image"></button>
+                <button class="btn btn-danger btn-action" onclick="deleteUser(${user.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button>
                 </td>
             `;
             userList.appendChild(row);
         });
     }
 
-    // <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
+    // <td className="action-container">
+    //     <button className="btn btn-success btn-sm" onClick="modifyUser(${user.id})">Modify</button>
+    // <button className="btn btn-danger btn-sm" onClick="deleteUser(${user.id})">Delete</button>
     // </td>
 
     // 將標籤轉換為字串
@@ -553,7 +555,8 @@
             },
             series: [{
                 name: 'New Audience',
-                data: newAudienceData
+                data: newAudienceData,
+                color: '#10B981'
             }]
         });
     }

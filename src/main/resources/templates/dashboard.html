@@ -342,12 +342,15 @@
             plotOptions: {
                 column: {
                     pointPadding: 0.2,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    // colorByPoint: true,
+                    // colors: ['#10B981']
                 }
             },
             series: [{
                 name: 'Events',
-                data: eventData
+                data: eventData,
+                color: '#10B981'
             }]
         });
     }
@@ -486,7 +489,8 @@
             },
             series: [{
                 name: 'Success Rate',
-                data: deliveryData
+                data: deliveryData,
+                color: '#10B981'
             }]
         });
     }
@@ -685,10 +689,19 @@
                 series: [{
                     name: 'Age',
                     colorByPoint: true,
-                    data: seriesData
+                    data: seriesData,
+                    colors: ['#10B981', '#96e6b3', '#ccfccb']
                 }],
                 drilldown: {
-                    series: drilldownData
+                    // series: drilldownData
+                    series: drilldownData.map((drilldownItem) => {
+                        return {
+                            ...drilldownItem,
+                            colorByPoint: true, // 使用每个数据点的颜色
+                            // 使用顏色數組設置每個drilldownItem的顏色
+                            colors: ['#10B981', '#96e6b3', '#ccfccb']// 例如，前兩個drilldownItem分別設置為橙色和綠色
+                        };
+                    })
                 }
             });
         } catch (error) {

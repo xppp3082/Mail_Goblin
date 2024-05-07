@@ -302,14 +302,16 @@
                 <td>${campaign.tag}</td>
                 <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
                 <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>
-                <td><button class="btn btn-success" onclick="sendCampaign(${campaign.id})">Send Now</button>
-                <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button></td>
+                <td><button class="btn btn-action btn-success" onclick="sendCampaign(${campaign.id})"><img class="delete-image" src="/images/takeoff.png" alt="send image"></button>
+                <button class="btn btn-action btn-danger" onclick="deleteCampaign(${campaign.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button></td>
             `;
             campaignList.appendChild(row);
         });
     }
 
-    // <button class="btn btn-danger" onclick="deleteCampaign(${campaign.id})">Delete</button>
+    // <td>
+    //     <button className="btn btn-success" onClick="sendCampaign(${campaign.id})">Send Now</button>
+    // <button className="btn btn-danger" onClick="deleteCampaign(${campaign.id})">Delete</button>
     // </td>
 
     async function sendCampaign(campaignId) {
