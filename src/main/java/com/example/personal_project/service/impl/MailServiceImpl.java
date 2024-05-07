@@ -98,6 +98,12 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    public List<Mail> searchMailsByKeywordWithPage(String keyword, Long campaignId, int paging) {
+        int offset = paging * pagingSize;
+        return mailRepo.searchMailsByKeywordWithPage(keyword, campaignId, pagingSize + 1, offset);
+    }
+
+    @Override
     public void insertReceiveRecordWithMailHook(MailHook mailHook) {
         mailRepo.insertReiveRecordWithMailHook(mailHook);
     }

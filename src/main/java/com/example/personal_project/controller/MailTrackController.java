@@ -221,7 +221,24 @@ public class MailTrackController {
                             failMails.size() > pagingSize ? paging.orElse(0) + 1 : null
                     ));
         } catch (Exception e) {
-            String errorResponse = "Error on getting failed mails by campaign.";
+            String errorResponse = "Error on getting mails event by campaign.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchPageEventMailsByCampaign(@RequestParam("keyword") String keyword,
+                                                            @RequestParam("id") Long campaignId,
+                                                            @RequestParam("number") Optional<Integer> paging) {
+        try {
+            List<Mail> keywordResults = mailService.searchMailsByKeywordWithPage(keyword, campaignId, paging.orElse(0));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new GenericResponse<>(keywordResults.stream().limit(pagingSize).toList(),
+                            keywordResults.size() > pagingSize ? paging.orElse(0) + 1 : null
+                    ));
+        } catch (Exception e) {
+            String errorResponse = "Error on  search keyword by campaign.";
             log.error(errorResponse + " : " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }

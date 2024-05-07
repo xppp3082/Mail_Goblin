@@ -50,11 +50,17 @@
 
             <div class="campaign-graph-container">
                 <div class="dashboard-card age-graph" id="campaign-age"></div>
-                <div class="age-cards-container" id="age-cards"></divclass>
+                <div class="age-cards-container" id="age-cards"></div>
                 </div>
             </div>
             <div class="fail-list-container">
-                <h3>Event List</h3>
+                <div class="search-container">
+                    <h3>Event List</h3>
+                    <div class="search-bar-container">
+                        <input class="search-bar" type="text" id="searchKeyword" placeholder="Search...">
+                        <button class="search-bar" id="searchButton">Go</button>
+                    </div>
+                </div>
                 <table id="failListTable" class="table">
                     <thead>
                     <tr>
@@ -802,6 +808,100 @@
             </tr>
         `;
         }).join('');
+    }
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        if (keyword !== '') {
+            console.log(selectedCampaignId);
+            fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+        } else {
+            alert('Please type in the valid keyword');
+        }
+    });
+
+    document.getElementById('searchKeyword').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const keyword = this.value.trim();
+            if (keyword !== '') {
+                fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+            } else {
+                alert('Please type in the valid keyword');
+            }
+        }
+    });
+
+    // document.getElementById('searchKeyword').addEventListener('input', function() {
+    //     const keyword = this.value.trim();
+    //     setTimeout(function() {
+    //         if (keyword !== '') {
+    //             fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+    //         } else {
+    //             renderFailedTable(selectedCampaignId, currentPage)
+    //         }
+    //     }, 1000); // Debund for 1 second
+    // });
+
+    async function fetchCampaignEventDataWithKeyword(campaignID,currentPage,keyword){
+        try{
+            const response = await fetch(`api/1.0/track/search?keyword=${keyword}&id=${campaignID}&number=${currentPage}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            const nextPage = data.next_paging;
+            const keywordResult = data.data;
+            const prevButton = document.getElementById('prevFailListButton');
+            const nextButton = document.getElementById('nextFailListButton');
+            if (currentPage <= 0) {
+                prevButton.disabled = true;
+                prevButton.classList.add("is-active")
+            } else {
+                prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+                nextButton.classList.add("is-active")
+            } else {
+                nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
+            }
+            const failListBody = document.getElementById('failListBody');
+
+            failListBody.innerHTML = keywordResult.map(entry => {
+                let statusColorClass = '';
+                switch (entry.status) {
+                    case 'RECEIVE':
+                        statusColorClass = 'badge-success';
+                        break;
+                    case 'FAILED':
+                        statusColorClass = 'badge-danger';
+                        break;
+                    case 'OPEN':
+                        statusColorClass = 'badge-info';
+                        break;
+                    case 'CLICK':
+                        statusColorClass = 'badge-warning';
+                        break;
+                    default:
+                        statusColorClass = 'badge-warning';
+                }
+                return `
+            <tr>
+                <td>${entry.recipient_mail}</td>
+                <td>${entry.subject}</td>
+                <td><span class="badge ${statusColorClass}">${entry.status}</span></td>
+                <td>${entry.send_date}</td>
+            </tr>
+        `;
+            }).join('');
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+            // 如果發生錯誤，可以顯示錯誤信息給用戶，比如彈出提示框等
+            alert('發生錯誤，請稍後重試。');
+        }
     }
 
     function nextPage() {

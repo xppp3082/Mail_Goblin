@@ -37,6 +37,8 @@ public interface MailService {
 
     List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int paging);
 
+    List<Mail> searchMailsByKeywordWithPage(String keyword, Long campaignId, int paging);
+
     void insertReceiveRecordWithMailHook(MailHook mailHook);
 }
 

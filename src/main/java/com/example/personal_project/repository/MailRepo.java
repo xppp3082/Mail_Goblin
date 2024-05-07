@@ -481,7 +481,42 @@ public class MailRepo {
         }
     }
 
-    
+    public List<Mail> searchMailsByKeywordWithPage(String keyword, Long campaignId, int pageSize, int offset) {
+//        String sql = """
+//                SELECT * FROM mail
+//                WHERE (recipient_mail LIKE :keyword
+//                OR subject LIKE :keyword
+//                OR status LIKE :keyword)
+//                AND campaign_id = :campaignId
+//                LIMIT :pageSize OFFSET :offset;
+//                """;
+        String sql = """
+                SELECT * FROM mail
+                WHERE (recipient_mail LIKE ?
+                OR subject LIKE ?
+                OR status LIKE ?)
+                AND campaign_id = ?
+                LIMIT ? OFFSET ?;
+                """;
+//        Map<String, Object> paraMap = new HashMap<>();
+//        paraMap.put("keyword", "%" + keyword + "%");
+//        paraMap.put("campaignId", campaignId);
+//        paraMap.put("pageSize", pageSize);
+//        paraMap.put("offset", offset);
+        keyword = "%" + keyword + "%";
+        RowMapper<Mail> mapper = originMailRowMapper();
+        try {
+            return jdbcTemplate.query(sql, mapper, keyword, keyword, keyword, campaignId, pageSize, offset);
+//            return jdbcTemplate.query(sql,
+//                    new Object[]{keyword, keyword, keyword, campaignId, pageSize, offset},
+//                    mapper);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("error on searching mail by keyword and campaignId: " + e.getMessage());
+            return null;
+        }
+    }
+
+
     public RowMapper<Mail> originMailRowMapper() {
         return new RowMapper<Mail>() {
             @Override
