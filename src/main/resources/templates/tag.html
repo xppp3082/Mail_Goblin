@@ -66,6 +66,7 @@
         event.preventDefault();
         const formData = new FormData(this);
         const requestData = Object.fromEntries(formData.entries());
+        const tagInputBox = document.getElementById('tagName');
         fetch(this.getAttribute('action'), {
             method: 'POST',
             headers: headers,
@@ -75,6 +76,7 @@
                 if (response.ok) {
                     // alert('Tag added successfully');
                     loadTagsWithPage(currentPage);
+                    tagInputBox.value = '';
                 } else {
                     alert('Failed to add tag');
                     throw new Error('Failed to add tag');

@@ -7,9 +7,8 @@
     <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/highchart.css" rel="stylesheet">
-    <link href="/_css/dashboard.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="/_css/dashboard.css" rel="stylesheet">
     <!--    flatpickr test-->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 </head>
@@ -219,16 +218,20 @@
             },
             series: [{
                 name: 'RECEIVE',
-                data: receiveData // 接收事件數據
+                data: receiveData,// 接收事件數據
+                color:'#10B981'
             }, {
                 name: 'FAILED',
-                data: failedData // 失敗事件數據
+                data: failedData, // 失敗事件數據
+                color: '#96E6B3'
             }, {
                 name: 'OPEN',
-                data: openData // 打開事件數據
+                data: openData, // 打開事件數據
+                color: '#568259'
             }, {
                 name: 'CLICK',
-                data: clickData // 點擊事件數據
+                data: clickData,// 點擊事件數據
+                color: '#464E47'
             }],
             responsive: {
                 rules: [{

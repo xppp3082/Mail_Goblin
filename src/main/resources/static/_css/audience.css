@@ -173,6 +173,12 @@ body {
     /*--tagify-dd-color-primary: #96E6B3;*/
 }
 
+.btn-success {
+    background-color: #1aa06d;
+    border-color: #1aa06d;
+}
+
+
 .btn-action {
     height: 1.7rem;
     width: 2rem;

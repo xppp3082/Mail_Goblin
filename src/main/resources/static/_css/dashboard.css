@@ -45,7 +45,7 @@ body {
     cursor: pointer;
     border: none;
     border-radius: 5px;
-    background-color: #007bff;
+    background-color: #1aa06d;
     color: #fff;
 }
 
@@ -126,9 +126,14 @@ body {
 }
 
 .title-text {
-    margin-left: 0.5rem;
-    color: #374151;
+    /*margin-left: 0.5rem;*/
+    /*color: #374151;*/
+    /*font-size: 18px;*/
+    /*margin-left: 0.5rem;*/
+    color: #10b981;
     font-size: 18px;
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 .percent {
@@ -257,7 +262,8 @@ body {
 
 .badge-success {
     color: #fff;
-    background-color: #28a745;
+    /*background-color: #28a745;*/
+    background-color: #94d3a3;
 }
 
 .badge-danger {
