@@ -2,6 +2,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-size: 1.15rem;
 }
 
 body {
@@ -28,7 +29,7 @@ body {
 }
 
 .badge-success {
-    color: #fff;
+    color: #1f2d3d;
     /*!*94d3a3*!96E6B3*/
     /*background-color: #28a745;*/
     background-color: #94d3a3;
@@ -150,3 +151,53 @@ body {
     position: relative;
     overflow: hidden;
 }
+
+/* 調整模式對話框的大小 */
+.modal-dialog {
+    max-width: 800px; /* 最大寬度 */
+    margin: 30px auto; /* 上下居中 */
+}
+
+/* 模式對話框內容容器 */
+.modal-content {
+    margin-top: 120px;
+    margin-left: 120px;
+    padding: 20px;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+}
+
+#addCampaignBtn {
+    margin: 0.5rem;
+    background-color: white;
+    color: #1aa06d;
+    font-weight: bold;
+    font-size: 24px;
+    width: 50px; /* 按鈕寬度 */
+    height: 50px; /* 按鈕高度 */
+    border-radius: 50%; /* 圓形 */
+    border: 0.5px solid #cccccc;
+    cursor: pointer;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* 陰影 */
+    transition: box-shadow 0.3s ease;
+}
+
+#addCampaignBtn:hover,
+#addCampaignBtn :focus {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3)
+}
+
+#addCampaignBtn :active {
+    box-shadow: none;
+}
+
+/*#addCampaignBtn::before {*/
+/*    content: "+"; !* 按鈕內容 *!*/
+/*    position: absolute; !* 絕對定位 *!*/
+/*    top: 50%; !* 垂直置中 *!*/
+/*    left: 50%; !* 水平置中 *!*/
+/*    transform: translate(-50%, -50%); !* 中心偏移 *!*/
+/*}*/

@@ -1,9 +1,18 @@
+.noto-sans-tc {
+    font-family: "Noto Sans TC", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
+    font-size: 1.15rem;
 }
 
 body {
     padding-left: 240px;
+    font-family: "Noto Sans TC", sans-serif;
 }
 
 .container {

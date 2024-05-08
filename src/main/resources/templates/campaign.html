@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Home Page</title>
+    <title>Campaign</title>
     <link href="/images/goblin.png" rel="icon" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,12 @@
     <hr>
     <br>
     <div>
-        <h2>All Campaigns</h2>
+        <div class=title-container>
+            <h2>All Campaigns</h2>
+            <button class="btn btn-success" id="addCampaignBtn" onclick="showNewCampaignModal()" type="button">
+                +
+            </button>
+        </div>
         <table class="table">
             <thead>
             <tr>
@@ -45,39 +50,90 @@
     </div>
     <!-- Create New Campaign Form -->
     <div>
-        <h2>Create New Campaign</h2>
-        <form id="newCampaignForm">
-            <div class="form-group">
-                <label for="subject">Subject:</label>
-                <input class="form-control" id="subject" name="subject" required="required" type="text">
+        <!--        <h2>Create New Campaign</h2>-->
+        <div aria-hidden="true" aria-labelledby="newCampaignModalLabel" class="modal fade" id="newCampaignModal"
+             role="dialog" tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="newCampaignModalLabel">Create New Campaign</h5>
+                        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newCampaignForm">
+                            <!-- Your form fields go here -->
+                            <div class="form-group">
+                                <label for="subject">Subject:</label>
+                                <input class="form-control" id="subject" name="subject" required="required" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="templateId">Template:</label>
+                                <select class="form-control" id="templateId" name="template_id">
+                                    <!-- Populate with existing templates -->
+                                </select>
+                            </div>
+                            <!--            <div class="form-group">-->
+                            <!--                <label for="send_date">Send Date:</label>-->
+                            <!--                <input class="form-control" id="send_date" name="send_date" type="date">-->
+                            <!--            </div>-->
+                            <div class="form-group">
+                                <input class="form-control" id="send_datetime_UTC" name="send_datetime"
+                                       style="display: none"
+                                       type="text">
+                                <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
+                                <input class="form-control" id="send_datetime" name="send_datetime2" required="required"
+                                       type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="tag_id">Tag:</label>
+                                <select class="form-control" id="tag_id" name="tag_id">
+                                    <!-- Populate with available tags -->
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>
+                        <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="templateId">Template:</label>
-                <select class="form-control" id="templateId" name="template_id">
-                    <!-- Populate with existing templates -->
-                </select>
-            </div>
-            <!--            <div class="form-group">-->
-            <!--                <label for="send_date">Send Date:</label>-->
-            <!--                <input class="form-control" id="send_date" name="send_date" type="date">-->
-            <!--            </div>-->
-            <div class="form-group">
-                <input class="form-control" id="send_datetime_UTC" name="send_datetime" style="display: none"
-                       type="text">
-                <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
-                <input class="form-control" id="send_datetime" name="send_datetime2" required="required" type="text">
-            </div>
-            <div class="form-group">
-                <label for="tag_id">Tag:</label>
-                <select class="form-control" id="tag_id" name="tag_id">
-                    <!-- Populate with available tags -->
-                </select>
-            </div>
-            <!--            <button class="btn btn-primary-->
-            <!--            <button class="btn btn-success"-->
-            <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>
-            <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>
-        </form>
+        </div>
+        <!--                <form id="newCampaignForm">-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="subject">Subject:</label>-->
+        <!--                        <input class="form-control" id="subject" name="subject" required="required" type="text">-->
+        <!--                    </div>-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="templateId">Template:</label>-->
+        <!--                        <select class="form-control" id="templateId" name="template_id">-->
+        <!--                            &lt;!&ndash; Populate with existing templates &ndash;&gt;-->
+        <!--                        </select>-->
+        <!--                    </div>-->
+        <!--                    &lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+        <!--                    &lt;!&ndash;                <label for="send_date">Send Date:</label>&ndash;&gt;-->
+        <!--                    &lt;!&ndash;                <input class="form-control" id="send_date" name="send_date" type="date">&ndash;&gt;-->
+        <!--                    &lt;!&ndash;            </div>&ndash;&gt;-->
+        <!--                    <div class="form-group">-->
+        <!--                        <input class="form-control" id="send_datetime_UTC" name="send_datetime" style="display: none"-->
+        <!--                               type="text">-->
+        <!--                        <label for="send_datetime">Send Date and Time (Hourly Precision):</label>-->
+        <!--                        <input class="form-control" id="send_datetime" name="send_datetime2" required="required" type="text">-->
+        <!--                    </div>-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="tag_id">Tag:</label>-->
+        <!--                        <select class="form-control" id="tag_id" name="tag_id">-->
+        <!--                            &lt;!&ndash; Populate with available tags &ndash;&gt;-->
+        <!--                        </select>-->
+        <!--                    </div>-->
+        <!--                    &lt;!&ndash;            <button class="btn btn-primary&ndash;&gt;-->
+        <!--                    &lt;!&ndash;            <button class="btn btn-success"&ndash;&gt;-->
+        <!--                    <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>-->
+        <!--                    <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>-->
+        <!--                </form>-->
     </div>
 </div>
 <br><br>
@@ -130,7 +186,9 @@
     });
     // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
-    // 构建请求头
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
@@ -411,6 +469,10 @@
         });
     }
 
+    function showNewCampaignModal() {
+        $('#newCampaignModal').modal('show');
+    }
+
     // Save draft
     async function saveDraft() {
         const formData = new FormData(document.getElementById('newCampaignForm'));
@@ -425,6 +487,8 @@
             if (response.ok) {
                 alert('Draft saved successfully');
                 // await loadCampaigns(); // Reload campaigns
+                $('#newCampaignModal').modal('hide'); // 隱藏模式對話框
+                document.getElementById('newCampaignForm').reset(); //重置表單
                 await loadCampaignsWihPage(currentPage)
             } else {
                 throw new Error('Failed to save draft');
@@ -448,7 +512,8 @@
             });
             if (response.ok) {
                 alert('Complete campaign saved successfully');
-                // await loadCampaigns(); // Reload campaigns
+                $('#newCampaignModal').modal('hide'); // 隱藏模式對話框
+                document.getElementById('newCampaignForm').reset(); //重置表單
                 await loadCampaignsWihPage(currentPage)
             } else {
                 throw new Error('Failed to save complete campaign');

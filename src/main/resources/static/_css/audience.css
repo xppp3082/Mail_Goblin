@@ -1,11 +1,21 @@
+.noto-sans-tc {
+    font-family: "Noto Sans TC", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-size: 1.15rem;
+    /*font-family: "Noto Sans TC", sans-serif;*/
 }
 
 body {
     padding-left: 240px;
+    font-family: "Noto Sans TC", sans-serif;
 }
 
 
@@ -184,4 +194,39 @@ body {
     width: 2rem;
     position: relative;
     overflow: hidden;
+}
+
+.modal-content {
+    margin-top: 120px;
+    margin-left: 120px;
+    padding: 20px;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+}
+
+#addAudienceBtn {
+    margin: 0.5rem;
+    background-color: white;
+    color: #1aa06d;
+    font-weight: bold;
+    font-size: 24px;
+    width: 50px; /* 按鈕寬度 */
+    height: 50px; /* 按鈕高度 */
+    border-radius: 50%; /* 圓形 */
+    border: 0.5px solid #cccccc;
+    cursor: pointer;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* 陰影 */
+    transition: box-shadow 0.3s ease;
+}
+
+#addAudienceBtn:hover,
+#addAudienceBtn :focus {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3)
+}
+
+#addAudienceBtn :active {
+    box-shadow: none;
 }

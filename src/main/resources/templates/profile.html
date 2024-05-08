@@ -10,6 +10,12 @@
     <link href="/_css/navbar.css" rel="stylesheet">
     <link href="/_css/profile.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!--    font import-->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
+          rel="stylesheet">
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
@@ -73,7 +79,9 @@
 <script>
     // Fetch token from localStorage
     const token = localStorage.getItem('token');
-
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
