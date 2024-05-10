@@ -76,7 +76,7 @@
         e.preventDefault();
 
 
-        const account = $('#username');
+        const account = $('#username').val();
         if (!validateEmail(account)) {
             alert('invalid email address')
             return
