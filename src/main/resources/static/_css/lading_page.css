@@ -1,0 +1,310 @@
+.jersey-25-regular {
+    font-family: "Jersey 25", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.logo-link {
+    display: flex;
+    text-decoration: none;
+    color: #fff;
+    align-items: center;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header 樣式 */
+
+header {
+    height: 2.5rem;
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    font-family: "Jersey 25", sans-serif;
+}
+
+.logo img {
+    height: 3rem;
+    margin-right: 0.8rem;
+}
+
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+/* 主要區塊樣式 */
+
+.hero {
+    /*background-image: url("https://d1l4paive701xn.cloudfront.net/pikaso_texttoimage_colorful-flat-illustration-classical-animes-A-dist.jpeg");*/
+    /*background-size: cover;*/
+    background-position: center;
+    /*text-align: center;*/
+    text-align: left;
+    padding: 100px 0;
+    /*opacity: 0.8;*/
+    position: relative;
+    /*background-color: #f4f4f4;*/
+    /*text-align: center;*/
+    /*padding: 100px 0;*/
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://d1l4paive701xn.cloudfront.net/pikaso_texttoimage_colorful-flat-illustration-classical-animes-A-dist.jpeg");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.4; /* 调整透明度，值范围为 0（完全透明）到 1（完全不透明） */
+    /* filter: saturate(50%); */ /* 使用饱和度来调整图像的饱和度，值范围为 0%（完全灰度）到 100%（原始饱和度） */
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    /*margin: 0 auto;*/
+    margin: 6rem 6rem;
+
+    p {
+        line-height: 2;
+    }
+
+}
+
+/*.hero-content {*/
+/*    max-width: 800px;*/
+/*    margin: 0 auto;*/
+/*}*/
+
+.hero h1 {
+    font-size: 36px;
+}
+
+.hero p {
+    font-size: 18px;
+}
+
+.cta-btn {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+/* 功能特色樣式 */
+
+.features {
+    background-color: #fff;
+    padding: 50px 0;
+    display: flex;
+    justify-content: space-around;
+}
+
+.feature {
+    text-align: center;
+    max-width: 300px;
+}
+
+
+.feature {
+    h2 {
+        color: #464E47;
+        text-align: left;
+    }
+
+    p {
+        font-size: 1.2rem;
+        text-align: left;
+        line-height: 1.5;
+    }
+}
+
+/* 關於我們區域樣式 */
+
+.about {
+    background-color: #f4f4f4;
+    padding: 50px 0;
+    text-align: center;
+
+    p {
+        line-height: 1.5;
+    }
+}
+
+/* 聯絡我們區域樣式 */
+
+.contact {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.contact form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.contact input,
+.contact textarea {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.contact button {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* 頁腳樣式 */
+
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+footer nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+footer nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.features {
+    display: flex;
+    justify-content: space-around;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeUp 1s ease forwards;
+}
+
+.feature {
+    text-align: center;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.feature:nth-child(1) {
+    animation: fade 1s ease 0.5s forwards;
+}
+
+.feature:nth-child(2) {
+    animation: fade 1s ease 1s forwards;
+}
+
+.feature:nth-child(3) {
+    animation: fade 1s ease 1.5s forwards;
+}
+
+.feature:nth-child(4) {
+    animation: fade 1s ease 2s forwards;
+}
+
+.highlight {
+    font-size: 1.5em; /* 改變文字大小為 1.2em */
+    color: #464E47; /* 設置文字顏色為黃色 */
+    font-weight: bold;
+    line-height: 1.5; /* 設置行高為文字大小的 1.5 倍 */
+}
+
+
+.hero-content {
+    position: relative; /* 使内容可以相对于父容器定位 */
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeUp 1s ease forwards;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-content h1,
+.hero-content p,
+.hero-content .cta-btn {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade 1s ease forwards;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

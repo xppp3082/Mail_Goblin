@@ -104,4 +104,9 @@ public class FrontController {
     public String showProfilePage() {
         return "profile";
     }
+
+    @GetMapping("/index")
+    public String showLandingPage() {
+        return "landing_page";
+    }
 }
