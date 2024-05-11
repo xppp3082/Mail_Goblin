@@ -71,7 +71,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                    <h5 class="modal-title" id="addUserModalLabel">Add Audience</h5>
                     <button aria-label="Close" class="close" data-dismiss="modal" type="button">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -294,23 +294,36 @@
 
         users.forEach(function (user) {
             const row = document.createElement('tr');
+            const tagsContainer = document.createElement('div');
+
+            user.tags.forEach(function (tag) {
+                const tagSpan = document.createElement('span');
+                tagSpan.textContent = tag.name;
+                tagSpan.classList.add('badge', 'badge-normal');
+                tagsContainer.appendChild(tagSpan);
+            });
             row.innerHTML = `
-                <td>${user.name}</td>
-                <td>${user.email}</td>
-                <td>${user.birthday}</td>
+                <td><span class="badge-large">${user.name}</span></td>
+                <td><span class="badge">${user.email}</span></td>
+                <td><span class="badge">${user.birthday}</span></td>
                 <td>${user.mailcount}</td>
                 <td>${user.opencount}</td>
                 <td>${user.clickcount}</td>
-                <td>${getTagsAsString(user.tags)}</td>
-                <td class="action-container">
+                <td class="tags-container">
+                </td>
+                <td>
+                <div class="action-container">
                 <button class="btn btn-success btn-action" onclick="modifyUser(${user.id})"><img class="delete-image" src="/images/edit.png" alt="edit image"></button>
                 <button class="btn btn-danger btn-action" onclick="deleteUser(${user.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button>
+                </div>
                 </td>
             `;
+            row.querySelector('.tags-container').appendChild(tagsContainer);
             userList.appendChild(row);
         });
     }
 
+    // <td>${getTagsAsString(user.tags)}</td>
     // <td className="action-container">
     //     <button className="btn btn-success btn-sm" onClick="modifyUser(${user.id})">Modify</button>
     // <button className="btn btn-danger btn-sm" onClick="deleteUser(${user.id})">Delete</button>
@@ -411,13 +424,12 @@
 
             document.querySelectorAll('#modify-tag-list .tagify .tagify__tag ').forEach(function (tagElement) {
                 requestBody.tags.push({
-                    id: parseInt(tagElement.id), // 將值轉換為整數
-                    company_id: companyId, // 假設 company_id 固定為 1，你可以根據實際情況調整
-                    name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+                    id: parseInt(tagElement.id),
+                    company_id: companyId,
+                    name: tagElement.title
                 });
             });
 
-            // 发送 PATCH 请求到后端
             const response = await fetch(`/api/1.0/audience/update?id=${userID}`, {
                 method: 'PATCH',
                 headers: headers,
@@ -636,7 +648,7 @@
                 align: 'left'
             },
             subtitle: {
-                text: 'Source: Your API Endpoint',
+                text: 'Source: Recently New Add Audience',
                 align: 'left'
             },
             xAxis: {

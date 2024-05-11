@@ -9,6 +9,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-size: 1.15rem;
 }
 
 body {
@@ -27,7 +28,7 @@ body {
 
 .card {
     width: calc((100% - 120px) / 3);
-    height: 300px;
+    /*height: 300px;*/
     align-content: space-between;
     overflow: hidden;
     position: relative;
@@ -58,6 +59,7 @@ body {
 
 .container {
     padding-top: 3rem;
+    max-width: 1300px;
 }
 
 
@@ -176,7 +178,7 @@ body {
 }
 
 .add-template-btn {
-    margin-left: 1rem;
+    /*margin-left: 1rem;*/
     padding: 1.3em 3em;
     font-size: 12px;
     text-transform: uppercase;

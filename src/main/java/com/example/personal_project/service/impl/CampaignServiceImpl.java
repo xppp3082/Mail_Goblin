@@ -94,7 +94,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public Campaign insertNewCampaign(Campaign campaign, String status) {
+    public Campaign insertNewCampaign(Campaign campaign, String status) throws Exception {
 //        //將前端設定的時區轉換為UTC+0的時區
 //        assert campaign.getSendDateTime() != null;
 //        String sendDateTimeString = campaign.getSendDateTime().replace(' ', 'T');
@@ -108,6 +108,7 @@ public class CampaignServiceImpl implements CampaignService {
 //
 //        // 將轉換後的 UTC+0 時間格式化為字符串，並設置回 campaign 中
 //        campaign.setSendDateTime(utcDateTime.format(formatter));
+        // 检查 Campaign 对象中是否有 null 值的字段
 
         campaign.setStatus(status);
         campaign.setExecuteStatus(ExecuteStatus.PENDING.name());

@@ -21,6 +21,7 @@ body {
 
 .container {
     padding-top: 3rem;
+    max-width: 1300px;
 }
 
 #audience-table td {
@@ -186,6 +187,7 @@ body {
 .btn-success {
     background-color: #1aa06d;
     border-color: #1aa06d;
+    margin-right: 5px;
 }
 
 
@@ -201,6 +203,12 @@ body {
     margin-left: 120px;
     padding: 20px;
 }
+
+.modal-dialog {
+    max-width: 800px;
+    margin: 30px auto;
+}
+
 
 .title-container {
     display: flex;
@@ -229,4 +237,37 @@ body {
 
 #addAudienceBtn :active {
     box-shadow: none;
+}
+
+
+.badge-normal {
+    color: #1f2d3d;
+    background-color: #ccc;
+    margin-right: 5px;
+}
+
+.badge {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 85%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.badge-large {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 100%;
+    font-weight: bold;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }

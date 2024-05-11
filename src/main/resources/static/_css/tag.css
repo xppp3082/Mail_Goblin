@@ -19,6 +19,7 @@ body {
 
 .container {
     padding-top: 3rem;
+    max-width: 1300px;
 }
 
 #tag-title {

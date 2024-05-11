@@ -139,7 +139,15 @@ public class CampaignRepo {
         }
     }
 
-    public Campaign insertNewCampaign(Campaign campaign) {
+    public Campaign insertNewCampaign(Campaign campaign) throws Exception {
+        if (campaign.getTemplateId() == null ||
+                campaign.getSubject() == null ||
+                campaign.getTagId() == null ||
+                campaign.getExecuteStatus() == null ||
+                campaign.getSendDateTime() == null) {
+            log.error("Campaign object contains null values");
+            throw new Exception("Campaign object contains null values");
+        }
         String sql = """
                 INSERT INTO campaign 
                 (template_id,subject,target_date,status,tag_id,execute_status,target_datetime)
@@ -153,6 +161,7 @@ public class CampaignRepo {
                     campaign.getTagId(), campaign.getExecuteStatus(), campaign.getSendDateTime());
         } catch (Exception e) {
             log.error("Error on inserting new campaign with templateId : " + campaign.getTemplateId());
+            throw new Exception("Error on inserting new campaign with templateId : " + campaign.getTemplateId());
         }
         return campaign;
     }

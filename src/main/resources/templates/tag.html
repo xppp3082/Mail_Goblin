@@ -31,7 +31,8 @@
     <form id="addTagForm" method="post" th:action="@{/api/1.0/tag/add}">
         <div class="form-group">
             <label for="tagName">New Tag Name:</label>
-            <input class="form-control" id="tagName" name="name" placeholder="Enter tag name" type="text">
+            <input class="form-control" id="tagName" name="name" placeholder="Enter tag name" required="required"
+                   type="text">
         </div>
         <!--        <button class="btn btn-primary" type="submit">Add Tag</button>-->
         <button class="btn btn-tag" type="submit">Add Tag</button>

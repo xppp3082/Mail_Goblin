@@ -70,7 +70,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="templateId">Template:</label>
-                                <select class="form-control" id="templateId" name="template_id">
+                                <select class="form-control" id="templateId" name="template_id" required="required">
                                     <!-- Populate with existing templates -->
                                 </select>
                             </div>
@@ -88,7 +88,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="tag_id">Tag:</label>
-                                <select class="form-control" id="tag_id" name="tag_id">
+                                <select class="form-control" id="tag_id" name="tag_id" required="required">
                                     <!-- Populate with available tags -->
                                 </select>
                             </div>
@@ -352,12 +352,17 @@
             // Convert UTC time to local time
             const sendDatetimeUTC = new Date(campaign.send_datetime);
             const sendDatetimeLocal = new Date(sendDatetimeUTC.getTime() - sendDatetimeUTC.getTimezoneOffset() * 60000);
-            const sendDatetimeString = sendDatetimeLocal.toLocaleString(); // Convert to local string format
+            const sendDatetimeString = sendDatetimeLocal.toLocaleString([], {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }); // Convert to local string format
 
             row.innerHTML = `
-                <td>${campaign.subject}</td>
-                <td>${sendDatetimeString}</td>
-                <td>${campaign.tag}</td>
+                <td><span class="badge-large">${campaign.subject}</span></td>
+                <td><span class="badge">${sendDatetimeString}</span></td>
+                <td><span class="badge badge-normal">${campaign.tag}</span></td>
                 <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
                 <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>
                 <td><button class="btn btn-action btn-success" onclick="sendCampaign(${campaign.id})"><img class="delete-image" src="/images/takeoff.png" alt="send image"></button>
@@ -478,6 +483,12 @@
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
         console.log(requestData);
+
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
+
         try {
             const response = await fetch('/api/1.0/campaign/draft', {
                 method: 'POST',
@@ -491,11 +502,16 @@
                 document.getElementById('newCampaignForm').reset(); //重置表單
                 await loadCampaignsWihPage(currentPage)
             } else {
-                throw new Error('Failed to save draft');
+                // throw new Error('Failed to save draft');
+                alert('Failed to save draft campaign, please fill in all content correctly.');
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
             }
         } catch (error) {
             console.error(error);
             alert('Failed to save draft');
+            throw new Error('Failed to save draft campaign');
+
         }
     }
 
@@ -503,6 +519,12 @@
     async function saveComplete() {
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
+
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
+
 
         try {
             const response = await fetch('/api/1.0/campaign/complete', {
@@ -516,11 +538,15 @@
                 document.getElementById('newCampaignForm').reset(); //重置表單
                 await loadCampaignsWihPage(currentPage)
             } else {
-                throw new Error('Failed to save complete campaign');
+                alert('Failed to save complete campaign, please fill in all content correctly.');
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
             }
         } catch (error) {
             console.error(error);
             alert('Failed to save complete campaign');
+            throw new Error('Failed to save complete campaign');
+
         }
     }
 

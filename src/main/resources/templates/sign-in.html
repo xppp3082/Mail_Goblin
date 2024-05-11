@@ -84,7 +84,7 @@
             } else {
                 let errorRes = 'Log in failed, please check your username and password.';
                 alert(errorRes);
-                throw new Error(errorRes);
+                // throw new Error(errorRes);
             }
         } catch (error) {
             alert('Log in failed: ' + error.message);

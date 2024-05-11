@@ -11,6 +11,7 @@ body {
 
 .container {
     padding-top: 3rem;
+    max-width: 1300px;
 }
 
 #campaign-title {
@@ -21,6 +22,12 @@ body {
 #campaign-picture {
     height: 4rem;
     margin-right: 1rem;
+}
+
+
+.badge-normal {
+    color: #1f2d3d;
+    background-color: #ccc;
 }
 
 .badge-warning {
@@ -49,8 +56,22 @@ body {
 .badge {
     display: inline-block;
     padding: .25em .4em;
-    font-size: 75%;
+    font-size: 85%;
     font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+
+.badge-large {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 100%;
+    font-weight: bold;
     line-height: 1;
     text-align: center;
     white-space: nowrap;

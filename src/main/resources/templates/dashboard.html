@@ -17,6 +17,7 @@
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
           rel="stylesheet">
+
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
@@ -72,7 +73,7 @@
                         <th>Recipient Mail</th>
                         <th>Subject</th>
                         <th>Status</th>
-                        <th>Send Date</th>
+                        <th>Timestamp</th>
                     </tr>
                     </thead>
                     <tbody id="failListBody"></tbody>
@@ -594,6 +595,7 @@
         const mainBody = document.createElement('div')
         mainBody.classList.add('card-main-body')
         const leftBody = document.createElement('div')
+        leftBody.classList.add('card-content-body');
         const rightBody = document.createElement('div')
 
         const titleDiv = document.createElement('div');
@@ -625,6 +627,9 @@
         clickDiv.appendChild(clickKey);
         clickDiv.appendChild(clickValue);
 
+        const conversionDiv = document.createElement('div');
+        conversionDiv.appendChild(openDiv);
+        conversionDiv.appendChild(clickDiv);
 
         //目前年紀分成0-19,20-39,40-59,60+
         // const ageImgae = document.createElement('div');
@@ -635,8 +640,9 @@
         // ageImgae.innerHTML=`<img src="${imagePath}" alt="age-image">`;
 
         rightBody.appendChild(titleDiv);
-        rightBody.appendChild(openDiv);
-        rightBody.appendChild(clickDiv);
+        // rightBody.appendChild(openDiv);
+        // rightBody.appendChild(clickDiv);
+        leftBody.appendChild(conversionDiv);
         leftBody.appendChild(ageImgae);
         mainBody.appendChild(rightBody);
         mainBody.appendChild(leftBody);
@@ -708,9 +714,8 @@
                     series: drilldownData.map((drilldownItem) => {
                         return {
                             ...drilldownItem,
-                            colorByPoint: true, // 使用每个数据点的颜色
-                            // 使用顏色數組設置每個drilldownItem的顏色
-                            colors: ['#10B981', '#96e6b3', '#ccfccb']// 例如，前兩個drilldownItem分別設置為橙色和綠色
+                            colorByPoint: true,
+                            colors: ['#10B981', '#96e6b3', '#ccfccb']
                         };
                     })
                 }
@@ -806,6 +811,18 @@
         const data = await fetchCampaignFailData(campaignId, currentPage);
 
         failListBody.innerHTML = data.map(entry => {
+
+            const timestamp = new Date(entry.timestamp);
+            const userTimezoneOffset = timestamp.getTimezoneOffset() * 60000;
+            const localTimestamp = new Date(timestamp.getTime() - userTimezoneOffset);
+            const formattedTimestamp = localTimestamp.toLocaleString([], {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second:'2-digit',
+                hour12: false
+            });
+
             let statusColorClass = '';
             switch (entry.status) {
                 case 'RECEIVE':
@@ -828,7 +845,7 @@
                 <td>${entry.recipient_mail}</td>
                 <td>${entry.subject}</td>
                 <td><span class="badge ${statusColorClass}">${entry.status}</span></td>
-                <td>${entry.send_date}</td>
+                <td>${formattedTimestamp}</td>
             </tr>
         `;
         }).join('');
@@ -894,6 +911,17 @@
             const failListBody = document.getElementById('failListBody');
 
             failListBody.innerHTML = keywordResult.map(entry => {
+                const timestamp = new Date(entry.timestamp);
+                const userTimezoneOffset = timestamp.getTimezoneOffset() * 60000;
+                const localTimestamp = new Date(timestamp.getTime() - userTimezoneOffset);
+                const formattedTimestamp = localTimestamp.toLocaleString([], {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second:'2-digit',
+                    hour12: false
+                });
+
                 let statusColorClass = '';
                 switch (entry.status) {
                     case 'RECEIVE':
@@ -916,7 +944,7 @@
                 <td>${entry.recipient_mail}</td>
                 <td>${entry.subject}</td>
                 <td><span class="badge ${statusColorClass}">${entry.status}</span></td>
-                <td>${entry.send_date}</td>
+                <td>${formattedTimestamp}</td>
             </tr>
         `;
             }).join('');

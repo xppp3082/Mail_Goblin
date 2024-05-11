@@ -21,7 +21,7 @@ public interface CampaignService {
 
     void updateCampaignExecuteStatus(Campaign campaign);
 
-    Campaign insertNewCampaign(Campaign campaign, String status);
+    Campaign insertNewCampaign(Campaign campaign, String status) throws Exception;
 
     void deleteCampaign(Long id) throws Exception;
 
