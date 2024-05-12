@@ -115,9 +115,9 @@ public class MailConsumer {
                     EmailCampaign emailCampaign = new EmailCampaign(campaign, mailTemplate, audiences);
                     try {
                         List<Mail> mails = mailServerService.sendBatchMails2(emailCampaign);
-//                            mailService.insertBatch(mails);
-                        Thread.sleep(8000);
-                        mailService.updateBatchByMimeId(mails);
+////                            mailService.insertBatch(mails);
+//                        Thread.sleep(8000);
+//                        mailService.updateBatchByMimeId(mails);
                         campaignService.updateCampaignExecuteStatus(campaign);
                         log.info("batch insert mail record successfully with campaignID :" + campaign.getId());
                     } catch (Exception e) {

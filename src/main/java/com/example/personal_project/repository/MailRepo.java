@@ -2,6 +2,7 @@ package com.example.personal_project.repository;
 
 import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.MailHook;
+import com.example.personal_project.model.RedisMail;
 import com.example.personal_project.model.status.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,35 @@ public class MailRepo {
                 ps.setString(6, mail.getTimestamp().toString());
                 ps.setInt(7, mail.getCheckTimes());
                 ps.setLong(8, mail.getAudienceID());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return mails.size();
+            }
+        });
+    }
+
+    public void batchInsertRedisMail(List<RedisMail> mails) {
+        String sql = """
+                INSERT INTO
+                mail (campaign_id,recipient_mail,subject,status,timestamp,audience_id,mime_id,send_date) 
+                VALUES 
+                (?,?,?,?,?,?,?,?);
+                """;
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                RedisMail mail = mails.get(i);
+                //Set values for prepareStatement
+                ps.setLong(1, mail.getCampaignID());
+                ps.setString(2, mail.getRecipientMail());
+                ps.setString(3, mail.getSubject());
+                ps.setString(4, mail.getStatus());
+                ps.setString(5, mail.getTimestamp().toString());
+                ps.setLong(6, mail.getAudienceID());
+                ps.setString(7, mail.getMimeID());
+                ps.setDate(8, java.sql.Date.valueOf(LocalDate.now()));
             }
 
             @Override

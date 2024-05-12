@@ -3,11 +3,13 @@ package com.example.personal_project.controller;
 import com.example.personal_project.component.AuthenticationComponent;
 import com.example.personal_project.model.Mail;
 import com.example.personal_project.model.MailHook;
+import com.example.personal_project.model.RedisMail;
 import com.example.personal_project.model.response.GenericResponse;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.service.AudienceService;
 import com.example.personal_project.service.CompanyService;
 import com.example.personal_project.service.MailService;
+import com.example.personal_project.service.impl.RedisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,16 +38,19 @@ public class MailTrackController {
     private final CompanyService companyService;
     private final AuthenticationComponent authenticationComponent;
 
+    private final RedisService redisService;
+
     @Value("${product.paging.size}")
     private int pagingSize;
 
 
-    public MailTrackController(AudienceService audienceService, ObjectMapper objectMapper, MailService mailService, CompanyService companyService, AuthenticationComponent authenticationComponent) {
+    public MailTrackController(AudienceService audienceService, ObjectMapper objectMapper, MailService mailService, CompanyService companyService, AuthenticationComponent authenticationComponent, RedisService redisService) {
         this.audienceService = audienceService;
         this.objectMapper = objectMapper;
         this.mailService = mailService;
         this.companyService = companyService;
         this.authenticationComponent = authenticationComponent;
+        this.redisService = redisService;
     }
 
     @GetMapping("/open")
@@ -265,9 +270,15 @@ public class MailTrackController {
         }
         MailHook mailHook = new MailHook(recipientEmail, subject, mimeId, status);
         mailHook.setMimeID(mimeId);
+        RedisMail redisMail = new RedisMail();
+        redisMail.setRecipientMail(recipientEmail);
+        redisMail.setSubject(subject);
+        redisMail.setMimeID(mimeId);
+        redisMail.setStatus(status);
         System.out.println(mailHook.getMimeID());
         try {
-            mailService.insertReceiveRecordWithMailHook(mailHook);
+//            mailService.insertReceiveRecordWithMailHook(mailHook);
+            redisService.updateMailFromWebhook(redisMail);
             return new ResponseEntity<>(mailHook, HttpStatus.OK);
         } catch (Exception e) {
             String errorResponse = "error on insert record with mailgun webhook";

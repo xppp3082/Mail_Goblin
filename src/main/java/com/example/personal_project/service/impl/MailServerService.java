@@ -1,9 +1,6 @@
 package com.example.personal_project.service.impl;
 
-import com.example.personal_project.model.Audience;
-import com.example.personal_project.model.EmailCampaign;
-import com.example.personal_project.model.Mail;
-import com.example.personal_project.model.MailTemplate;
+import com.example.personal_project.model.*;
 import com.example.personal_project.model.status.DeliveryStatus;
 import com.example.personal_project.service.AudienceService;
 import jakarta.mail.MessagingException;
@@ -40,11 +37,14 @@ public class MailServerService {
     private final TemplateEngine htmlTemplateEngine;
     private final AudienceService audienceService;
 
-    public MailServerService(Environment environment, JavaMailSender mailSender, TemplateEngine htmlTemplateEngine, AudienceService audienceService) {
+    private final RedisService redisService;
+
+    public MailServerService(Environment environment, JavaMailSender mailSender, TemplateEngine htmlTemplateEngine, AudienceService audienceService, RedisService redisService) {
         this.environment = environment;
         this.mailSender = mailSender;
         this.htmlTemplateEngine = htmlTemplateEngine;
         this.audienceService = audienceService;
+        this.redisService = redisService;
     }
 
     public String sendRegisterMail()
@@ -206,6 +206,18 @@ public class MailServerService {
                     }
                     mail.setStatus(DeliveryStatus.FAILED.name());
                     mails.add(mail);
+                }
+                //insert mail data to redis
+                try {
+                    RedisMail redisMail = new RedisMail();
+                    redisMail.setMimeID(mail.getMimeID());
+                    redisMail.setCampaignID(mail.getCampaignID());
+                    redisMail.setTimestamp(mail.getTimestamp());
+                    redisMail.setAudienceID(mail.getAudienceID());
+//                    Thread.sleep(8000);
+                    redisService.updateMailFromSpringboot(redisMail);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
                 }
             }
             return mails;

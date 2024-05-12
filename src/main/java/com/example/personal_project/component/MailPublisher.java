@@ -42,9 +42,6 @@ public class MailPublisher {
             List<Campaign> campaignsToSend = campaignService.getAllCompletedCampaigns();
 //            log.info(campaignsToSend.toString());
             for (Campaign campaign : campaignsToSend) {
-//                log.info("來自Queue的問候: campaign 預計要寄送的日期是 " + campaign.getSendDate());
-//                if (campaign.getSendDate().equals(targetDate)) {
-//                LocalDateTime sendDateTime = LocalDateTime.parse(campaign.getSendDateTime());
                 if (campaign.getSendDateTime() == null) continue;
 //                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime sendDateTime = LocalDateTime.parse(campaign.getSendDateTime()).truncatedTo(ChronoUnit.HOURS);
