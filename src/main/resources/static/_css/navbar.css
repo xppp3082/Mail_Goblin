@@ -59,6 +59,9 @@
     font-style: normal;
 }
 
+h1 {
+    font-weight: 600;
+}
 
 .sidebar {
     margin-top: -4rem;
