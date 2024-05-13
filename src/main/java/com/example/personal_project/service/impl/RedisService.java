@@ -5,7 +5,6 @@ import com.example.personal_project.repository.MailRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -76,7 +75,7 @@ public class RedisService {
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
+    //    @Scheduled(fixedDelay = 10000)
     public void checkAndUpdateRedisMail() {
 //        log.info("Start cleaning Redis Mail !");
         try {

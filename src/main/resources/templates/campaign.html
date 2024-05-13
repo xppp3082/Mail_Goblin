@@ -483,12 +483,10 @@
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
         console.log(requestData);
-
-        if (Object.values(requestData).includes(null)) {
-            alert('Please fill out all fields');
-            return;
-        }
-
+        // if (Object.values(requestData).includes(null)) {
+        //     alert('Please fill out all fields');
+        //     return;
+        // }
         try {
             const response = await fetch('/api/1.0/campaign/draft', {
                 method: 'POST',
@@ -519,13 +517,10 @@
     async function saveComplete() {
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
-
-        if (Object.values(requestData).includes(null)) {
-            alert('Please fill out all fields');
-            return;
-        }
-
-
+        // if (Object.values(requestData).includes(null)) {
+        //     alert('Please fill out all fields');
+        //     return;
+        // }
         try {
             const response = await fetch('/api/1.0/campaign/complete', {
                 method: 'POST',
