@@ -66,6 +66,7 @@ public class CampaignController {
 
     @PostMapping("/complete")
     public ResponseEntity<?> addCompleteCampaigns(@RequestBody Campaign campaign) {
+        log.info("Controller: " + campaign.toString());
         try {
             campaign = campaignService.insertNewCampaign(campaign, CampaignStatus.COMPLETED.name());
             return new ResponseEntity<>(campaign, HttpStatus.OK);

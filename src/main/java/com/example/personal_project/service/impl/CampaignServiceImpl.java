@@ -112,6 +112,7 @@ public class CampaignServiceImpl implements CampaignService {
 
         campaign.setStatus(status);
         campaign.setExecuteStatus(ExecuteStatus.PENDING.name());
+        log.info(campaign.toString());
         return campaignRepo.insertNewCampaign(campaign);
     }
 

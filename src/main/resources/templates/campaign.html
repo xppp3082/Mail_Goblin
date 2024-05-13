@@ -70,7 +70,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="templateId">Template:</label>
-                                <select class="form-control" id="templateId" name="template_id" required="required">
+                                <select class="form-control" id="templateId" name="template_id">
                                     <!-- Populate with existing templates -->
                                 </select>
                             </div>
@@ -88,7 +88,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="tag_id">Tag:</label>
-                                <select class="form-control" id="tag_id" name="tag_id" required="required">
+                                <select class="form-control" id="tag_id" name="tag_id">
                                     <!-- Populate with available tags -->
                                 </select>
                             </div>
@@ -191,7 +191,7 @@
     }
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+        'Authorization': `Bearer ${token}`
     };
     // Load all template after windows loading completed
     let currentPage = 0;
@@ -482,11 +482,12 @@
     async function saveDraft() {
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
-        console.log(requestData);
-        // if (Object.values(requestData).includes(null)) {
-        //     alert('Please fill out all fields');
-        //     return;
-        // }
+        delete requestData.send_datetime2;
+        // console.log(requestData);
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
         try {
             const response = await fetch('/api/1.0/campaign/draft', {
                 method: 'POST',
@@ -509,7 +510,6 @@
             console.error(error);
             alert('Failed to save draft');
             throw new Error('Failed to save draft campaign');
-
         }
     }
 
@@ -517,10 +517,12 @@
     async function saveComplete() {
         const formData = new FormData(document.getElementById('newCampaignForm'));
         const requestData = Object.fromEntries(formData.entries());
-        // if (Object.values(requestData).includes(null)) {
-        //     alert('Please fill out all fields');
-        //     return;
-        // }
+        delete requestData.send_datetime2;
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
+        console.log(JSON.stringify(requestData));
         try {
             const response = await fetch('/api/1.0/campaign/complete', {
                 method: 'POST',
@@ -540,8 +542,7 @@
         } catch (error) {
             console.error(error);
             alert('Failed to save complete campaign');
-            throw new Error('Failed to save complete campaign');
-
+            // throw new Error('Failed to save complete campaign');
         }
     }
 
