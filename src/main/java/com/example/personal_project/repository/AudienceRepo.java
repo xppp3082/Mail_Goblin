@@ -48,9 +48,7 @@ public class AudienceRepo {
                 ps.setLong(6, audience.getCompanyId());
                 return ps;
             }, keyHolder);
-            // 拿到生成的 ID
             Long generatedId = keyHolder.getKey().longValue();
-            // 在此處進行其他操作，如果需要的話
             audience.setId(generatedId);
             return audience;
         } catch (DuplicateKeyException e) {
@@ -75,13 +73,13 @@ public class AudienceRepo {
                     audience.getName(), audience.getEmail(),
                     audience.getBirthday(), audience.getId(), audience.getCompanyId());
             if (rowsUpdated > 0) {
-                return audience; // 返回更新后的 Audience 对象
+                return audience;
             } else {
-                return null; // 或者根据业务需求返回其他值，比如 throw 一个异常
+                return null;
             }
         } catch (Exception e) {
             log.error("Error updating audience with ID " + audience.getId() + ": " + e.getMessage());
-            return null; // 或者根据业务需求返回其他值，比如 throw 一个异常
+            return null;
         }
     }
 
@@ -383,8 +381,8 @@ public class AudienceRepo {
         for (int i = 0; i < daysCount; i++) {
             LocalDate date = LocalDate.now().minusDays(i);
             String dateString = date.toString();
-            int newAUdienceCount = getNewAudienceCountForDate(date, account);
-            newAudienceCountMap.put(dateString, newAUdienceCount);
+            int newAudienceCount = getNewAudienceCountForDate(date, account);
+            newAudienceCountMap.put(dateString, newAudienceCount);
         }
         return newAudienceCountMap;
     }

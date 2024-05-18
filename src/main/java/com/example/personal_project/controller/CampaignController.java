@@ -50,7 +50,6 @@ public class CampaignController {
     public ResponseEntity<?> getPageCampaignByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
-//            List<Campaign> campaigns = campaignService.getPageCampaignByAccount(account, paging.orElse(0));
             List<Campaign> campaigns = campaignService.getPageCampaignByAccountWithTag(account, paging.orElse(0));
             int totalCount = campaignService.getTotalCampaignCountByAccount(account);
             int totalPaging = (int) Math.ceil((double) totalCount / pagingSize);
@@ -92,7 +91,6 @@ public class CampaignController {
     @PostMapping("/send")
     public ResponseEntity<?> sendCampaignById(@RequestParam("id") Long campaignId) {
         try {
-//            campaignService.sendCampaignById(campaignId);
             Campaign campaign = campaignService.findCampaignById(campaignId);
             mailPublisher.publishCampaign(campaign);
             String successResponse = "Successfully send campaign with id : " + campaignId;

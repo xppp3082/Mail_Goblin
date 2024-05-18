@@ -42,7 +42,6 @@ public class AudienceController {
             String account = authenticationComponent.getAccountFromAuthentication();
             Long companyId = companyService.getIdByAccount(account);
             List<Audience> audiences = audienceService.getAudiencesWithTagsByCompanyId(companyId);
-//            List<Audience> audiences = audienceService.getAllAudienceByAccount(account);
             return new ResponseEntity<>(audiences, HttpStatus.OK);
         } catch (Exception e) {
             String errorMessage = "error on getting all audience by company account.";
@@ -95,8 +94,8 @@ public class AudienceController {
     @PostMapping("/add")
     public ResponseEntity<?> addNewAudience(@RequestBody Audience audience) {
         //includes:
-        //step1. 新增audience
-        //step2. 針對audience中的tagList進行batch insert
+        //step1. add new udience
+        //step2. batch insert base on the tag list of this audience
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
             Long companyId = companyService.getIdByAccount(account);
@@ -128,7 +127,6 @@ public class AudienceController {
     @PatchMapping("/update")
     public ResponseEntity<?> updateAudience(@RequestParam("id") Long id, @RequestBody AudienceUpdateForm audience) {
         try {
-//            audience = audienceService.updateAudience(audience);
             audienceService.updateAudienceWithTags(id, audience);
             String successResponse = "Successfully updated this audience";
             return new ResponseEntity<>(successResponse, HttpStatus.OK);

@@ -11,14 +11,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.KeyStore;
 import java.time.Instant;
 import java.util.Date;
 
@@ -39,19 +37,20 @@ public class JwtTokenUtil {
         jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
-    public UsernamePasswordAuthenticationToken getAuthentication(String token){
+    public UsernamePasswordAuthenticationToken getAuthentication(String token) {
         UserDetails userDetails = User.withUsername(getAccountFromToken(token))
                 .password("")
                 .build();
-        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
     public Claims parseToken(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
-    public Boolean validate(String token){
+    public Boolean validate(String token) {
         final String companyAccount = getAccountFromToken(token);
-        return (companyAccount!=null && !isTokenExpired(token));
+        return (companyAccount != null && !isTokenExpired(token));
     }
 
     public LoginResponse createToken(Company company) {
@@ -63,16 +62,16 @@ public class JwtTokenUtil {
         res.setCompanyDto(companyDto);
         return res;
     }
+
     public String createAccessToken(Company company) {
-        //有效時間(毫秒)
+        //valid time (millisecond)
         long expirationMillis = Instant.now().plusSeconds(jwtExpireTimeAsSec).getEpochSecond() * 1000;
-        //設置標準內容與自定義內容
         Claims claims = Jwts.claims();
         claims.setSubject(company.getAccount());
         claims.setIssuedAt(new Date());
         claims.setExpiration(new Date(expirationMillis));
         claims.put("company", company);
-        claims.put("title",company.getTitle());
+        claims.put("title", company.getTitle());
         claims.put("account", company.getAccount());
         return Jwts.builder().
                 setClaims(claims).
@@ -80,15 +79,15 @@ public class JwtTokenUtil {
                 compact();
     }
 
-    public String getAccountFromToken(String token){
+    public String getAccountFromToken(String token) {
         return parseToken(token).getSubject();
     }
 
-    public Date getExpirationDateFromToken(String token){
+    public Date getExpirationDateFromToken(String token) {
         return parseToken(token).getExpiration();
     }
 
-    public Boolean isTokenExpired(String token){
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }

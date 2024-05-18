@@ -62,7 +62,7 @@ public class CompanyRepo {
         try {
             return jdbcTemplate.queryForObject(sql, Long.class, account);
         } catch (EmptyResultDataAccessException e) {
-            return null; // or handle the case where no company is found for the given account
+            return null;
         } catch (DataAccessException e) {
             log.error("Error retrieving company ID for account " + account + ": " + e.getMessage());
             throw new RuntimeException("Failed to retrieve company ID for account " + account);
@@ -74,7 +74,7 @@ public class CompanyRepo {
         try {
             return jdbcTemplate.queryForObject(sql, originCompanyRowMapper(), account);
         } catch (EmptyResultDataAccessException e) {
-            return null; // or handle the case where no company is found for the given account
+            return null;
         } catch (DataAccessException e) {
             log.error("Error retrieving company for account " + account + ": " + e.getMessage());
             throw new RuntimeException("Failed to retrieve company for account " + account);

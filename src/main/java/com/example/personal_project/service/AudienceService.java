@@ -34,7 +34,7 @@ public interface AudienceService {
 
     List<Audience> getAllAudienceByCampaign(Campaign campaign);
 
-    List<Audience> getAudienceByTag(Long tagId, String acount);
+    List<Audience> getAudienceByTag(Long tagId, String account);
 
     Audience insertNewAudience(Audience audience);
 

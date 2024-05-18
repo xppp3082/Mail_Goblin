@@ -14,11 +14,11 @@ import java.util.Collections;
 @Configuration
 public class TemplateEngineConfig {
     private static final String EMAIL_TEMPLATE_ENCODING = "UTF-8";
+
     @Bean
     @Primary
-    public TemplateEngine emailTemplateEngine(){
+    public TemplateEngine emailTemplateEngine() {
         final SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        //Resolver for HTML eamils(except the edi)
         templateEngine.addTemplateResolver(emailTemplateResolver());
 
         return templateEngine;

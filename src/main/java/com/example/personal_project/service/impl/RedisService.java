@@ -15,7 +15,6 @@ import java.util.Set;
 @Service
 @Slf4j
 public class RedisService {
-    //    private final RedisTemplate<String, Mail> redisTemplate;
     private final RedisTemplate<String, RedisMail> redisTemplate;
     private final MailRepo mailRepo;
     private final HashOperations<String, String, RedisMail> hashOperations;
@@ -37,9 +36,6 @@ public class RedisService {
                 log.info("add mail to redis by mailgun webhook !");
             } else {
                 RedisMail existingMail = hashOperations.get(mimeID, "mail");
-//                existingMail.setCampaignID(mail.getCampaignID());
-//                existingMail.setTimestamp(mail.getTimestamp());
-//                existingMail.setAudienceID(mail.getAudienceID());
                 existingMail.setRecipientMail(mail.getRecipientMail());
                 existingMail.setSubject(mail.getSubject());
                 existingMail.setStatus(mail.getStatus());

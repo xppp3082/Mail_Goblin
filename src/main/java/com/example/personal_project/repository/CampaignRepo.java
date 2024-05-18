@@ -174,16 +174,12 @@ public class CampaignRepo {
                 campaign.setId(rs.getLong("id"));
                 campaign.setTemplateId(rs.getLong("template_id"));
                 campaign.setSubject(rs.getString("subject"));
-//                Date senDateSQL = rs.getDate("target_date");
-//                LocalDate sendDate = senDateSQL.toLocalDate();
-//                campaign.setSendDate(sendDate);
                 campaign.setStatus(rs.getString("status"));
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));
                 campaign.setExecuteStatus(rs.getString("execute_status"));
                 Timestamp sendDateTime = rs.getTimestamp("target_datetime");
                 campaign.setSendDateTime(sendDateTime.toString().replace(' ', 'T'));
-//                campaign.setSendDateTime(sendDateTime.toString());
                 return campaign;
             }
         };
@@ -197,9 +193,6 @@ public class CampaignRepo {
                 campaign.setId(rs.getLong("id"));
                 campaign.setTemplateId(rs.getLong("template_id"));
                 campaign.setSubject(rs.getString("subject"));
-//                Date senDateSQL = rs.getDate("target_date");
-//                LocalDate sendDate = senDateSQL.toLocalDate();
-//                campaign.setSendDate(sendDate);
                 campaign.setStatus(rs.getString("status"));
                 campaign.setTagId(rs.getLong("tag_id"));
                 campaign.setAutomationId(rs.getLong("automation_id"));

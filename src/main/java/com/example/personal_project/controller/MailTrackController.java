@@ -98,7 +98,6 @@ public class MailTrackController {
     public ResponseEntity<?> trackDeliveryRate() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
-//            Long companyId = companyService.getIdByAccount(account);
             Double successRate = mailService.getMailDeliveryRateForCompany(account);
             return new ResponseEntity<>(successRate, HttpStatus.OK);
         } catch (Exception e) {
@@ -112,8 +111,6 @@ public class MailTrackController {
     public ResponseEntity<?> dailyMailDeliveryRate() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
-//            Long companyId = companyService.getIdByAccount(account);
-//            Map<LocalDate,Double> successRate = mailService.getDailyMailDeliveryRate(companyId);
             Map<LocalDate, Double> successRate = mailService.trackDailyMailDeliveryRate(account);
             return new ResponseEntity<>(successRate, HttpStatus.OK);
         } catch (Exception e) {
@@ -155,7 +152,6 @@ public class MailTrackController {
                                                                @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
-//            Map<String, Integer> conversionRates = mailService.calculateMailConversionRate(account);
             Map<String, Integer> conversionRates = mailService.calculateMailConversionRateByDate(account, startDate, endDate);
             return new ResponseEntity<>(conversionRates, HttpStatus.OK);
         } catch (Exception e) {
@@ -252,13 +248,11 @@ public class MailTrackController {
     @PostMapping("/mailgun/webhook")
     public ResponseEntity<?> handleMailgunWebhook(@RequestBody String payload) throws JsonProcessingException {
         JsonNode rootNode = objectMapper.readTree(payload);
-        log.info(rootNode.toString());
         String eventType = rootNode.path("event-data").path("event").asText();
         String recipientEmail = rootNode.path("event-data").path("recipient").asText();
         String subject = rootNode.path("event-data").path("message").path("headers").path("subject").asText();
         String mimeId = rootNode.path("event-data").path("message").path("headers").path("message-id").asText();
         log.info(recipientEmail);
-        log.info(eventType);
         log.info(mimeId);
         String status = "";
         if (eventType.equals("failed")) {
@@ -275,9 +269,7 @@ public class MailTrackController {
         redisMail.setSubject(subject);
         redisMail.setMimeID(mimeId);
         redisMail.setStatus(status);
-        System.out.println(mailHook.getMimeID());
         try {
-//            mailService.insertReceiveRecordWithMailHook(mailHook);
             redisService.updateMailFromWebhook(redisMail);
             return new ResponseEntity<>(mailHook, HttpStatus.OK);
         } catch (Exception e) {
@@ -285,18 +277,5 @@ public class MailTrackController {
             log.error(errorResponse + " : " + e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
-//        if(eventType.equals("delivered")){
-//            //update user delivery
-//            try{
-//                //應該再多一層是對公司id的雙重篩選，因為同一個customer有可能兩間公司都有
-//                Audience targetAudience = audienceService.findAudienceByEmail(recipientEmail);
-//                audienceService.updateMailCount(targetAudience.getAudienceUUID());
-//                log.info(targetAudience.getName());
-//                log.info("Track email count successfully!");
-//            }catch (Exception e){
-//                log.error("Error on tracking mail count" +e.getMessage());
-//            }
-//        }
-//        return new ResponseEntity<>("Email send to " + recipientEmail + "failed.", HttpStatus.OK);
     }
 }

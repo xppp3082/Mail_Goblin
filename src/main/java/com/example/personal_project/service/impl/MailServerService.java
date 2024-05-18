@@ -56,9 +56,7 @@ public class MailServerService {
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper email;
             email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//        email.setTo(user.getEmail());
             email.setTo("xppp3081@gmail.com");
-//            email.setTo("leslie20100430@gmail.com");
             email.setSubject(MAIL_SUBJECT);
             email.setFrom(new InternetAddress(mailFrom, mailFromName));
 
@@ -67,16 +65,13 @@ public class MailServerService {
             ctx.setVariable("name", "test user");
             ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
             ctx.setVariable("url", confirmationUrl);
-//            ctx.setVariable("endpoint","https://traviss.beauty/api/1.0/user/test.png?category=XX");
             ctx.setVariable("url2", "http://3.24.104.209/api/1.0/track/click?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244&cusWeb=https://traviss.beauty/index.html?category=all");
             ctx.setVariable("endpoint", "http://3.24.104.209/api/1.0/track/open?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244");
-//            ctx.setVariable("testPNG","http://3.24.104.209/docker1.png");
             final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
             email.setText(htmlContent, true);
 
             ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
             email.addInline("springLogo", clr, PNG_MIME);
-//            mailSender.send(mimeMessage);
             return "User created successfully";
         } catch (Exception e) {
             return "User created failed";
@@ -98,7 +93,6 @@ public class MailServerService {
                 final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
                 final MimeMessageHelper email;
                 email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//                email.setTo("xppp3081@gmail.com");
                 email.setTo(audience.getEmail());
                 email.setSubject(emailCampaign.getCampaign().getSubject());
                 email.setFrom(new InternetAddress(mailFrom, mailFromName));
@@ -133,13 +127,11 @@ public class MailServerService {
             for (Audience audience : emailCampaign.getAudiences()) {
                 String confirmationUrl = mailTemplate.getUrl();
                 log.info(audience.getEmail());
-//                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
                 String openTrackUrl = String.format("https://mailgoblin.site/api/1.0/track/open?UID=%s&CID=%s&recipient=%s&subject=%s",
                         audience.getAudienceUUID(),
                         emailCampaign.getCampaign().getId(),
                         audience.getEmail(),
                         emailCampaign.getCampaign().getSubject());
-//                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
                 String clickTrackUrl = String.format("https://mailgoblin.site/api/1.0/track/click?UID=%s&CID=%s&cusWeb=%s&recipient=%s&subject=%s",
                         audience.getAudienceUUID(),
                         emailCampaign.getCampaign().getId(),
@@ -201,7 +193,6 @@ public class MailServerService {
                             log.warn("Mail Error: Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
                             break;
                         default:
-                            // 其他MailException的處理邏輯
                             log.warn("Mail Error: Generic mail exception: " + e.getMessage());
                     }
                     mail.setStatus(DeliveryStatus.FAILED.name());
@@ -214,7 +205,6 @@ public class MailServerService {
                     redisMail.setCampaignID(mail.getCampaignID());
                     redisMail.setTimestamp(mail.getTimestamp());
                     redisMail.setAudienceID(mail.getAudienceID());
-//                    Thread.sleep(8000);
                     redisService.updateMailFromSpringboot(redisMail);
                 } catch (Exception e) {
                     log.error(e.getMessage());

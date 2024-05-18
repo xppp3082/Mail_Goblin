@@ -60,7 +60,7 @@ public class CompanyController {
             return new ResponseEntity<>("Token might be null or invalid", HttpStatus.UNAUTHORIZED);
         }
         try {
-            String token = bearerToken.substring(7);//也可以從空白鍵開始切
+            String token = bearerToken.substring(7);
             Claims claims = jwtTokenUtil.parseToken(token);
             return new ResponseEntity<>(claims, HttpStatus.OK);
         } catch (Exception e) {

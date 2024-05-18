@@ -24,7 +24,6 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
     @Override
     public void insertNewTemplate(String account, MailTemplate mailTemplate) {
-//        mailTemplateRepo.insertMailTemplate(mailTemplate);
         mailTemplateRepo.insertMailTemplateByAccount(account, mailTemplate);
     }
 

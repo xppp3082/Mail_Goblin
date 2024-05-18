@@ -16,6 +16,4 @@ public class EmailCampaignService {
         this.mailRepo = mailRepo;
     }
 
-    //將emailCampaign內的properties組裝成email並寄出
-
 }

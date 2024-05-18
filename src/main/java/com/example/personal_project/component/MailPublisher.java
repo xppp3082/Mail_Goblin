@@ -36,15 +36,11 @@ public class MailPublisher {
     public void publishCampaign() {
         try {
             GetQueueUrlResult queueUrlResult = amazonSQSClient.getQueueUrl(queueName);
-//            LocalDate targetDate = LocalDate.now();
-//            LocalDateTime targetDateTime = LocalDateTime.now();
             LocalDateTime targetDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
             log.info(targetDateTime.toString());
             List<Campaign> campaignsToSend = campaignService.getAllCompletedCampaigns();
-//            log.info(campaignsToSend.toString());
             for (Campaign campaign : campaignsToSend) {
                 if (campaign.getSendDateTime() == null) continue;
-//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime sendDateTime = LocalDateTime.parse(campaign.getSendDateTime()).truncatedTo(ChronoUnit.HOURS);
                 if (sendDateTime.equals(targetDateTime)) {
                     log.info("來自Queue的問候:今天有Campaign要發送喔!! " + campaign.toString());

@@ -16,7 +16,6 @@ public class SendMailService {
     @Value("${mailgun.api.key}")
     private String API_KEY;
 
-    //    public JsonNode sendEmail() throws UnirestException
     public JsonNode sendEmail() {
         try {
             String userVariables = "first_name=John&last_name=Smith&my_message_id=123";
@@ -30,7 +29,6 @@ public class SendMailService {
                     .queryString("html", "<p>Just a test for ensuring everything is fine.</p>")
                     .queryString("user-variables", recipientVariables)
                     .queryString("v", userVariables)
-//                    .queryString("text", "Your API has exceptions during automated testing: ")
                     .asJson();
             log.info(request.getBody().toString());
             return request.getBody();
@@ -41,5 +39,3 @@ public class SendMailService {
 
     }
 }
-//                .queryString("html", "<p>Just a test for ensuring everything is fine.</p>")
-//                .queryString("text", "Your API has exceptions during automated testing: " + apiUrl + ".")

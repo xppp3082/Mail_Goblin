@@ -51,7 +51,6 @@ public class TagController {
                 HttpStatus.OK);
     }
 
-    //少一層再去找CompanyId的步驟，直接join速度最快
     @GetMapping("/get")
     public ResponseEntity<?> getAllTagsByCompany() {
         String account = authenticationComponent.getAccountFromAuthentication();

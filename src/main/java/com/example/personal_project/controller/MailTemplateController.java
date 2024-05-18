@@ -31,17 +31,6 @@ public class MailTemplateController {
         this.authenticationComponent = authenticationComponent;
     }
 
-//    @GetMapping("/all")
-//    public ResponseEntity<?> getAllTemplateByCompanyID(@RequestParam(value = "id") Long companyId) {
-//        try {
-//            List<MailTemplate> templates = mailTemplateService.getTemplatesByCompany(companyId);
-//            return new ResponseEntity<>(templates, HttpStatus.OK);
-//        } catch (Exception e) {
-//            log.error("error on getting all the template under this company in controller layer");
-//            return new ResponseEntity<>("Request Error,please check the company of this id exists", HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
     @GetMapping("/all")
     public ResponseEntity<?> getAllTemplateByCompanyAccount() {
         try {

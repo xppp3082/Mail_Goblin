@@ -11,7 +11,6 @@ public class JacksonConfig {
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        // 注冊 JavaTimeModule 以支持 Java 8 的日期時間類型
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }

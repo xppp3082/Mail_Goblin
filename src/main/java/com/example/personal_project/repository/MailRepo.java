@@ -161,7 +161,7 @@ public class MailRepo {
         Integer successfulMailsCount = jdbcTemplate.queryForObject(sql,
                 Integer.class, account, DeliveryStatus.RECEIVE.name(), startDate);
 
-        //計算郵件總量
+        //Calculate total mail count
         sql = """
                 SELECT COUNT(*) FROM mail AS m 
                 LEFT JOIN campaign AS c ON m.campaign_id = c.id 
@@ -173,7 +173,7 @@ public class MailRepo {
         Integer totalMailCount = jdbcTemplate.queryForObject(sql,
                 Integer.class, account, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(), startDate);
 
-        //計算郵件傳送率
+        //Calculate mail drop off rate
         if (totalMailCount != null && totalMailCount > 0) {
             return (double) successfulMailsCount / totalMailCount;
         } else {
@@ -184,12 +184,12 @@ public class MailRepo {
     public Map<LocalDate, Double> getDailyMailDeliveryRate(Long companyID) {
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
 
-        //拿到過去30天的起始日期
+        //get past 30 days for default setting
         LocalDate startDate = LocalDate.now().minusDays(30);
 
-        //循環計算每一天的郵件送達率
+        //loop for calculating mail delivery rate
         for (LocalDate date = startDate; !date.isAfter(LocalDate.now()); date = date.plusDays(1)) {
-            //計算當天郵件傳送成功的數量
+            //calculate the success rate per day
             String sql = """
                     SELECT COUNT(*) FROM mail m
                     LEFT JOIN campaign c ON m.campaign_id =c.id
@@ -212,11 +212,9 @@ public class MailRepo {
             Integer totalMailsCount = jdbcTemplate.queryForObject(sql,
                     Integer.class, companyID, date, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name());
 
-            // 計算郵件送達率
             double deliveryRate = totalMailsCount != null && totalMailsCount > 0 ?
                     (double) successfulMailsCount / totalMailsCount : 0.0;
 
-            // 將日期和對應的郵件送達率存儲在 Map 中
             dailyDeliveryRates.put(date, deliveryRate);
         }
 
@@ -227,7 +225,7 @@ public class MailRepo {
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
         LocalDate startDate = LocalDate.now().minusDays(30);
         LocalDate endDate = LocalDate.now().plusDays(1);
-        // 初始化所有日期的成功率為 0.0
+        // init all date with value 0.0
         for (int i = 0; i <= 30; i++) {
             dailyDeliveryRates.put(startDate.plusDays(i), 0.0);
         }
@@ -242,17 +240,15 @@ public class MailRepo {
                 AND m.send_date BETWEEN ? AND ?
                 GROUP BY DATE(m.send_date)
                 """;
-        // 執行 SQL 查詢
         jdbcTemplate.query(sql, rs -> {
                     LocalDate sendDate = rs.getDate("send_date").toLocalDate();
                     int successfulMailsCount = rs.getInt("successful_mails");
                     int totalMailsCount = rs.getInt("total_mails");
 
-                    // 計算郵件送達率
+                    // calculate mail delivery rate
                     double deliveryRate = totalMailsCount > 0 ?
                             (double) successfulMailsCount / totalMailsCount : 0.0;
 
-                    // 將日期和對應的郵件送達率存儲在 Map 中
                     dailyDeliveryRates.put(sendDate, deliveryRate);
                 }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
                 account, startDate, endDate);
@@ -262,7 +258,7 @@ public class MailRepo {
 
     public Map<LocalDate, Double> trackDailyMailDeliveryRateByDate(String account, LocalDate startDate, LocalDate endDate) {
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
-        // 初始化所有日期的成功率為 0.0
+        // init all date with value 0.0
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             dailyDeliveryRates.put(date, 0.0);
         }
@@ -277,17 +273,14 @@ public class MailRepo {
                 AND m.send_date BETWEEN ? AND ?
                 GROUP BY DATE(m.send_date)
                 """;
-        // 執行 SQL 查詢
         jdbcTemplate.query(sql, rs -> {
                     LocalDate sendDate = rs.getDate("send_date").toLocalDate();
                     int successfulMailsCount = rs.getInt("successful_mails");
                     int totalMailsCount = rs.getInt("total_mails");
 
-                    // 計算郵件送達率
                     double deliveryRate = totalMailsCount > 0 ?
                             (double) successfulMailsCount / totalMailsCount : 0.0;
 
-                    // 將日期和對應的郵件送達率存儲在 Map 中
                     dailyDeliveryRates.put(sendDate, deliveryRate);
                 }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(),
                 account, startDate, endDate);
@@ -317,10 +310,8 @@ public class MailRepo {
             conversionRates.put("OPEN", rs.getInt("OPEN"));
             conversionRates.put("CLICK", rs.getInt("CLICK"));
         }, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name(), DeliveryStatus.OPEN.name(), DeliveryStatus.CLICK.name(), account);
-//        // 計算所有郵件的總數
-//        int totalMails = conversionRates.values().stream().mapToInt(Integer::intValue).sum();
-//        conversionRates.put("ALL", totalMails);
-        // 計算 "ALL"，即 RECEIVE 和 FAILED 的總和
+        // calculate all mail count
+        // 計算 "ALL" =  RECEIVE 和 FAILED 的總和
         int totalReceivedAndFailed = conversionRates.getOrDefault("RECEIVE", 0) + conversionRates.getOrDefault("FAILED", 0);
         conversionRates.put("ALL", totalReceivedAndFailed);
         return conversionRates;
@@ -383,9 +374,6 @@ public class MailRepo {
             String status = rs.getString("status");
             LocalDate sendDate = rs.getDate("send_date").toLocalDate();
             int count = rs.getInt("count");
-
-//            //generate a new map once the event type is not exist in eventAnalysis.
-//            eventAnalysis.computeIfAbsent(status,k->new LinkedHashMap<>()).put(sendDate,count);
             eventAnalysis.get(status).put(sendDate, count);
         }, account, startDate, endDate);
         return eventAnalysis;
@@ -491,11 +479,6 @@ public class MailRepo {
     }
 
     public List<Mail> trackFailedMailsByCampaignIdWithPage(Long campaignId, int pageSize, int offset) {
-//        String sql = """
-//                SELECT * FROM mail
-//                WHERE status = ? AND campaign_id = ?
-//                LIMIT ? OFFSET ?;
-//                """;
         String sql = """
                 SELECT * FROM mail
                 WHERE campaign_id = ?
@@ -503,7 +486,6 @@ public class MailRepo {
                 """;
         RowMapper<Mail> mapper = originMailRowMapper();
         try {
-//            return jdbcTemplate.query(sql, mapper, DeliveryStatus.FAILED.name(), campaignId, pageSize, offset);
             return jdbcTemplate.query(sql, mapper, campaignId, pageSize, offset);
         } catch (EmptyResultDataAccessException e) {
             log.error("error on getting failed mail of this campaign : " + e.getMessage());
@@ -512,14 +494,6 @@ public class MailRepo {
     }
 
     public List<Mail> searchMailsByKeywordWithPage(String keyword, Long campaignId, int pageSize, int offset) {
-//        String sql = """
-//                SELECT * FROM mail
-//                WHERE (recipient_mail LIKE :keyword
-//                OR subject LIKE :keyword
-//                OR status LIKE :keyword)
-//                AND campaign_id = :campaignId
-//                LIMIT :pageSize OFFSET :offset;
-//                """;
         String sql = """
                 SELECT * FROM mail
                 WHERE (recipient_mail LIKE ?
@@ -528,18 +502,10 @@ public class MailRepo {
                 AND campaign_id = ?
                 LIMIT ? OFFSET ?;
                 """;
-//        Map<String, Object> paraMap = new HashMap<>();
-//        paraMap.put("keyword", "%" + keyword + "%");
-//        paraMap.put("campaignId", campaignId);
-//        paraMap.put("pageSize", pageSize);
-//        paraMap.put("offset", offset);
         keyword = "%" + keyword + "%";
         RowMapper<Mail> mapper = originMailRowMapper();
         try {
             return jdbcTemplate.query(sql, mapper, keyword, keyword, keyword, campaignId, pageSize, offset);
-//            return jdbcTemplate.query(sql,
-//                    new Object[]{keyword, keyword, keyword, campaignId, pageSize, offset},
-//                    mapper);
         } catch (EmptyResultDataAccessException e) {
             log.error("error on searching mail by keyword and campaignId: " + e.getMessage());
             return null;
