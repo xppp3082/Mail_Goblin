@@ -63,7 +63,6 @@
                     </div>
                     <div class="modal-body">
                         <form id="newCampaignForm">
-                            <!-- Your form fields go here -->
                             <div class="form-group">
                                 <label for="subject">Subject:</label>
                                 <input class="form-control" id="subject" name="subject" required="required" type="text">
@@ -71,13 +70,8 @@
                             <div class="form-group">
                                 <label for="templateId">Template:</label>
                                 <select class="form-control" id="templateId" name="template_id">
-                                    <!-- Populate with existing templates -->
                                 </select>
                             </div>
-                            <!--            <div class="form-group">-->
-                            <!--                <label for="send_date">Send Date:</label>-->
-                            <!--                <input class="form-control" id="send_date" name="send_date" type="date">-->
-                            <!--            </div>-->
                             <div class="form-group">
                                 <input class="form-control" id="send_datetime_UTC" name="send_datetime"
                                        style="display: none"
@@ -177,14 +171,8 @@
             const utcDate = selectedDates[0].toISOString().slice(0, 16).replace("T", " ");
             document.getElementById('send_datetime_UTC').value = utcDate;
 
-            // 將選擇的日期轉換為UTC+0時間
-            // const utcDate = new Date(selectedDates[0].getTime() - (selectedDates[0].getTimezoneOffset() * 60000));
-            // console.log("UTC時間為: " + utcDate);
-            // // 將UTC+0時間設置到表單中
-            // document.getElementById('send_datetime').value = utcDate.toISOString().slice(0, 16).replace("T", " ");
         }
     });
-    // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = '/sign-in'
@@ -196,26 +184,16 @@
     // Load all template after windows loading completed
     let currentPage = 0;
 
-    // window.onload = async function () {
-    //     // await loadCampaigns();
-    //     await loadTemplates();
-    //     // await loadTemplatesWithPage(currentPage);
-    //     await loadTags();
-    //     await loadCampaignsWihPage(currentPage);
-    // }
 
     loadTemplates();
     loadTags();
     loadCampaignsWihPage(currentPage);
 
-    // function navigateToAddTemplate() {
-    //     window.location.href = '/configure';
-    // }
 
     async function loadCampaigns() {
         try {
             const response = await fetch('/api/1.0/campaign/all', {
-                method: 'GET', // 或其他请求方法
+                method: 'GET',
                 headers: headers
             });
             const campaigns = await response.json();
@@ -228,7 +206,7 @@
     async function loadCampaignsWihPage(pageNumber) {
         try {
             const response = await fetch(`/api/1.0/campaign/paging?number=${pageNumber}`, {
-                method: 'GET', // 或其他请求方法
+                method: 'GET',
                 headers: headers
             });
             const campaignData = await response.json();
@@ -293,7 +271,7 @@
             pageLink.classList.add('page-btn');
             // Check if the current page is the active page
             if (i === currentPageNumber) {
-                pageLink.classList.add('is-active'); // Add 'is-active' class to the current page
+                pageLink.classList.add('is-active');
             }
 
             pageLink.addEventListener('click', function () {
@@ -372,10 +350,6 @@
         });
     }
 
-    // <td>
-    //     <button className="btn btn-success" onClick="sendCampaign(${campaign.id})">Send Now</button>
-    // <button className="btn btn-danger" onClick="deleteCampaign(${campaign.id})">Delete</button>
-    // </td>
 
     async function sendCampaign(campaignId) {
         try {
@@ -385,7 +359,6 @@
             });
             if (response.ok) {
                 alert('Campaign sent successfully');
-                // await loadCampaigns(); // Reload campaigns
             } else {
                 throw new Error('Failed to send campaign');
             }
@@ -414,10 +387,9 @@
         }
     }
 
-    // 加载模板列表
+
     async function loadTemplates() {
         try {
-            // const response = await fetch('/api/1.0/template/all?id=11'); // get all template api end point
             const response = await fetch(`/api/1.0/template/all`, {
                 method: 'GET',
                 headers: headers
@@ -497,8 +469,8 @@
             if (response.ok) {
                 alert('Draft saved successfully');
                 // await loadCampaigns(); // Reload campaigns
-                $('#newCampaignModal').modal('hide'); // 隱藏模式對話框
-                document.getElementById('newCampaignForm').reset(); //重置表單
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
                 await loadCampaignsWihPage(currentPage)
             } else {
                 // throw new Error('Failed to save draft');
@@ -531,8 +503,8 @@
             });
             if (response.ok) {
                 alert('Complete campaign saved successfully');
-                $('#newCampaignModal').modal('hide'); // 隱藏模式對話框
-                document.getElementById('newCampaignForm').reset(); //重置表單
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
                 await loadCampaignsWihPage(currentPage)
             } else {
                 alert('Failed to save complete campaign, please fill in all content correctly.');
@@ -546,76 +518,6 @@
         }
     }
 
-    // // 显示模板列表
-    // function displayTemplates(templates) {
-    //     const templateContainer = document.getElementById('templateContainer');
-    //     templateContainer.innerHTML = ''; // 清空容器内容
-    //
-    //     templates.forEach(function (template) {
-    //         // 创建模板卡片
-    //         const templateCard = document.createElement('div');
-    //         templateCard.classList.add('card', 'mb-3');
-    //
-    //         // 卡片内容
-    //         const cardBody = document.createElement('div');
-    //         cardBody.classList.add('card-body');
-    //
-    //         // 主题
-    //         const subject = document.createElement('h5');
-    //         subject.classList.add('card-title');
-    //         subject.innerText = template.subject;
-    //
-    //         // 编辑按钮
-    //         const editButton = document.createElement('button');
-    //         editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
-    //         editButton.innerText = 'Edit';
-    //         editButton.onclick = function () {
-    //             editTemplate(template.id);
-    //         };
-    //
-    //         // 删除按钮
-    //         const deleteButton = document.createElement('button');
-    //         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
-    //         deleteButton.innerText = 'Delete';
-    //         deleteButton.onclick = function () {
-    //             deleteTemplate(template.id);
-    //         };
-    //
-    //         // 组装卡片内容
-    //         cardBody.appendChild(subject);
-    //         cardBody.appendChild(editButton);
-    //         cardBody.appendChild(deleteButton);
-    //         templateCard.appendChild(cardBody);
-    //
-    //         // 添加到模板容器中
-    //         templateContainer.appendChild(templateCard);
-    //     });
-    // }
-    //
-    // // 编辑模板
-    // function editTemplate(templateId) {
-    //     // 构造编辑页面的 URL
-    //     const editUrl = '/templateEditor?id=' + templateId;
-    //     // 在当前窗口中打开编辑页面
-    //     window.location.href = editUrl;
-    // }
-    //
-    // // 删除模板
-    // async function deleteTemplate(templateId) {
-    //     try {
-    //         const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
-    //         if (response.ok) {
-    //             alert('Template deleted successfully');
-    //             await loadTemplatesWithPage(currentPage); // 重新載入模板列表
-    //             // await loadTemplates(); // 重新載入模板列表
-    //         } else {
-    //             throw new Error('Failed to delete template');
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         alert('Failed to delete template');
-    //     }
-    // }
 
     async function loadTags() {
         try {
@@ -633,7 +535,7 @@
 
     function populateTagOptions(tags) {
         const tagSelect = document.getElementById('tag_id');
-        tagSelect.innerHTML = ''; // 清空選項
+        tagSelect.innerHTML = '';
 
         tags.forEach(function (tag) {
             const option = document.createElement('option');
@@ -645,7 +547,7 @@
 
     function displayTags(tags) {
         const tagsContainer = document.getElementById('tagList');
-        tagsContainer.innerHTML = ''; // 清空容器
+        tagsContainer.innerHTML = '';
 
         tags.forEach(function (tag) {
             const tagItem = document.createElement('div');

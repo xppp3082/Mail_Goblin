@@ -25,7 +25,7 @@
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
-<!-- Summernote 编辑器 -->
+<!-- Summernote editor -->
 <div class="container">
     <div id="template-title">
         <img alt="template icon" id="template-picture" src="/images/email.png">
@@ -53,28 +53,25 @@
 
 <script>
     $(document).ready(function () {
-        //從URL中獲取模板ID
         const urlParams = new URLSearchParams(window.location.search);
         const templateId = urlParams.get('id');
         console.log(templateId);
-        //初始化Summernote編輯器
+        //init Summernote editor
         $('#templateContent').summernote({
             placeholder: 'Enter template content here...',
             height: 600,
             callbacks: {
                 onImageUpload: function (files) {
-                    // 将图片上传到服务器
                     var formData = new FormData();
                     formData.append('image', files[0]);
 
                     $.ajax({
-                        url: '/upload-image', // 上传图片的接口地址
+                        url: '/upload-image',
                         method: 'POST',
                         data: formData,
                         processData: false,
                         contentType: false,
                         success: function (response) {
-                            // 图片上传成功后，将图片 URL 插入到编辑器中
                             console.log(response);
                             // console.log(response.url);
                             $('#templateContent').summernote('insertImage', response);
@@ -87,18 +84,15 @@
             }
         });
 
-        // 如果有模板 ID，載入模板内容到编辑器中
         if (templateId) {
             loadTemplate(templateId);
         }
 
-        //載入模板內容
         async function loadTemplate(id) {
             try {
                 const response = await fetch("api/1.0/template/get?id=" + id);
                 const template = await response.json();
                 console.log("template :" + template);
-                //將模板內容載入Summernote編輯器
                 $('#marketingSubject').val(template.subject);
                 $('#marketingUrl').val(template.url);
                 $('#templateContent').summernote('code', template.content);
@@ -115,10 +109,8 @@
                 subject: subject,
                 content: content,
                 url: url
-                //如果還有其他部分要更新，也在這邊加入
             };
             try {
-                //發送更新請求
                 const response = await fetch(`api/1.0/template/update?id=` + templateId, {
                     method: 'PATCH',
                     headers: {

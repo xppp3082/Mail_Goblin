@@ -28,35 +28,6 @@
     </div>
     <hr>
     <br>
-    <!--    <h2>Add User</h2>-->
-
-
-    <!-- Add User Form -->
-    <!--    <form id="addUserForm">-->
-    <!--        <div class="form-group">-->
-    <!--            <label for="name">Name:</label>-->
-    <!--            <input class="form-control" id="name" name="name" placeholder="Enter name" type="text">-->
-    <!--        </div>-->
-    <!--        <div class="form-group">-->
-    <!--            <label for="email">Email:</label>-->
-    <!--            <input class="form-control" id="email" name="email" placeholder="Enter email" type="email">-->
-    <!--        </div>-->
-    <!--        <div class="form-group">-->
-    <!--            <label for="birthday">Birthday:</label>-->
-    <!--            <input class="form-control" id="birthday" name="birthday" type="date">-->
-    <!--        </div>-->
-    <!--        <div class="form-group tagList-container">-->
-    <!--            <label for="tagsList">Select Tags:</label>-->
-    <!--            <input class="form-control" id='tagsList' name='tagsList' placeholder='write some tags'>-->
-    <!--        </div>-->
-    <!--        <br>-->
-    <!--        <div id="audience-btn-container">-->
-    <!--            <button class="add-template-btn" type="submit">Add User</button>-->
-    <!--        </div>-->
-    <!--    </form>-->
-    <!--</div>-->
-    <!--<br><br>-->
-    <!--<div class="container">-->
     <div class="title-container">
         <h2>Audience List</h2>
         <button class="btn btn-success" id="addAudienceBtn" onclick="showAddUserModal()" type="button">
@@ -118,7 +89,6 @@
         </tr>
         </thead>
         <tbody id="userList">
-        <!-- 使用者資料將動態插入到這裡 -->
         </tbody>
     </table>
 </div>
@@ -153,11 +123,6 @@
                     </div>
                 </form>
             </div>
-            <!--            <div class="modal-footer">-->
-            <!--                <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>-->
-            <!--                &lt;!&ndash; 添加一个用于触发更新用户信息的按钮 &ndash;&gt;-->
-            <!--                <button class="btn btn-primary" onclick="updateUser()" type="button">Update</button>-->
-            <!--            </div>-->
         </div>
     </div>
 </div>
@@ -197,10 +162,6 @@
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     };
-    // window.onload = async function () {
-    //     await loadTags();
-    //     await loadUsersWithPage(0);
-    // }
     loadTags('input[name=tagsList]');
     loadUsersWithPage(0);
 
@@ -211,9 +172,6 @@
                 headers: headers
             });
             const tags = await response.json();
-            // displayTags(tags);
-            // populateTagOptions(tags);
-            // console.log(tags);
             const newArray = tags.map(obj => ({...obj, value: obj.name}))
             console.log(newArray);
             drawTagListWithTagify(newArray, elementName);
@@ -287,10 +245,10 @@
         }
     }
 
-    // 顯示使用者列表
+
     function displayUsers(users) {
         const userList = document.getElementById('userList');
-        userList.innerHTML = ''; // 清空現有列表
+        userList.innerHTML = '';
 
         users.forEach(function (user) {
             const row = document.createElement('tr');
@@ -323,13 +281,7 @@
         });
     }
 
-    // <td>${getTagsAsString(user.tags)}</td>
-    // <td className="action-container">
-    //     <button className="btn btn-success btn-sm" onClick="modifyUser(${user.id})">Modify</button>
-    // <button className="btn btn-danger btn-sm" onClick="deleteUser(${user.id})">Delete</button>
-    // </td>
 
-    // 將標籤轉換為字串
     function getTagsAsString(tags) {
         if (!tags || tags.length === 0) {
             return 'No tags';
@@ -337,7 +289,7 @@
         return tags.map(tag => tag.name).join(', ');
     }
 
-    //修改使用者
+
     async function modifyUser(userId) {
         try {
             const response = await fetch(`/api/1.0/audience/get?id=${userId}`, {
@@ -359,16 +311,6 @@
         }
     }
 
-    // function populateModifyUserModal(userData) {
-    //     const modalBody = document.getElementById('modifyUserModalBody');
-    //     modalBody.innerHTML = `
-    //     <p>ID: ${userData.id}</p>
-    //     <p>Name: ${userData.name}</p>
-    //     <p>Email: ${userData.email}</p>
-    //     <p>Birthday: ${userData.birthday}</p>
-    //     <p>Tags: ${getTagsAsString(userData.tags)}</p>
-    // `;
-    // }
 
     function populateModifyUserModal(userData) {
         const modalBody = document.getElementById('modifyUserModalBody');
@@ -397,29 +339,18 @@
         loadTags('#modifyTags');
     }
 
-    // function populateModifyUserModal(userData) {
-    //     document.getElementById('modifyName').value = userData.name;
-    //     document.getElementById('modifyEmail').value = userData.email;
-    //     document.getElementById('modifyBirthday').value = userData.birthday;
-    //     document.getElementById('modifyTags').value = getTagsAsString(userData.tags);
-    // }
 
     async function updateUser(userID) {
         try {
-            // 获取表单中的值
-            // const id =userID /* 获取用户ID */;
             const name = document.getElementById('modifyName').value;
             const email = document.getElementById('modifyEmail').value;
             const birthday = document.getElementById('modifyBirthday').value;
-            // const tags = document.getElementById('modifyTags').value.split(','); // 将标签字符串转换为数组
 
-            // 构建请求体
             const requestBody = {
                 name: name,
                 email: email,
                 birthday: birthday,
                 tags: []
-                // tags: tags.map(tag => ({ id: /* 根据标签名称从后端获取对应的ID */, name: tag }))
             };
 
             document.querySelectorAll('#modify-tag-list .tagify .tagify__tag ').forEach(function (tagElement) {
@@ -449,7 +380,6 @@
         }
     }
 
-    // 刪除使用者
     async function deleteUser(userId) {
         try {
             const response = await fetch(`/api/1.0/audience/delete?id=${userId}`, {
@@ -458,7 +388,6 @@
             });
             if (response.ok) {
                 alert('User deleted successfully');
-                // await loadUsers(); // 重新載入使用者列表
                 await loadUsersWithPage(currentAudiencePage);
             } else {
                 throw new Error('Failed to delete user');
@@ -469,17 +398,8 @@
         }
     }
 
-    // 填充標籤選項
-    function populateTagOptions(tags) {
-        // const tagSelect = document.getElementById('tags');
-        // tagSelect.innerHTML = ''; // 清空選項
 
-        // tags.forEach(function(tag) {
-        //     const option = document.createElement('option');
-        //     option.value = tag.id;
-        //     option.innerText = tag.name;
-        //     tagSelect.appendChild(option);
-        // });
+    function populateTagOptions(tags) {
         const tagOptionsDiv = document.getElementById('tagOptions');
         tagOptionsDiv.innerHTML = ''; // 清空選項
 
@@ -511,28 +431,27 @@
     }
 
     async function submitUserModal() {
-        // 收集表單數據
+
         const user = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             birthday: document.getElementById('birthday').value,
-            tags: [] // 初始化 tags 數組
+            tags: []
         };
-        // 遍歷選中的標籤，將其添加到 tags 數組中
         document.querySelectorAll('.tagify__tag ').forEach(function (tagElement) {
             user.tags.push({
-                id: parseInt(tagElement.id), // 將值轉換為整數
-                company_id: companyId, // 假設 company_id 固定為 1，你可以根據實際情況調整
-                name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
+                id: parseInt(tagElement.id),
+                company_id: companyId,
+                name: tagElement.title
             });
         });
 
-        // 將 user 對象轉換為 JSON 字符串並添加到 FormData 中
+
         const formData = new FormData();
         formData.append('user', JSON.stringify(user));
 
-        console.log(formData.toString()); // 輸出 FormData 字符串表示形式
-        console.log([...formData]); // 輸出 FormData 中的鍵值對
+        console.log(formData.toString());
+        console.log([...formData]);
 
         // 提交 FormData
         try {
@@ -540,13 +459,13 @@
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(user)
-                // body: JSON.stringify(requestData)
+
             });
             if (response.ok) {
                 alert('User added successfully');
 
                 // this.reset();
-                await loadTags('input[name=tagsList]'); // 重新載入標籤列表
+                await loadTags('input[name=tagsList]');
                 await loadUsersWithPage(currentAudiencePage);
             } else {
                 throw new Error('Failed to add user');
@@ -560,66 +479,6 @@
         // 清空表單
         document.getElementById('addUserFormModal').reset();
     }
-
-    // document.getElementById('addUserForm').addEventListener('submit', async function (event) {
-    //     event.preventDefault(); // 阻止表單默認提交行為
-    //
-    //     // 手動構建包含 name、email 和 birthday 的對象
-    //     const user = {
-    //         name: document.getElementById('name').value,
-    //         email: document.getElementById('email').value,
-    //         birthday: document.getElementById('birthday').value,
-    //         tags: [] // 初始化 tags 數組
-    //     };
-    //
-    //     // 遍歷選中的標籤，將其添加到 tags 數組中
-    //     // document.querySelectorAll('input[name="tags"]:checked').forEach(function (checkbox) {
-    //     //     user.tags.push({
-    //     //         id: parseInt(checkbox.value), // 將值轉換為整數
-    //     //         company_id: 11, // 假設 company_id 固定為 1，你可以根據實際情況調整
-    //     //         name: checkbox.dataset.name // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
-    //     //     });
-    //     // });
-    //
-    //     // 遍歷選中的標籤，將其添加到 tags 數組中
-    //     document.querySelectorAll('.tagify__tag ').forEach(function (tagElement) {
-    //         user.tags.push({
-    //             id: parseInt(tagElement.id), // 將值轉換為整數
-    //             company_id: companyId, // 假設 company_id 固定為 1，你可以根據實際情況調整
-    //             name: tagElement.title // 如果需要，你可以從 checkbox 的 data 屬性中獲取標籤名稱
-    //         });
-    //     });
-    //
-    //
-    //     // 將 user 對象轉換為 JSON 字符串並添加到 FormData 中
-    //     const formData = new FormData();
-    //     formData.append('user', JSON.stringify(user));
-    //
-    //     console.log(formData.toString()); // 輸出 FormData 字符串表示形式
-    //     console.log([...formData]); // 輸出 FormData 中的鍵值對
-    //
-    //     // 提交 FormData
-    //     try {
-    //         const response = await fetch('/api/1.0/audience/add', {
-    //             method: 'POST',
-    //             headers: headers,
-    //             body: JSON.stringify(user)
-    //             // body: JSON.stringify(requestData)
-    //         });
-    //         if (response.ok) {
-    //             alert('User added successfully');
-    //             // 清空表單
-    //             this.reset();
-    //             await loadTags('input[name=tagsList]'); // 重新載入標籤列表
-    //             await loadUsersWithPage(currentAudiencePage);
-    //         } else {
-    //             throw new Error('Failed to add user');
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         alert('Failed to add user');
-    //     }
-    // });
 
     async function fetchNewAudienceData(days) {
         try {

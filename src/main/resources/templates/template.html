@@ -20,7 +20,6 @@
 </head>
 <body>
 <div th:insert="_components/navbar.html"></div>
-<!--<div class="container mt-5">-->
 <div class="container">
     <div id="template-title">
         <img alt="template icon" id="template-picture" src="/images/email.png">
@@ -43,18 +42,14 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     let currentPage = 0;
-    // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = '/sign-in'
     }
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+        'Authorization': `Bearer ${token}`
     };
-    // window.onload = async function () {
-    //     await loadTemplatesWithPage(currentPage);
-    // }
     loadTemplatesWithPage(currentPage);
 
     function navigateToAddTemplate() {
@@ -108,50 +103,6 @@
         }
     }
 
-    // function displayTemplates(templates) {
-    //     const templateContainer = document.getElementById('templateContainer');
-    //     templateContainer.innerHTML = ''; // 清空容器内容
-    //
-    //     templates.forEach(function (template) {
-    //         // 创建模板卡片
-    //         const templateCard = document.createElement('div');
-    //         templateCard.classList.add('card', 'mb-3');
-    //
-    //         // 卡片内容
-    //         const cardBody = document.createElement('div');
-    //         cardBody.classList.add('card-body');
-    //
-    //         // 主题
-    //         const subject = document.createElement('h5');
-    //         subject.classList.add('card-title');
-    //         subject.innerText = template.subject;
-    //
-    //         // 编辑按钮
-    //         const editButton = document.createElement('button');
-    //         editButton.classList.add('btn', 'btn-primary', 'btn-sm', 'mr-2');
-    //         editButton.innerText = 'Edit';
-    //         editButton.onclick = function () {
-    //             editTemplate(template.id);
-    //         };
-    //
-    //         // 删除按钮
-    //         const deleteButton = document.createElement('button');
-    //         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
-    //         deleteButton.innerText = 'Delete';
-    //         deleteButton.onclick = function () {
-    //             deleteTemplate(template.id);
-    //         };
-    //
-    //         // 组装卡片内容
-    //         cardBody.appendChild(subject);
-    //         cardBody.appendChild(editButton);
-    //         cardBody.appendChild(deleteButton);
-    //         templateCard.appendChild(cardBody);
-    //
-    //         // 添加到模板容器中
-    //         templateContainer.appendChild(templateCard);
-    //     });
-    // }
 
     function displayTemplates(templates) {
         const templateContainer = document.getElementById('templateContainer');
@@ -230,13 +181,13 @@
         });
     }
 
-    // 编辑模板
+
     function editTemplate(templateId) {
         const editUrl = '/templateEditor?id=' + templateId;
         window.location.href = editUrl;
     }
 
-    // 删除模板
+
     async function deleteTemplate(templateId) {
         try {
             const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});

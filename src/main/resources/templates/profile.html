@@ -85,7 +85,7 @@
     }
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+        'Authorization': `Bearer ${token}`
     };
 
     fetchAndDrawProfileCard();
@@ -149,7 +149,6 @@
         const totalTags = data.total_tags;
         const container = document.querySelector('#profile-data-container');
         container.innerHTML = '';
-        // container.appendChild(createProfileDataCard("Total mails :", totalMailCount));
         container.appendChild(createProfileDataCard("Total Audience :", totalAudience));
         container.appendChild(createProfileDataCard("Total tags :", totalTags));
     }
@@ -193,7 +192,6 @@
         const fillWidthPercentage = ((currentUsage / max) * 100).toFixed(2);
 
         console.log(fillWidthPercentage)
-        //製作title部分
         const titleDiv = document.createElement('div');
         container.innerHTML = `
             <div class="title">
@@ -212,22 +210,6 @@
                 </div>
             </div>
         `;
-        // titleDiv.classList.add('title');
-        // const titleText = document.createElement('p');
-        // titleText.classList.add('title-text');
-        // titleText.textContent = 'Mail Usage';
-        // const maxMailUsage = document.createElement('p');
-        // maxMailUsage.classList.add('percent');
-        // maxMailUsage.textContent = "Max: " + max;
-        // titleDiv.appendChild(titleText);
-        // titleDiv.appendChild(maxMailUsage);
-        //
-        // //製作data部分
-        // const dataDiv = document.createElement('div');
-        // dataDiv.classList.add('data');
-        // const dataTextContainer = document.createElement('div');
-        // dataTextContainer.classList.add('data-text-container')
-        // const usage = document.createElement('')
     }
 </script>
 </body>

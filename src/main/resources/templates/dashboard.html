@@ -126,8 +126,6 @@
         if (startTime && endTime) {
             console.log(endTime);
             console.log(typeof endTime);
-            // 在這裡可以將 startTime 和 endTime 送到後端處理
-            // alert("已選擇時間區間: " + startTime + " 到 " + endTime + "，將提交至後端處理。");
             fetchDataAndDrawChart();
             fetchAndDrawConversionChart();
             fetchAndDrawDeliveryChart();
@@ -137,19 +135,15 @@
     });
 
 
-    // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = '/sign-in'
     }
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // 添加 JWT token 到请求头中
+        'Authorization': `Bearer ${token}`
     };
-    // call function for drawing highchart
     loadCampaigns();
-    // fetchAndDrawPieChart();
-
     fetchDataAndDrawChart();
     fetchAndDrawConversionChart();
     fetchAndDrawDeliveryChart();
@@ -187,11 +181,11 @@
 
     function drawLineChart(data, elementID) {
         // 整理數據
-        const categories = Object.keys(data["RECEIVE"]); // 取得日期列表
-        const receiveData = Object.values(data["RECEIVE"]); // 接收事件數據
-        const failedData = Object.values(data["FAILED"]); // 失敗事件數據
-        const openData = Object.values(data["OPEN"]); // 打開事件數據
-        const clickData = Object.values(data["CLICK"]); // 點擊事件數據
+        const categories = Object.keys(data["RECEIVE"]);
+        const receiveData = Object.values(data["RECEIVE"]);
+        const failedData = Object.values(data["FAILED"]);
+        const openData = Object.values(data["OPEN"]);
+        const clickData = Object.values(data["CLICK"]);
         // 使用Highcharts繪製圖表
         Highcharts.chart(elementID, {
             title: {
@@ -259,7 +253,6 @@
         });
     }
 
-    // 使用async/await等待數據獲取完成並繪製Highchart
     async function fetchDataAndDrawChart() {
         try {
             const startDate = transTimeToDateString(startTime);
@@ -321,8 +314,6 @@
 
         const categories = sortedData.map(pair => pair[0]);
         const eventData = sortedData.map(pair => pair[1]);
-        // const categories = Object.keys(data);//獲取事件類型
-        // const eventData = Object.values(data);
         Highcharts.chart(elementID, {
             chart: {
                 type: 'column'
@@ -385,7 +376,6 @@
     function createConversionCard(title, value, percent) {
         const card = document.createElement('div');
         card.classList.add('conversion-card');
-        // card.classList.add('card');
 
         const titleDiv = document.createElement('div');
         titleDiv.classList.add('title');
@@ -468,11 +458,9 @@
     }
 
     function drawDailyDeliveryChart(data, elementID) {
-        // 整理數據
-        const categories = Object.keys(data); // 取得日期列表
-        const deliveryData = Object.values(data).map(value => parseFloat((value * 100).toFixed(2))); // 將值轉換為百分比
+        const categories = Object.keys(data);
+        const deliveryData = Object.values(data).map(value => parseFloat((value * 100).toFixed(2)));
 
-        // 使用Highcharts繪製折線圖
         Highcharts.chart(elementID, {
             chart: {
                 type: 'line'
@@ -560,8 +548,6 @@
     }
 
     function generateAgeCards(data) {
-        // const campaignId = 15; // Replace with your campaign ID
-        // const data = await fetchCampaignAgeById(campaignId);
         const ageCardsContainer = document.getElementById('age-cards');
         ageCardsContainer.innerHTML = "";
         data.forEach(ageData => {
@@ -637,28 +623,19 @@
         ageImgae.classList.add('age-image')
         ageImgae.src = imagePath;
         ageImgae.alt = "age-image";
-        // ageImgae.innerHTML=`<img src="${imagePath}" alt="age-image">`;
 
         rightBody.appendChild(titleDiv);
-        // rightBody.appendChild(openDiv);
-        // rightBody.appendChild(clickDiv);
         leftBody.appendChild(conversionDiv);
         leftBody.appendChild(ageImgae);
         mainBody.appendChild(rightBody);
         mainBody.appendChild(leftBody);
         card.appendChild(mainBody);
-
-        // card.appendChild(titleDiv);
-        // card.appendChild(openDiv);
-        // card.appendChild(clickDiv);
-        // // card.appendChild(ageImgae);
         return card;
     }
 
-    // async function drawCampaignPieChart(data,elementId)
-    function drawCampaignPieChart(data, elementId) {
+        // async function drawCampaignPieChart(data,elementId)
+        function drawCampaignPieChart(data, elementId) {
         try {
-            // const data = await fetchCampaignAgeById(15);
             const ageCategories = data.map(item => item.age);
             const seriesData = data.map(item => {
                 return {
@@ -966,8 +943,7 @@
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
-            // 如果發生錯誤，可以顯示錯誤信息給用戶，比如彈出提示框等
-            alert('發生錯誤，請稍後重試。');
+            alert('error, plz try it later.');
         }
     }
 
@@ -985,58 +961,6 @@
         }
     }
 
-    // function createCampaignFailRows(entry){
-    //     const row = document.createElement('tr');
-    //     const recipientCell = document.createElement('td');
-    //     recipientCell.textContent = entry.recipient_mail;
-    //
-    // }
-
-    // async function fetchAndDrawPieChart() {
-    //     try {
-    //         const campaignId = 15;
-    //         const data = await fetchCampaignAgeById(campaignId);
-    //         const pieData = reorganizeDataForPieChart(data);
-    //
-    //         Highcharts.chart('campaign-age', {
-    //             chart: {
-    //                 type: 'pie'
-    //             },
-    //             title: {
-    //                 text: 'Campaign Age Distribution',
-    //                 align: 'left'
-    //             },
-    //             plotOptions: {
-    //                 pie: {
-    //                     shadow: false,
-    //                     center: ['50%', '50%']
-    //                 }
-    //             },
-    //             tooltip: {
-    //                 valueSuffix: '%'
-    //             },
-    //             series: [{
-    //                 name: 'Age',
-    //                 colorByPoint: true,
-    //                 data: pieData,
-    //                 size: '80%',
-    //                 dataLabels: {
-    //                     format: '<b>{point.name}:</b> <span style="opacity: 0.5">{point.y:.1f}%</span>',
-    //                     filter: {
-    //                         property: 'y',
-    //                         operator: '>',
-    //                         value: 1
-    //                     },
-    //                     style: {
-    //                         fontWeight: 'normal'
-    //                     }
-    //                 }
-    //             }]
-    //         });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
 </script>
 </body>
 </html>
