@@ -80,8 +80,7 @@ public class RedisService {
             assert keys != null;
             for (String key : keys) {
                 RedisMail mail = hashOperations.get(key, "mail");
-                if (mail != null && mail.getSpringBootUpdate() != null && mail.getMailHookUpdate() != null
-                        && mail.getSpringBootUpdate() && mail.getMailHookUpdate()) {
+                if (mail != null && mail.getSpringBootUpdate() != null && mail.getMailHookUpdate() != null && mail.getSpringBootUpdate() && mail.getMailHookUpdate()) {
                     mailsCompleted.add(mail);
                 }
             }

@@ -11,6 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Date;
 
 @Slf4j
@@ -40,7 +41,10 @@ public class PersonalProjectApplication {
         LocalDate currentDateLocal = LocalDate.now();
         log.info(currentDateLocal.toString());
         PersonalProjectApplication app = context.getBean(PersonalProjectApplication.class);
-        app.mailConsumer.consumeCampaignLongPoll();
+
+        if (Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("consumer")) {
+            app.mailConsumer.consumeCampaignLongPoll();
+        }
     }
 //	@Bean
 //	public ApplicationRunner runner(MailPublisher publisher) {
