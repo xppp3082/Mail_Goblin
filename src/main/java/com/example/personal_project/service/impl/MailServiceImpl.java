@@ -46,10 +46,6 @@ public class MailServiceImpl implements MailService {
         return mailRepo.getMailDeliveryRateForCompany(account);
     }
 
-    @Override
-    public Map<LocalDate, Double> getDailyMailDeliveryRate(Long companyId) {
-        return mailRepo.getDailyMailDeliveryRate(companyId);
-    }
 
     @Override
     public Map<LocalDate, Double> trackDailyMailDeliveryRate(String account) {

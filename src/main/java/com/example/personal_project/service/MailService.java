@@ -16,8 +16,6 @@ public interface MailService {
 
     Double getMailDeliveryRateForCompany(String account);
 
-    Map<LocalDate, Double> getDailyMailDeliveryRate(Long companyId);
-
     Map<LocalDate, Double> trackDailyMailDeliveryRate(String account);
 
     Map<LocalDate, Double> trackDailyMailDeliveryRateByDate(String account, LocalDate startDate, LocalDate endDate);

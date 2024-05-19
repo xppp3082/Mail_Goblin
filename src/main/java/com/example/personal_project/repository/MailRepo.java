@@ -180,46 +180,7 @@ public class MailRepo {
             return 0.0;
         }
     }
-
-    public Map<LocalDate, Double> getDailyMailDeliveryRate(Long companyID) {
-        Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();
-
-        //get past 30 days for default setting
-        LocalDate startDate = LocalDate.now().minusDays(30);
-
-        //loop for calculating mail delivery rate
-        for (LocalDate date = startDate; !date.isAfter(LocalDate.now()); date = date.plusDays(1)) {
-            //calculate the success rate per day
-            String sql = """
-                    SELECT COUNT(*) FROM mail m
-                    LEFT JOIN campaign c ON m.campaign_id =c.id
-                    LEFT JOIN template t ON c.template_id = t.id
-                    WHERE t.company_id = ?
-                    AND DATE(m.send_date) = ?
-                    AND m.status = ?
-                    """;
-            Integer successfulMailsCount = jdbcTemplate.queryForObject(sql,
-                    Integer.class, companyID, date, DeliveryStatus.RECEIVE.name());
-
-            sql = """
-                    SELECT COUNT(*) FROM mail m 
-                    LEFT JOIN campaign c ON m.campaign_id = c.id
-                    LEFT JOIN template t ON c.template_id = t.id
-                    WHERE t.company_id = ?
-                    AND DATE (m.send_date) =?
-                    AND (m.status = ? OR m.status = ?)
-                    """;
-            Integer totalMailsCount = jdbcTemplate.queryForObject(sql,
-                    Integer.class, companyID, date, DeliveryStatus.RECEIVE.name(), DeliveryStatus.FAILED.name());
-
-            double deliveryRate = totalMailsCount != null && totalMailsCount > 0 ?
-                    (double) successfulMailsCount / totalMailsCount : 0.0;
-
-            dailyDeliveryRates.put(date, deliveryRate);
-        }
-
-        return dailyDeliveryRates;
-    }
+    
 
     public Map<LocalDate, Double> trackDailyMailDeliveryRate(String account) {
         Map<LocalDate, Double> dailyDeliveryRates = new LinkedHashMap<>();

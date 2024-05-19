@@ -30,7 +30,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Company getCompanyByAccount(String account) {
         return companyRepo.getCompanyByAccount(account);
     }
-
+    
     @Override
     public Company signUp(Company company) {
         try {
@@ -39,13 +39,13 @@ public class CompanyServiceImpl implements CompanyService {
             UUID uuid = UUID.randomUUID();
             company.setCompanyUUID(uuid.toString());
             company.setPassword(encodedPassword);
+            return companyRepo.insertNewCompany(company);
         } catch (DuplicateKeyException e) {
             throw e;
         } catch (Exception e) {
             log.error("Error on saving company in service layer : " + e.getMessage());
             throw e;
         }
-        return companyRepo.insertNewCompany(company);
     }
 
     @Override
