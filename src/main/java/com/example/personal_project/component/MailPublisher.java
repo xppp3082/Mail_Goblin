@@ -43,7 +43,7 @@ public class MailPublisher {
                 if (campaign.getSendDateTime() == null) continue;
                 LocalDateTime sendDateTime = LocalDateTime.parse(campaign.getSendDateTime()).truncatedTo(ChronoUnit.HOURS);
                 if (sendDateTime.equals(targetDateTime)) {
-                    log.info("來自Queue的問候:今天有Campaign要發送喔!! " + campaign.toString());
+                    log.info("Message from Queue, there's a campaign be sent today :" + campaign.toString());
                     var result = amazonSQSClient.sendMessage(queueUrlResult.getQueueUrl(), objectMapper.writeValueAsString(campaign));
                     log.info(result.toString());
                 }

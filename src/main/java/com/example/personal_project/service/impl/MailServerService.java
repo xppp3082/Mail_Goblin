@@ -9,7 +9,6 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -36,7 +35,6 @@ public class MailServerService {
     private final JavaMailSender mailSender;
     private final TemplateEngine htmlTemplateEngine;
     private final AudienceService audienceService;
-
     private final RedisService redisService;
 
     public MailServerService(Environment environment, JavaMailSender mailSender, TemplateEngine htmlTemplateEngine, AudienceService audienceService, RedisService redisService) {
@@ -47,79 +45,8 @@ public class MailServerService {
         this.redisService = redisService;
     }
 
-    public String sendRegisterMail()
-            throws MessagingException, UnsupportedEncodingException {
-        try {
-            String confirmationUrl = "https://traviss.beauty/index.html?category=all";
-            String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
-            String mailFromName = environment.getProperty("mail.from.name", "Identity");
-            final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-            final MimeMessageHelper email;
-            email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            email.setTo("xppp3081@gmail.com");
-            email.setSubject(MAIL_SUBJECT);
-            email.setFrom(new InternetAddress(mailFrom, mailFromName));
 
-            final Context ctx = new Context(LocaleContextHolder.getLocale());
-            ctx.setVariable("email", "xppp3081@gmail.com");
-            ctx.setVariable("name", "test user");
-            ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
-            ctx.setVariable("url", confirmationUrl);
-            ctx.setVariable("url2", "http://3.24.104.209/api/1.0/track/click?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244&cusWeb=https://traviss.beauty/index.html?category=all");
-            ctx.setVariable("endpoint", "http://3.24.104.209/api/1.0/track/open?UID=550e8400-e29b-41d4-a716-446655440000&CID=19ef56c6-8749-34f2-6a0a-22e1eb43a244");
-            final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
-            email.setText(htmlContent, true);
-
-            ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
-            email.addInline("springLogo", clr, PNG_MIME);
-            return "User created successfully";
-        } catch (Exception e) {
-            return "User created failed";
-        }
-    }
-
-    //    public String sendBatchMails(List<Mail>mails)
-    public String sendBatchMails(EmailCampaign emailCampaign)
-            throws MessagingException, UnsupportedEncodingException {
-        try {
-            for (Audience audience : emailCampaign.getAudiences()) {
-                String confirmationUrl = "https://traviss.beauty/index.html?category=all";
-                String openTrackUrl = String.format("http://3.24.104.209/api/1.0/track/open?UID=%S", audience.getAudienceUUID());
-                String clickTrackUrl = String.format("http://3.24.104.209/api/1.0/track/click?UID=%S&cusWeb=https://traviss.beauty/index.html?category=all", audience.getAudienceUUID());
-                log.info(openTrackUrl);
-                log.info(clickTrackUrl);
-                String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
-                String mailFromName = environment.getProperty("mail.from.name", "Identity");
-                final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-                final MimeMessageHelper email;
-                email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                email.setTo(audience.getEmail());
-                email.setSubject(emailCampaign.getCampaign().getSubject());
-                email.setFrom(new InternetAddress(mailFrom, mailFromName));
-
-                final Context ctx = new Context(LocaleContextHolder.getLocale());
-                ctx.setVariable("email", audience.getEmail());
-                ctx.setVariable("name", audience.getName());
-                ctx.setVariable("springLogo", SPRING_LOGO_IMAGE);
-                ctx.setVariable("url", confirmationUrl);
-                ctx.setVariable("url2", clickTrackUrl);
-                ctx.setVariable("endpoint", openTrackUrl);
-                final String htmlContent = this.htmlTemplateEngine.process(TEMPLATE_NAME, ctx);
-                email.setText(htmlContent, true);
-
-                ClassPathResource clr = new ClassPathResource(SPRING_LOGO_IMAGE);
-                email.addInline("springLogo", clr, PNG_MIME);
-                mailSender.send(mimeMessage);
-                String messageId = mimeMessage.getMessageID();
-                log.info(mimeMessage.getMessageID());
-            }
-            return "User created successfully";
-        } catch (Exception e) {
-            return "User created failed";
-        }
-    }
-
-    public List<Mail> sendBatchMails2(EmailCampaign emailCampaign)
+    public List<Mail> sendBatchMails(EmailCampaign emailCampaign)
             throws MessagingException, UnsupportedEncodingException {
         List<Mail> mails = new ArrayList<>();
         try {
@@ -138,8 +65,7 @@ public class MailServerService {
                         confirmationUrl,
                         audience.getEmail(),
                         emailCampaign.getCampaign().getSubject());
-                log.info(openTrackUrl);
-                log.info(clickTrackUrl);
+                log.info(openTrackUrl + clickTrackUrl);
                 String mailFrom = environment.getProperty("spring.mail.properties.mail.smtp.from");
                 String mailFromName = environment.getProperty("mail.from.name", "Identity");
                 final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
@@ -182,7 +108,7 @@ public class MailServerService {
                     log.info("update mail count successfully!");
                 } catch (MailException e) {
                     Long audienceId = audience.getId();
-                    switch (getMialExceptionType(e)) {
+                    switch (getMailExceptionType(e)) {
                         case AUTHENTICATION:
                             log.warn("Mail Error: Error on sending email due to authentication issue: " + e.getMessage());
                             break;
@@ -210,13 +136,15 @@ public class MailServerService {
                     log.error(e.getMessage());
                 }
             }
-            return mails;
+//            return mails;
         } catch (Exception e) {
-            return null;
+            log.error("Error sending batch mails", e);
+//            return null;
         }
+        return mails;
     }
 
-    private MailExceptionType getMialExceptionType(MailException e) {
+    private MailExceptionType getMailExceptionType(MailException e) {
         if (e instanceof MailAuthenticationException) {
             return MailExceptionType.AUTHENTICATION;
         } else if (e instanceof MailParseException) {

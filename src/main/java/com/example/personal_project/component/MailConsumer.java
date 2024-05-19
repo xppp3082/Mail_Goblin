@@ -14,11 +14,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Profile("consumer")
 @Slf4j
 public class MailConsumer {
     private final AmazonSQS amazonSQSClient;
@@ -69,7 +71,7 @@ public class MailConsumer {
                     MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
                     EmailCampaign emailCampaign = new EmailCampaign(campaign, mailTemplate, audiences);
                     try {
-                        List<Mail> mails = mailServerService.sendBatchMails2(emailCampaign);
+                        List<Mail> mails = mailServerService.sendBatchMails(emailCampaign);
                         campaignService.updateCampaignExecuteStatus(campaign);
                         log.info("batch insert mail record successfully with campaignID :" + campaign.getId());
                     } catch (Exception e) {

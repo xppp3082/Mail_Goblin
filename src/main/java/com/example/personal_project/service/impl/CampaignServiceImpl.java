@@ -78,7 +78,7 @@ public class CampaignServiceImpl implements CampaignService {
         MailTemplate mailTemplate = mailTemplateService.getTemplateByCampaign(campaign);
         EmailCampaign emailCampaign = new EmailCampaign(campaign, mailTemplate, audiences);
         try {
-            List<Mail> mails = mailServerService.sendBatchMails2(emailCampaign);
+            List<Mail> mails = mailServerService.sendBatchMails(emailCampaign);
 //            mailService.insertBatch(mails);
             mailService.updateBatchByMimeId(mails);
             log.info("batch insert mail record successfully");
