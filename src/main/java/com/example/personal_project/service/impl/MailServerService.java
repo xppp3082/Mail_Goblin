@@ -59,14 +59,11 @@ public class MailServerService {
             //generate click URL and open URL
             for (Audience audience : emailCampaign.getAudiences()) {
                 MimeMessage mimeMessage = createTrackingMail(mailTemplate, audience, campaign);
-                Mail mail = createMailBaseOnMimeStatus(campaign, audience, mimeMessage);
+                Mail mail = createMail(campaign, audience);
+                sendMimeMessage(mimeMessage, mail, audience);
                 mails.add(mail);
                 //insert mail data to redis
-                try {
-                    updateRedisMailFromSpringBoot(mail);
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                }
+                updateRedisMailFromSpringBoot(mail);
             }
         } catch (Exception e) {
             log.error("Error sending batch mails", e);
@@ -74,6 +71,7 @@ public class MailServerService {
         return mails;
     }
 
+    //組裝 mime 格式 email 所需要的資訊
     public MimeMessage createTrackingMail(MailTemplate mailTemplate, Audience audience, Campaign campaign) throws MessagingException, UnsupportedEncodingException {
         String confirmationUrl = mailTemplate.getUrl();
         log.info(audience.getEmail());
@@ -113,10 +111,7 @@ public class MailServerService {
         return mimeMessage;
     }
 
-
-    //要 follow function 的單一職責
-    public Mail createMailBaseOnMimeStatus(Campaign campaign, Audience audience, MimeMessage mimeMessage) throws RuntimeException {
-        //Create Email base on Audience information
+    public Mail createMail(Campaign campaign, Audience audience) {
         Mail mail = new Mail();
         mail.setCampaignID(campaign.getId());
         mail.setCompanyID(campaign.getId());
@@ -126,10 +121,15 @@ public class MailServerService {
         mail.setSendDate(LocalDate.now());
         mail.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         mail.setCheckTimes(0);
+        return mail;
+    }
+
+    //要 follow function 的單一職責
+    public Mail sendMimeMessage(MimeMessage mimeMessage, Mail mail, Audience audience) throws RuntimeException {
         try {
             mailSender.send(mimeMessage);
             String messageId = mimeMessage.getMessageID();
-            //Split mimeMessageId to fit the payload of
+            //Split mimeMessageId to fit the payload of MailGun
             messageId = messageId.substring(1, messageId.length() - 1);
             log.info(messageId);
             mail.setMimeID(messageId);
@@ -138,27 +138,14 @@ public class MailServerService {
             audienceService.updateMailCount(audience.getAudienceUUID());
             log.info("update mail count successfully!");
         } catch (MailException e) {
-            Long audienceId = audience.getId();
-            switch (getMailExceptionType(e)) {
-                case AUTHENTICATION:
-                    log.warn("Mail Error: Error on sending email due to authentication issue: " + e.getMessage());
-                    break;
-                case PARSE:
-                    log.warn("Mail Error: Error on parsing email content: " + e.getMessage());
-                    break;
-                case PREPARATION:
-                    log.warn("Mail Error: Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
-                    break;
-                default:
-                    log.warn("Mail Error: Generic mail exception: " + e.getMessage());
-            }
-            mail.setStatus(DeliveryStatus.FAILED.name());
+            handleMailException(e, mail, audience);
         } catch (MessagingException e) {
             log.error("error on creating mail base on mime message : " + e.getMessage());
             throw new RuntimeException(e);
         }
         return mail;
     }
+
 
     public void updateRedisMailFromSpringBoot(Mail mail) {
         RedisMail redisMail = new RedisMail();
@@ -167,6 +154,24 @@ public class MailServerService {
         redisMail.setTimestamp(mail.getTimestamp());
         redisMail.setAudienceID(mail.getAudienceID());
         redisService.updateMailFromSpringboot(redisMail);
+    }
+
+    private void handleMailException(MailException e, Mail mail, Audience audience) {
+        Long audienceId = audience.getId();
+        switch (getMailExceptionType(e)) {
+            case AUTHENTICATION:
+                log.error("Mail Error: Error on sending email due to authentication issue: " + e.getMessage());
+                break;
+            case PARSE:
+                log.error("Mail Error: Error on parsing email content: " + e.getMessage());
+                break;
+            case PREPARATION:
+                log.error("Mail Error: Error on sending email to audience with id : " + audienceId + ": " + e.getMessage());
+                break;
+            default:
+                log.error("Mail Error: Generic mail exception: " + e.getMessage());
+        }
+        mail.setStatus(DeliveryStatus.FAILED.name());
     }
 
     private MailExceptionType getMailExceptionType(MailException e) {
@@ -189,5 +194,4 @@ public class MailServerService {
         PREPARATION,
         SEND
     }
-
 }
