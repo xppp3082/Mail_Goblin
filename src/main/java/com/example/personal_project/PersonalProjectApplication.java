@@ -46,11 +46,4 @@ public class PersonalProjectApplication {
             app.mailConsumer.consumeCampaignLongPoll();
         }
     }
-//	@Bean
-//	public ApplicationRunner runner(MailPublisher publisher) {
-//		return args -> {
-//			Thread.sleep(3000);
-//			publisher.publishCampaign();
-//		};
-//	}
 }

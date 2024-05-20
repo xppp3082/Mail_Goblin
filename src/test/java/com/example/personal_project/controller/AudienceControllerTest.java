@@ -1,6 +1,7 @@
 package com.example.personal_project.controller;
 
 import com.example.personal_project.component.AuthenticationComponent;
+import com.example.personal_project.component.MailConsumer;
 import com.example.personal_project.config.SecurityConfig;
 import com.example.personal_project.middleware.JwtTokenFilter;
 import com.example.personal_project.service.AudienceService;
@@ -19,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         classes = {JwtTokenFilter.class}),
         excludeAutoConfiguration = {SecurityConfig.class})
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("consumer")
 public class AudienceControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -50,15 +53,13 @@ public class AudienceControllerTest {
     private CompanyService companyService;
     @MockBean
     private AuthenticationComponent authenticationComponent;
+    @MockBean
+    private MailConsumer mailConsumer;
 
 
     @BeforeEach
     public void init() {
         //Mock Security Context
-//        Authentication authentication = mock(Authentication.class);
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        SecurityContextHolder.setContext(securityContext);
-//        when(securityContext.getAuthentication()).thenReturn(authentication);
         Authentication authentication = new UsernamePasswordAuthenticationToken("test12345@example.com", null, List.of());
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);

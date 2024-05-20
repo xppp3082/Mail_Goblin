@@ -25,7 +25,8 @@ public class AuthenticationComponent {
         } catch (Exception e) {
             String errorMessage = "error on getting company account from middleware context holder.";
             log.error(errorMessage);
-            return errorMessage;
+//            return errorMessage;
+            return null;
         }
     }
 }

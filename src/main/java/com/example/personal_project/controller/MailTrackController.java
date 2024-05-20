@@ -98,6 +98,11 @@ public class MailTrackController {
     public ResponseEntity<?> trackDeliveryRate() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Double successRate = mailService.getMailDeliveryRateForCompany(account);
             return new ResponseEntity<>(successRate, HttpStatus.OK);
         } catch (Exception e) {
@@ -111,6 +116,11 @@ public class MailTrackController {
     public ResponseEntity<?> dailyMailDeliveryRate() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<LocalDate, Double> successRate = mailService.trackDailyMailDeliveryRate(account);
             return new ResponseEntity<>(successRate, HttpStatus.OK);
         } catch (Exception e) {
@@ -125,6 +135,11 @@ public class MailTrackController {
                                                          @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<LocalDate, Double> successRate = mailService.trackDailyMailDeliveryRateByDate(account, startDate, endDate);
             return new ResponseEntity<>(successRate, HttpStatus.OK);
         } catch (Exception e) {
@@ -138,6 +153,11 @@ public class MailTrackController {
     public ResponseEntity<?> calculateMailConversionRate() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Integer> conversionRates = mailService.calculateMailConversionRate(account);
             return new ResponseEntity<>(conversionRates, HttpStatus.OK);
         } catch (Exception e) {
@@ -152,6 +172,11 @@ public class MailTrackController {
                                                                @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Integer> conversionRates = mailService.calculateMailConversionRateByDate(account, startDate, endDate);
             return new ResponseEntity<>(conversionRates, HttpStatus.OK);
         } catch (Exception e) {
@@ -165,6 +190,11 @@ public class MailTrackController {
     public ResponseEntity<?> dailyEventCount(@RequestParam("days") Integer days) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Map<LocalDate, Integer>> result = mailService.analyzeEventPastDays(account, days);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
@@ -179,6 +209,11 @@ public class MailTrackController {
                                                    @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Map<LocalDate, Integer>> result = mailService.analyzeEventPastByDate(account, startDate, endDate);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {

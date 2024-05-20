@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class MailServerServiceTest {
     private JavaMailSender mailSender;
 
     @Mock
-    private TemplateEngine htmlTemplataEngine;
+    private TemplateEngine htmlTemplateEngine;
 
     @Mock
     private AudienceService audienceService;
@@ -59,7 +58,7 @@ public class MailServerServiceTest {
     }
 
     @Test
-    public void testSendBatchMails_Success() throws MessagingException, UnsupportedEncodingException {
+    public void testSendBatchMails_Success() throws MessagingException {
         //Prepare Test Data
         Audience audience = new Audience();
         audience.setId(1L);
@@ -85,7 +84,7 @@ public class MailServerServiceTest {
         MimeMessage mimeMessage = mock(MimeMessage.class);
         when(mimeMessage.getMessageID()).thenReturn("<1234567890@example.com>");
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        when(htmlTemplataEngine.process(eq("registration"), any(Context.class))).thenReturn("Processed Template");
+        when(htmlTemplateEngine.process(eq("registration"), any(Context.class))).thenReturn("Processed Template");
 
         //Execute the method
         List<Mail> result = mailServerService.sendBatchMails(emailCampaign);

@@ -53,13 +53,13 @@ public class MailServerService {
     public List<Mail> sendBatchMails(EmailCampaign emailCampaign) {
         List<Mail> mails = new ArrayList<>();
         try {
-            //get MailTemplate from mail Campaign
+            //get mailTemplate from mail Campaign
             MailTemplate mailTemplate = emailCampaign.getMailTemplate();
             Campaign campaign = emailCampaign.getCampaign();
             //generate click URL and open URL
             for (Audience audience : emailCampaign.getAudiences()) {
                 MimeMessage mimeMessage = createTrackingMail(mailTemplate, audience, campaign);
-                Mail mail = createMailBaseOnMimeMessage(campaign, audience, mimeMessage);
+                Mail mail = createMailBaseOnMimeStatus(campaign, audience, mimeMessage);
                 mails.add(mail);
                 //insert mail data to redis
                 try {
@@ -113,7 +113,9 @@ public class MailServerService {
         return mimeMessage;
     }
 
-    public Mail createMailBaseOnMimeMessage(Campaign campaign, Audience audience, MimeMessage mimeMessage) throws RuntimeException {
+
+    //要 follow function 的單一職責
+    public Mail createMailBaseOnMimeStatus(Campaign campaign, Audience audience, MimeMessage mimeMessage) throws RuntimeException {
         //Create Email base on Audience information
         Mail mail = new Mail();
         mail.setCampaignID(campaign.getId());
@@ -127,6 +129,7 @@ public class MailServerService {
         try {
             mailSender.send(mimeMessage);
             String messageId = mimeMessage.getMessageID();
+            //Split mimeMessageId to fit the payload of
             messageId = messageId.substring(1, messageId.length() - 1);
             log.info(messageId);
             mail.setMimeID(messageId);

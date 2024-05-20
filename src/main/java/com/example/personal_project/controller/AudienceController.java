@@ -40,6 +40,11 @@ public class AudienceController {
         //retrieve audience from JWT parser
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Long companyId = companyService.getIdByAccount(account);
             List<Audience> audiences = audienceService.getAudiencesWithTagsByCompanyId(companyId);
             return new ResponseEntity<>(audiences, HttpStatus.OK);
@@ -54,6 +59,11 @@ public class AudienceController {
     public ResponseEntity<?> getAllAudienceByTag(@RequestParam("id") Long tagId) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<Audience> audiences = audienceService.getAudienceByTag(tagId, account);
             return new ResponseEntity<>(audiences, HttpStatus.OK);
         } catch (Exception e) {
@@ -67,6 +77,11 @@ public class AudienceController {
     public ResponseEntity<?> getNewAudienceCountLast7Days(@RequestParam("days") Integer days) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Integer> resultMap = audienceService.getNewAudienceCountLastWeek(account, days);
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
@@ -81,6 +96,11 @@ public class AudienceController {
         //retrieve audience from JWT parser
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Long companyId = companyService.getIdByAccount(account);
             List<Audience> audiences = audienceService.searchAudiencesWithTagsByCompanyIdANDMail(companyId, keyword);
             return new ResponseEntity<>(audiences, HttpStatus.OK);
@@ -98,6 +118,11 @@ public class AudienceController {
         //step2. batch insert base on the tag list of this audience
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Long companyId = companyService.getIdByAccount(account);
             audience.setCompanyId(companyId);
             Audience tagerAudience = audienceService.insertNewAudience(audience);
@@ -151,6 +176,11 @@ public class AudienceController {
     public ResponseEntity<?> getPageAudienceByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<Audience> audiences = audienceService.getPageAudienceWithTagsByAccount(account, paging.orElse(0));
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericResponse<>(audiences.stream().limit(pagingSize).toList(),

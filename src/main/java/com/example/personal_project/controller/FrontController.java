@@ -46,6 +46,10 @@ public class FrontController {
                                RedirectAttributes redirectAttributes) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+            }
             mailTemplateService.insertNewTemplate(account, mailTemplate);
             redirectAttributes.addFlashAttribute("message", "Successful save the mail template!");
         } catch (Exception e) {

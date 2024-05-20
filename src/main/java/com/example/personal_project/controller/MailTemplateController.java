@@ -35,6 +35,11 @@ public class MailTemplateController {
     public ResponseEntity<?> getAllTemplateByCompanyAccount() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<MailTemplate> templates = mailTemplateService.getTemplateByAccount(account);
             return new ResponseEntity<>(templates, HttpStatus.OK);
         } catch (Exception e) {
@@ -45,21 +50,6 @@ public class MailTemplateController {
 
     @GetMapping("/get")
     public ResponseEntity<?> getTemplateByID(@RequestParam(value = "id") Long templateId) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        // 檢查 Authentication 是否是 UsernamePasswordAuthenticationToken 的實例
-//        if (authentication instanceof UsernamePasswordAuthenticationToken) {
-//            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-//                    (UsernamePasswordAuthenticationToken) authentication;
-//            // 獲取使用者名稱
-//            String accountName = usernamePasswordAuthenticationToken.getName();
-//            Company company = companyService.getCompanyByAccount(accountName);
-//            log.info(company.toString());
-//            // 進行其他操作，例如根據使用者名稱從資料庫中獲取使用者資訊
-//            log.info("Hello, " + accountName + "! This is your profile page.");
-//        } else {
-//            // 如果不是 UsernamePasswordAuthenticationToken，表示未驗證或不明的身份，可以進行相應處理
-//            log.info("Unauthorized");
-//        }
         try {
             MailTemplate mailTemplate = mailTemplateService.findMailTemplateById(templateId);
             return new ResponseEntity<>(mailTemplate, HttpStatus.OK);
@@ -97,6 +87,11 @@ public class MailTemplateController {
         try {
             log.info("Adding tempalate via endpoint!");
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             MailTemplate targetTemplate = mailTemplateService.insertNewTemplateWithAccount(account, mailTemplate);
             return new ResponseEntity<>(targetTemplate, HttpStatus.OK);
         } catch (Exception e) {
@@ -110,6 +105,11 @@ public class MailTemplateController {
     public ResponseEntity<?> getPageTemplateByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<MailTemplate> mailTemplates = mailTemplateService.getPageMailTemplateByCompany(account, paging.orElse(0));
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericResponse<>(mailTemplates.stream().limit(pagingSize).toList(),

@@ -37,6 +37,11 @@ public class CampaignController {
     public ResponseEntity<?> getAllCampaignsByAccount() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<Campaign> campaigns = campaignService.getAllCampaignsByAccount(account);
             return new ResponseEntity<>(campaigns, HttpStatus.OK);
         } catch (Exception e) {
@@ -50,6 +55,11 @@ public class CampaignController {
     public ResponseEntity<?> getPageCampaignByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<Campaign> campaigns = campaignService.getPageCampaignByAccountWithTag(account, paging.orElse(0));
             int totalCount = campaignService.getTotalCampaignCountByAccount(account);
             int totalPaging = (int) Math.ceil((double) totalCount / pagingSize);

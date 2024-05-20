@@ -32,36 +32,75 @@ public class TagController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addNewTag(@RequestBody Tag tag) {
-        String account = authenticationComponent.getAccountFromAuthentication();
-        Long companyId = companyService.getIdByAccount(account);
-        tag.setCompanyId(companyId);
-        tagService.insertTag(tag);
-        return new ResponseEntity<>(
-                String.format("Add new tag under the company with id : %s successfully.", tag.getCompanyId()),
-                HttpStatus.OK);
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
+            Long companyId = companyService.getIdByAccount(account);
+            tag.setCompanyId(companyId);
+            tagService.insertTag(tag);
+            return new ResponseEntity<>(
+                    String.format("Add new tag under the company with id : %s successfully.", tag.getCompanyId()),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on adding tag to DB.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteTag(@RequestParam("id") Long tagId) {
-        String account = authenticationComponent.getAccountFromAuthentication();
-        Long companyId = companyService.getIdByAccount(account);
-        tagService.deleteTag(tagId, companyId);
-        return new ResponseEntity<>(
-                String.format("Delete tag under the company with id : %s successfully.", companyId),
-                HttpStatus.OK);
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
+            Long companyId = companyService.getIdByAccount(account);
+            tagService.deleteTag(tagId, companyId);
+            return new ResponseEntity<>(
+                    String.format("Delete tag under the company with id : %s successfully.", companyId),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on deleting tag from DB.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllTagsByCompany() {
-        String account = authenticationComponent.getAccountFromAuthentication();
-        List<Tag> tags = tagService.getTagsByCompanyAccount(account);
-        return new ResponseEntity<>(tags, HttpStatus.OK);
+        try {
+            String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
+            List<Tag> tags = tagService.getTagsByCompanyAccount(account);
+            return new ResponseEntity<>(tags, HttpStatus.OK);
+        } catch (Exception e) {
+            String errorResponse = "Error on getting all tags by company.";
+            log.error(errorResponse + " : " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/paging")
     public ResponseEntity<?> getPageTagsByAccount(@RequestParam("number") Optional<Integer> paging) {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             List<Tag> tags = tagService.getPageTagsByCompanyAccount(account, paging.orElse(0));
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericResponse<>(tags.stream().limit(pagingSize).toList(),

@@ -72,6 +72,11 @@ public class CompanyController {
     public ResponseEntity<?> companyDateFromToken() {
         try {
             String account = authenticationComponent.getAccountFromAuthentication();
+            if (account == null) {
+                String errorMessage = "User is not authenticated.";
+                log.warn(errorMessage);
+                return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+            }
             Map<String, Integer> resultMap = companyService.getCompanyProfileData(account);
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
