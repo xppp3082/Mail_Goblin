@@ -14,4 +14,6 @@ public class Company {
     @JsonProperty("company_uuid")
     private String companyUUID;
     private Date anniversary;
+    private String account;
+    private String password;
 }

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Templates</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/template.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+
+
+    <!--    font import-->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
+          rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<div class="container">
+    <div id="template-title">
+        <img alt="template icon" id="template-picture" src="/images/email.png">
+        <h1>TEMPLATE</h1>
+    </div>
+    <hr>
+    <h2>Template List</h2>
+    <br>
+    <button class="add-template-btn" onclick="navigateToAddTemplate()">Add New Template</button>
+    <div id="templateContainer"></div>
+    <div class="justify-content-center mt-4 p8" id="template-pagination">
+        <button id="prevTemplateButton" onclick="previousPage()">❮ Prev</button>
+        <span id="template-currentPage" style="display: none">1</span>
+        <button id="nextTemplateButton" onclick="nextPage()">Next ❯</button>
+    </div>
+    <!--    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>-->
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let currentPage = 0;
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    loadTemplatesWithPage(currentPage);
+
+    function navigateToAddTemplate() {
+        window.location.href = '/configure';
+    }
+
+    async function loadTemplatesWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const templatesData = await response.json();
+            const templates = templatesData.data;
+            const nextPage = templatesData.next_paging;
+            console.log(templates);
+            displayTemplates(templates)
+            //enable or disable the next page button base on next_paging key is exist or not
+            const prevButton = document.getElementById('prevTemplateButton');
+            const nextButton = document.getElementById('nextTemplateButton');
+            if (paging <= 0) {
+                prevButton.disabled = true;
+                prevButton.classList.add("is-active")
+            } else {
+                prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+                nextButton.classList.add("is-active")
+            } else {
+                nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function nextPage() {
+        currentPage++;
+        document.getElementById('template-currentPage').innerText = currentPage + 1;
+        loadTemplatesWithPage(currentPage);
+    }
+
+    function previousPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('template-currentPage').innerText = currentPage + 1;
+            loadTemplatesWithPage(currentPage);
+        }
+    }
+
+
+    function displayTemplates(templates) {
+        const templateContainer = document.getElementById('templateContainer');
+        templateContainer.innerHTML = ''; // 清空容器内容
+
+        templates.forEach(function (template) {
+            // 创建模板卡片
+            const templateCard = document.createElement('div');
+            templateCard.classList.add('card');
+
+            // 卡片内容
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
+            const titleSpan = document.createElement('span');
+            titleSpan.classList.add('title');
+            titleSpan.innerText = template.subject;
+
+            // const previewDiv = document.createElement('div');
+            // previewDiv.classList.add('preview');
+            // let htmlContent = template.content;
+            // let pattern = /<.*?>/g;
+            // let cleanedContent = htmlContent.replace(pattern, '');
+            // if (cleanedContent.length > 50) {
+            //     cleanedContent = cleanedContent.substring(0, 50) + '...';
+            // }
+            // previewDiv.innerText = cleanedContent;
+            const hasImage = template.content.includes('<img');
+
+            if (hasImage) {
+                const imgElement = document.createElement('img');
+                const srcRegex = /<img.*?src="(.*?)".*?>/g;
+                const match = srcRegex.exec(template.content);
+                if (match && match[1]) {
+                    imgElement.src = match[1];
+                    contentDiv.appendChild(imgElement);
+                }
+            } else {
+                const previewDiv = document.createElement('div');
+                previewDiv.classList.add('preview');
+                let htmlContent = template.content;
+                let pattern = /<.*?>/g;
+                let cleanedContent = htmlContent.replace(pattern, '');
+                if (cleanedContent.length > 50) {
+                    cleanedContent = cleanedContent.substring(0, 50) + '...';
+                }
+                previewDiv.innerText = cleanedContent;
+                contentDiv.appendChild(previewDiv);
+            }
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.classList.add('actions');
+            const editButton = document.createElement('button');
+            editButton.setAttribute('type', 'button');
+            editButton.classList.add('history');
+            editButton.innerText = 'Edit';
+            editButton.onclick = function () {
+                editTemplate(template.id);
+            };
+            const deleteButton = document.createElement('button');
+            deleteButton.setAttribute('type', 'button');
+            deleteButton.classList.add('track');
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = function () {
+                deleteTemplate(template.id);
+            };
+            actionsDiv.appendChild(editButton);
+            actionsDiv.appendChild(deleteButton);
+
+            // contentDiv.appendChild(titleSpan);
+            contentDiv.appendChild(actionsDiv);
+            templateCard.appendChild(titleSpan);
+            // templateCard.appendChild(previewDiv);
+            templateCard.appendChild(contentDiv);
+
+            templateContainer.appendChild(templateCard);
+        });
+    }
+
+
+    function editTemplate(templateId) {
+        const editUrl = '/templateEditor?id=' + templateId;
+        window.location.href = editUrl;
+    }
+
+
+    async function deleteTemplate(templateId) {
+        try {
+            const response = await fetch('/api/1.0/template/delete?id=' + templateId, {method: 'DELETE'});
+            if (response.ok) {
+                alert('Template deleted successfully');
+                await loadTemplatesWithPage(currentPage);
+                // await loadTemplates();
+            } else {
+                throw new Error('Failed to delete template');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete template');
+        }
+    }
+
+</script>
+</body>
+</html>

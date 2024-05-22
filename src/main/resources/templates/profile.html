@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>User Profile</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!--    font import-->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
+          rel="stylesheet">
+    <link href="/_css/profile.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<div class="container">
+    <div id="profile-title">
+        <img alt="profile icon" id="profile-picture" src="/images/user.png">
+        <h1>PROFILE</h1>
+    </div>
+    <hr>
+    <div class="company-info">
+        <!--        <div class="container profile-container">-->
+        <div class="profile-container">
+            <div class="card">
+                <h2>Company Information</h2>
+                <br>
+                <div class="profile-item">
+                    <label>Name/Account:</label>
+                    <span id="user-name"></span>
+                </div>
+                <div class="profile-item">
+                    <label>Company Name:</label>
+                    <span id="company-name"></span>
+                </div>
+                <div class="profile-item">
+                    <label>Description:</label>
+                    <span id="company-description"></span>
+                </div>
+                <div class="profile-item">
+                    <label>Industry:</label>
+                    <span id="company-industry"></span>
+                </div>
+                <div class="profile-item">
+                    <label>Established:</label>
+                    <span id="company-established"></span>
+                </div>
+            </div>
+            <div id="profile-data-container">
+            </div>
+        </div>
+        <!--        <div class="container" id="usage-container">-->
+        <div id="usage-container">
+            <!--            <div class="title">-->
+            <!--                <p class="title-text">Mail Usage</p>-->
+            <!--                <p class="percent">Max:5000</p>-->
+            <!--            </div>-->
+            <!--            <div class="data">-->
+            <!--                <div class="data-text-container">-->
+            <!--                    <p class="p1">126</p>-->
+            <!--                    <p class="p2"> / </p>-->
+            <!--                    <p class="p2">5000</p>-->
+            <!--                </div>-->
+            <!--                <div class="range">-->
+            <!--                    <div class="fill" style="width: 12.6%"></div>-->
+            <!--                </div>-->
+            <!--            </div>-->
+        </div>
+    </div>
+</div>
+<!--</div>-->
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+<script>
+    // Fetch token from localStorage
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+
+    fetchAndDrawProfileCard();
+    // Fetch user profile data from API
+    fetch('/api/1.0/company/profile', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Update user info
+            document.getElementById('user-name').innerText = data.account;
+            // document.getElementById('user-email').innerText = data.account;
+
+            // Update company info
+            document.getElementById('company-name').innerText = data.company.title;
+            document.getElementById('company-description').innerText = data.company.description;
+            document.getElementById('company-industry').innerText = data.company.industry;
+
+            // Convert timestamp to readable date format
+            const establishedDate = new Date(data.company.anniversary);
+            document.getElementById('company-established').innerText = establishedDate.toLocaleDateString('en-US');
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle error
+        });
+
+    async function fetchAndDrawProfileCard() {
+        try {
+            const data = await fetchProfileData();
+            console.log(data);
+            drawProfileCard(data);
+            createMailUsageCard(data, 5000);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function fetchProfileData() {
+        try {
+            const response = await fetch(`api/1.0/company/profile-data`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch company profile data.')
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('Failed to fetch company profile data: ', error);
+        }
+    }
+
+
+    function drawProfileCard(data) {
+        const totalMailCount = data.total_emails_count;
+        const totalAudience = data.total_audience;
+        const totalTags = data.total_tags;
+        const container = document.querySelector('#profile-data-container');
+        container.innerHTML = '';
+        container.appendChild(createProfileDataCard("Total Audience :", totalAudience));
+        container.appendChild(createProfileDataCard("Total tags :", totalTags));
+    }
+
+    function createProfileDataCard(title, value) {
+        const card = document.createElement('div');
+        card.classList.add('conversion-card');
+        // card.classList.add('card');
+
+        const titleDiv = document.createElement('div');
+        titleDiv.classList.add('title');
+        const titleText = document.createElement('p');
+        titleText.classList.add('title-text');
+        titleText.textContent = title;
+        // const percentText = document.createElement('p');
+        // const newPercent = percent !== '' ? `Drop-off ${percent}` : '';
+        // percentText.classList.add('percent');
+        titleDiv.appendChild(titleText);
+        // titleDiv.appendChild(percentText);
+
+        const dataDiv = document.createElement('div');
+        dataDiv.classList.add('data');
+        const dataValue = document.createElement('p');
+        dataValue.textContent = value.toLocaleString();
+        // const rangeDiv = document.createElement('div');
+        // rangeDiv.classList.add('range');
+        // const fillDiv = document.createElement('div');
+        // fillDiv.classList.add('fill');
+        // fillDiv.style.width = `calc(min(100%,100% + ${percent}))`;
+        // rangeDiv.appendChild(fillDiv);
+        dataDiv.appendChild(dataValue);
+        // dataDiv.appendChild(rangeDiv);
+        card.appendChild(titleDiv);
+        card.appendChild(dataDiv);
+        return card;
+    }
+
+    function createMailUsageCard(data, max) {
+        const container = document.querySelector('#usage-container');
+        const currentUsage = data.total_emails_count;
+        const fillWidthPercentage = ((currentUsage / max) * 100).toFixed(2);
+
+        console.log(fillWidthPercentage)
+        const titleDiv = document.createElement('div');
+        container.innerHTML = `
+            <div class="title">
+                <p class="title-text">Mail Usage</p>
+                <p class="percent">Max:${max}</p>
+            </div>
+            <div class="data">
+                <div class="data-text-container">
+                    <p class="p1">${currentUsage}</p>
+                    <p class="p2"> / </p>
+                    <p class="p2">${max}</p>
+                    <p class="percentage">${fillWidthPercentage}%<p>
+                </div>
+                <div class="range">
+                    <div class="fill" style="width: ${fillWidthPercentage}%"></div>
+                </div>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>

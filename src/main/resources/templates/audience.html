@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Audience</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="/_css/highchart.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <link href="/_css/audience.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+
+    <!--    font import-->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
+          rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<!--<div class="container mt-5">-->
+<div class="container">
+    <div id="audience-title">
+        <img alt="audience icon" id="audience-picture" src="/images/audience.png">
+        <h1>AUDIENCE</h1>
+    </div>
+    <hr>
+    <br>
+    <div class="title-container">
+        <h2>Audience List</h2>
+        <button class="btn btn-success" id="addAudienceBtn" onclick="showAddUserModal()" type="button">
+            +
+        </button>
+    </div>
+    <!--    <div id="audience-btn-container">-->
+    <!--        <button class="add-template-btn" onclick="showAddUserModal()" type="button">Add User</button>-->
+    <!--    </div>-->
+    <div aria-hidden="true" aria-labelledby="addUserModalLabel" class="modal fade" id="addUserModal" role="dialog"
+         tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add Audience</h5>
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserFormModal">
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input class="form-control" id="name" name="name" placeholder="Enter name" type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input class="form-control" id="email" name="email" placeholder="Enter email" type="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthday">Birthday:</label>
+                            <input class="form-control" id="birthday" name="birthday" type="date">
+                        </div>
+                        <div class="form-group tagList-container">
+                            <label for="tagsList">Select Tags:</label>
+                            <input class="form-control" id='tagsList' name='tagsList' placeholder='write some tags'>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                    <button class="btn btn-success" onclick="submitUserModal()" type="button">Add User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- User Table -->
+    <table class="table" id="audience-table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Birthday</th>
+            <th>Mail Count</th>
+            <th>Open Count</th>
+            <th>Click Count</th>
+            <th>Tags</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="userList">
+        </tbody>
+    </table>
+</div>
+<!-- 使用者修改表單的動態視窗-->
+<div aria-hidden="true" aria-labelledby="modifyUserModalLabel" class="modal fade" id="modifyUserModal" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modifyUserModalLabel">Modify User</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modifyUserModalBody">
+                <form id="modifyUserForm">
+                    <div class="form-group">
+                        <label for="modifyName">Name:</label>
+                        <input class="form-control" id="modifyName" name="name" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyEmail">Email:</label>
+                        <input class="form-control" id="modifyEmail" name="email" type="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyBirthday">Birthday:</label>
+                        <input class="form-control" id="modifyBirthday" name="birthday" type="date">
+                    </div>
+                    <div class="form-group">
+                        <label for="modifyTags">Tags:</label>
+                        <input class="form-control" id="modifyTags" name="tags" placeholder="Enter tags">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center mt-4 p8" id="audience-pagination">
+    <button id="prevAudienceButton" onclick="previousAudiencePage()">❮ Prev</button>
+    <span id="audience-currentPage" style="display: none">1</span>
+    <button id="nextAudienceButton" onclick="nextAudiencePage()">Next ❯</button>
+</div>
+<div class="container" id="new-add"></div>
+<figure class="container">
+    <div id="new-audience-container"></div>
+</figure>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script charset="utf-8" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<!--high chart import test-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<!--tagify import test-->
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+<script>
+    // localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3MTM3NjIxNjEsImV4cCI6MTcxNzM2MjE2MSwiY29tcGFueSI6eyJpZCI6MTEsInRpdGxlIjoi6Zi_5a-s5YWs5Y-4IiwiZGVzY3JpcHRpb24iOiLkuIDplpPmlrDlibXlhazlj7giLCJpbmR1c3RyeSI6InNvZnR3YXJlIGRldmVsb3BtZW50IiwiYW5uaXZlcnNhcnkiOjE1ODcwNTI4MDAwMDAsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRhZnd2MTd4RkVLVG1VdFJ6QUVOY3V1TVN0RnJTTEJ0M1QyVW5WWktzM0VFR0J2NDl4dGVKNiIsImNvbXBhbnlfdXVpZCI6IjBhZDkwZWRkLTYyOGYtNGQwNi1iMzI4LTNhYzFkYjg1MTA2NyJ9LCJ0aXRsZSI6IumYv-WvrOWFrOWPuCIsImFjY291bnQiOiJ0ZXN0MTIzNDVAZXhhbXBsZS5jb20ifQ.7ywY3ZbEZdLhRHNXsFcC3aaEUbP6G-nm2_AmIp5-oq4');
+    const companyId = localStorage.getItem('companyId');
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    loadTags('input[name=tagsList]');
+    loadUsersWithPage(0);
+
+    async function loadTags(elementName) {
+        try {
+            const response = await fetch('/api/1.0/tag/get', {
+                method: 'GET',
+                headers: headers
+            });
+            const tags = await response.json();
+            const newArray = tags.map(obj => ({...obj, value: obj.name}))
+            console.log(newArray);
+            drawTagListWithTagify(newArray, elementName);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/1.0/audience/all', {
+                method: 'GET',
+                headers: headers
+            });
+            const users = await response.json();
+            displayUsers(users);
+        } catch (error) {
+            console.error(error);
+            alert('Failed to load users');
+        }
+    }
+
+    async function loadUsersWithPage(paging) {
+        try {
+            const response = await fetch(`api/1.0/audience/paging?number=${paging}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const audienceData = await response.json();
+            const audiences = audienceData.data;
+            const nextPage = audienceData.next_paging;
+            console.log(audiences);
+            displayUsers(audiences);
+
+            const prevButton = document.getElementById('prevAudienceButton');
+            const nextButton = document.getElementById('nextAudienceButton');
+            if (paging <= 0) {
+                prevButton.disabled = true;
+                prevButton.classList.add("is-active")
+            } else {
+                prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+                nextButton.classList.add("is-active")
+            } else {
+                nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    let currentAudiencePage = 0;
+
+    function nextAudiencePage() {
+        currentAudiencePage++;
+        document.getElementById('audience-currentPage').innerText = currentAudiencePage + 1;
+        loadUsersWithPage(currentAudiencePage);
+    }
+
+    function previousAudiencePage() {
+        if (currentAudiencePage >= 1) {
+            currentAudiencePage--;
+            document.getElementById('audience-currentPage').innerText = currentAudiencePage + 1;
+            loadUsersWithPage(currentAudiencePage);
+        }
+    }
+
+
+    function displayUsers(users) {
+        const userList = document.getElementById('userList');
+        userList.innerHTML = '';
+
+        users.forEach(function (user) {
+            const row = document.createElement('tr');
+            const tagsContainer = document.createElement('div');
+
+            user.tags.forEach(function (tag) {
+                const tagSpan = document.createElement('span');
+                tagSpan.textContent = tag.name;
+                tagSpan.classList.add('badge', 'badge-normal');
+                tagsContainer.appendChild(tagSpan);
+            });
+            row.innerHTML = `
+                <td><span class="badge-large">${user.name}</span></td>
+                <td><span class="badge">${user.email}</span></td>
+                <td><span class="badge">${user.birthday}</span></td>
+                <td>${user.mailcount}</td>
+                <td>${user.opencount}</td>
+                <td>${user.clickcount}</td>
+                <td class="tags-container">
+                </td>
+                <td>
+                <div class="action-container">
+                <button class="btn btn-success btn-action" onclick="modifyUser(${user.id})"><img class="delete-image" src="/images/edit.png" alt="edit image"></button>
+                <button class="btn btn-danger btn-action" onclick="deleteUser(${user.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button>
+                </div>
+                </td>
+            `;
+            row.querySelector('.tags-container').appendChild(tagsContainer);
+            userList.appendChild(row);
+        });
+    }
+
+
+    function getTagsAsString(tags) {
+        if (!tags || tags.length === 0) {
+            return 'No tags';
+        }
+        return tags.map(tag => tag.name).join(', ');
+    }
+
+
+    async function modifyUser(userId) {
+        try {
+            const response = await fetch(`/api/1.0/audience/get?id=${userId}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (response.ok) {
+                const userData = await response.json();
+                // 填充用户信息到模态框中
+                populateModifyUserModal(userData);
+                // 显示模态框
+                $('#modifyUserModal').modal('show');
+            } else {
+                throw new Error('Failed to get user data');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to get user data');
+        }
+    }
+
+
+    function populateModifyUserModal(userData) {
+        const modalBody = document.getElementById('modifyUserModalBody');
+        modalBody.innerHTML = `
+        <div class="form-group">
+            <label for="modifyName">Name:</label>
+            <input class="form-control" id="modifyName" name="modifyName" type="text" value="${userData.name}">
+        </div>
+        <div class="form-group">
+            <label for="modifyEmail">Email:</label>
+            <input class="form-control" id="modifyEmail" name="modifyEmail" type="email" value="${userData.email}">
+        </div>
+        <div class="form-group">
+            <label for="modifyBirthday">Birthday:</label>
+            <input class="form-control" id="modifyBirthday" name="modifyBirthday" type="date" value="${userData.birthday}">
+        </div>
+        <div id="modify-tag-list" class="form-group">
+            <label for="modifyTags">Tags:</label>
+            <input class="form-control" id="modifyTags" name="modifyTags" type="text" value="${getTagsAsString(userData.tags)}">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+            <button class="btn btn-success" onclick="updateUser(${userData.id})" type="button">Update</button>
+        </div>
+    `;
+        loadTags('#modifyTags');
+    }
+
+
+    async function updateUser(userID) {
+        try {
+            const name = document.getElementById('modifyName').value;
+            const email = document.getElementById('modifyEmail').value;
+            const birthday = document.getElementById('modifyBirthday').value;
+
+            const requestBody = {
+                name: name,
+                email: email,
+                birthday: birthday,
+                tags: []
+            };
+
+            document.querySelectorAll('#modify-tag-list .tagify .tagify__tag ').forEach(function (tagElement) {
+                requestBody.tags.push({
+                    id: parseInt(tagElement.id),
+                    company_id: companyId,
+                    name: tagElement.title
+                });
+            });
+
+            const response = await fetch(`/api/1.0/audience/update?id=${userID}`, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+                alert('User updated successfully');
+                $('#modifyUserModal').modal('hide');
+                await loadUsersWithPage(currentAudiencePage);
+            } else {
+                throw new Error('Failed to update user');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update user');
+        }
+    }
+
+    async function deleteUser(userId) {
+        try {
+            const response = await fetch(`/api/1.0/audience/delete?id=${userId}`, {
+                method: 'DELETE',
+                headers: headers
+            });
+            if (response.ok) {
+                alert('User deleted successfully');
+                await loadUsersWithPage(currentAudiencePage);
+            } else {
+                throw new Error('Failed to delete user');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete user');
+        }
+    }
+
+
+    function populateTagOptions(tags) {
+        const tagOptionsDiv = document.getElementById('tagOptions');
+        tagOptionsDiv.innerHTML = ''; // 清空選項
+
+        tags.forEach(function (tag) {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.classList.add('form-check');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('form-check-input');
+            checkbox.value = tag.id;
+            checkbox.name = 'tags';
+            checkbox.id = 'tag' + tag.id;
+
+            const label = document.createElement('label');
+            label.classList.add('form-check-label');
+            label.htmlFor = 'tag' + tag.id;
+            label.innerText = tag.name;
+
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+
+            tagOptionsDiv.appendChild(checkboxDiv);
+        });
+    }
+
+    function showAddUserModal() {
+        $('#addUserModal').modal('show');
+    }
+
+    async function submitUserModal() {
+
+        const user = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            birthday: document.getElementById('birthday').value,
+            tags: []
+        };
+        document.querySelectorAll('.tagify__tag ').forEach(function (tagElement) {
+            user.tags.push({
+                id: parseInt(tagElement.id),
+                company_id: companyId,
+                name: tagElement.title
+            });
+        });
+
+
+        const formData = new FormData();
+        formData.append('user', JSON.stringify(user));
+
+        console.log(formData.toString());
+        console.log([...formData]);
+
+        // 提交 FormData
+        try {
+            const response = await fetch('/api/1.0/audience/add', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(user)
+
+            });
+            if (response.ok) {
+                alert('User added successfully');
+
+                // this.reset();
+                await loadTags('input[name=tagsList]');
+                await loadUsersWithPage(currentAudiencePage);
+            } else {
+                throw new Error('Failed to add user');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to add user');
+        }
+        // 關閉 modal
+        $('#addUserModal').modal('hide');
+        // 清空表單
+        document.getElementById('addUserFormModal').reset();
+    }
+
+    async function fetchNewAudienceData(days) {
+        try {
+            const response = await fetch('/api/1.0/audience/new-count?days=' + days, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    function drawNewAudienceChart(data, elementID) {
+        const categories = Object.keys(data).reverse();
+        const newAudienceData = Object.values(data).reverse();
+        Highcharts.chart(elementID, {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'New Audience Count in the Last 7 Days',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Source: Recently New Add Audience',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories,
+                accessibility: {
+                    description: 'Dates'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            tooltip: {
+                valueSuffix: ''
+            },
+            series: [{
+                name: 'New Audience',
+                data: newAudienceData,
+                color: '#10B981'
+            }]
+        });
+    }
+
+    async function fetchAndDrawNewAudienceChart() {
+        try {
+            const data = await fetchNewAudienceData(7);
+            drawNewAudienceChart(data, 'new-audience-container');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    fetchAndDrawNewAudienceChart();
+
+    function drawTagListWithTagify(tags, elementName) {
+        let whitelist = tags;
+        console.log(tags);
+        let input = document.querySelector(elementName)
+
+        let tagify = new Tagify(input, {
+            whitelist: whitelist,
+            tagTextProp: "name",
+            dropdown: {
+                position: "manual",
+                maxItems: Infinity,
+                enabled: 0,
+                classname: "customSuggestionsList"
+            },
+            enforceWhitelist: true
+        })
+
+        tagify.on("dropdown:show", onSuggestionsListUpdate)
+            .on("dropdown:hide", onSuggestionsListHide)
+            .on('dropdown:scroll', onDropdownScroll)
+        renderSuggestionsList(tagify)
+    }
+
+
+    function onSuggestionsListUpdate({detail: suggestionsElm}) {
+        console.log(suggestionsElm)
+    }
+
+    function onSuggestionsListHide() {
+        console.log("hide dropdown")
+    }
+
+    function onDropdownScroll(e) {
+        console.log(e.detail)
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+    function renderSuggestionsList(tagify) {
+        tagify.dropdown.show.call(tagify) // load the list
+        tagify.DOM.scope.parentNode.appendChild(tagify.DOM.dropdown)
+    }
+
+
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.example.personal_project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,4 +19,9 @@ public class Campaign extends ReadObject {
     private Long automationId;
     @JsonProperty("execute_status")
     private String executeStatus;
+    @JsonProperty("tag")
+    private String tagName;
+    @JsonProperty("send_datetime")
+    @Nullable
+    private String sendDateTime;
 }

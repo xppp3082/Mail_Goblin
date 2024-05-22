@@ -2,12 +2,15 @@ package com.example.personal_project.service.impl;
 
 import com.example.personal_project.model.Audience;
 import com.example.personal_project.model.Campaign;
+import com.example.personal_project.model.form.AudienceUpdateForm;
 import com.example.personal_project.repository.AudienceRepo;
 import com.example.personal_project.service.AudienceService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -15,13 +18,47 @@ import java.util.UUID;
 public class AudienceServiceImpl implements AudienceService {
     public final AudienceRepo audienceRepo;
 
+    @Value("${product.paging.size}")
+    private int pagingSize;
+
     public AudienceServiceImpl(AudienceRepo audienceRepo) {
         this.audienceRepo = audienceRepo;
     }
 
     @Override
-    public List<Audience> getAllAudience(String account) {
-        return audienceRepo.retrieveAudienceByCompany(account);
+    public List<Audience> getAllAudienceByAccount(String account) {
+        return audienceRepo.getAllAudienceByAccount(account);
+    }
+
+    @Override
+    public List<Audience> getAudiencesWithTagsByCompanyId(Long companyId) {
+        return audienceRepo.getAudiencesWithTagsByCompanyId(companyId);
+    }
+
+    @Override
+    public List<Audience> getPageAudienceWithTagsByAccount(String account, int paging) {
+        int offset = paging * pagingSize;
+        return audienceRepo.getPageAudienceWithTagsByAccount(account, pagingSize + 1, offset);
+    }
+
+    @Override
+    public List<Audience> searchAudiencesWithTagsByCompanyIdANDMail(Long companyId, String keyword) {
+        return audienceRepo.searchAudiencesWithTagsByCompanyIdANDMail(companyId, keyword);
+    }
+
+    @Override
+    public Audience findAudienceWithTagsById(Long audienceId) {
+        return audienceRepo.findAudienceWithTagsById(audienceId);
+    }
+
+    @Override
+    public Audience updateAudience(Audience audience) {
+        return audienceRepo.updateAudience(audience);
+    }
+
+    @Override
+    public void updateAudienceWithTags(Long audienceId, AudienceUpdateForm audienceUpdateForm) {
+        audienceRepo.updateAudienceWithTags(audienceId, audienceUpdateForm);
     }
 
     @Override
@@ -65,11 +102,20 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
-    public Audience insertNewAudience(Audience audience){
+    public List<Audience> getAudienceByTag(Long tagId, String account) {
+        return audienceRepo.getAllAudienceByTagId(tagId, account);
+    }
+
+    @Override
+    public Map<String, Integer> getNewAudienceCountLastWeek(String account, Integer daysCount) {
+        return audienceRepo.getNewAudienceCountLastWeek(account, daysCount);
+    }
+
+    @Override
+    public Audience insertNewAudience(Audience audience) {
         UUID uuid = UUID.randomUUID();
         audience.setAudienceUUID(uuid.toString());
-        Audience newAudience =audienceRepo.insertNewAudience(audience);
-        return newAudience;
+        return audienceRepo.insertNewAudience(audience);
     }
 
     @Override
@@ -78,7 +124,7 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
-    public void deleteAudience(Audience audience) {
-        audienceRepo.deleteAudience(audience);
+    public void deleteAudience(Long id) {
+        audienceRepo.deleteAudience(id);
     }
 }

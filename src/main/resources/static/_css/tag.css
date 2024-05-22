@@ -1,0 +1,118 @@
+.noto-sans-tc {
+    font-family: "Noto Sans TC", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-size: 1.15rem;
+}
+
+body {
+    padding-left: 240px;
+    font-family: "Noto Sans TC", sans-serif;
+}
+
+.container {
+    padding-top: 3rem;
+    max-width: 1300px;
+}
+
+#tag-title {
+    display: flex;
+    align-items: flex-end;
+}
+
+#tag-picture {
+    height: 4rem;
+    margin-right: 1rem;
+}
+
+.p8 button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1aa06d;
+    /*margin: auto 5px;*/
+    color: #fff;
+    font-weight: bold;
+    border: 3px solid #1aa06d;
+    margin: 0.5rem;
+    height: 2.2rem;
+    width: 5rem;
+}
+
+.p8 .is-active {
+    background-color: #fff;
+    color: #1aa06d;
+}
+
+#tags-pagination {
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
+#tags-currentPage {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    text-align: center;
+    background-color: #1aa06d;
+    border-radius: 100%;
+    color: #fff;
+}
+
+.delete-image {
+    height: 1.2rem;
+    width: 1.2rem;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #ffffff;
+    border: 0 solid #b0b0b0;
+}
+
+.btn-danger:hover {
+    color: #fff;
+    background-color: #ccc;
+    border: 1px solid #000000;
+}
+
+.btn-tag {
+    /*margin-left: 1rem;*/
+    padding: 1rem 1rem;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    color: #000;
+    /*background-color: #F1FFFA;*/
+    background-color: #ccfccb;
+    /*border: 0.5px solid #464E47;*/
+    border: none;
+    /*border-radius: 45px;*/
+    border-radius: 0.375rem;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn-tag:hover {
+    /*background-color: #1aa06d;*/
+    background-color: #23c483;
+    box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+    color: #fff;
+    transform: translateY(-7px);
+}
+
+.btn-tag:active {
+    transform: translateY(-1px);
+}

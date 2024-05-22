@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Design by foolishdeveloper.com -->
+    <title>Login</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <!--Stylesheet-->
+    <!--    <style media="screen">-->
+    <!--    <style </style>-->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/sign-up.css" rel="stylesheet">
+    <!--    <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">-->
+
+    <!--    flatpickr test-->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="background">
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+<form id="signInForm">
+    <h3>Login</h3>
+
+    <label for="username">Username</label>
+    <input id="username" placeholder="Email" required="required" type="text">
+
+    <label for="password">Password</label>
+    <input id="password" placeholder="Password" required="required" type="password">
+
+    <button type="submit">Log In</button>
+    <div class="social">
+        <!--        <div class="go"><i class="fab fa-google"></i> Google</div>-->
+        <!--        <div class="fb"><i class="fab fa-facebook"></i> Facebook</div>-->
+        <span class="txt1">Don't have an account? </span>
+        <br>
+        <a class="txt2" href="sign-up">Click Here</a>
+    </div>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    $('#signInForm').submit(async function (e) {
+        e.preventDefault();
+
+        let account = $('#username').val()
+        let password = $('#password').val();
+
+        if (account === null || password === null) {
+            alert("Please type in the correct info.");
+            return;
+        }
+
+        let companyData = {
+            account: account,
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/1.0/company/sign-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(companyData)
+            });
+
+            if (response.ok) {
+                // 儲存token在localstorage之後重新導向
+                const responseData = await response.json();
+                const {access_token, companyDto} = responseData;
+                const {id} = companyDto;
+
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('companyId', id);
+                // alert('Registration successful!');
+                //重新跳轉到"/template"
+                window.location.href = '/template';
+            } else {
+                let errorRes = 'Log in failed, please check your username and password.';
+                alert(errorRes);
+                // throw new Error(errorRes);
+            }
+        } catch (error) {
+            alert('Log in failed: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>

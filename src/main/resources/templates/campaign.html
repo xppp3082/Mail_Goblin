@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Campaign</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/campaign.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <!--    <script src="/_js/navbar.js"></script>-->
+
+    <!--    flatpickr test-->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<!-- Campaign Container -->
+<!--<div class="container mt-5">-->
+<div class="container">
+    <div id="campaign-title">
+        <img alt="campaign icon" id="campaign-picture" src="/images/campaign.png">
+        <h1>CAMPAIGN</h1>
+    </div>
+    <hr>
+    <br>
+    <div>
+        <div class=title-container>
+            <h2>All Campaigns</h2>
+            <button class="btn btn-success" id="addCampaignBtn" onclick="showNewCampaignModal()" type="button">
+                +
+            </button>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Target Date</th>
+                <th>Target Tag</th>
+                <th>Status</th>
+                <th>Execute Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="campaignList"></tbody>
+        </table>
+        <!-- Pagination -->
+        <div class="d-flex mt-4" id="pagination"></div>
+    </div>
+    <!-- Create New Campaign Form -->
+    <div>
+        <!--        <h2>Create New Campaign</h2>-->
+        <div aria-hidden="true" aria-labelledby="newCampaignModalLabel" class="modal fade" id="newCampaignModal"
+             role="dialog" tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="newCampaignModalLabel">Create New Campaign</h5>
+                        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newCampaignForm">
+                            <div class="form-group">
+                                <label for="subject">Subject:</label>
+                                <input class="form-control" id="subject" name="subject" required="required" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="templateId">Template:</label>
+                                <select class="form-control" id="templateId" name="template_id">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" id="send_datetime_UTC" name="send_datetime"
+                                       style="display: none"
+                                       type="text">
+                                <label for="send_datetime">Send Date and Time (Hourly Precision):</label>
+                                <input class="form-control" id="send_datetime" name="send_datetime2" required="required"
+                                       type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="tag_id">Tag:</label>
+                                <select class="form-control" id="tag_id" name="tag_id">
+                                    <!-- Populate with available tags -->
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+                        <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>
+                        <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--                <form id="newCampaignForm">-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="subject">Subject:</label>-->
+        <!--                        <input class="form-control" id="subject" name="subject" required="required" type="text">-->
+        <!--                    </div>-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="templateId">Template:</label>-->
+        <!--                        <select class="form-control" id="templateId" name="template_id">-->
+        <!--                            &lt;!&ndash; Populate with existing templates &ndash;&gt;-->
+        <!--                        </select>-->
+        <!--                    </div>-->
+        <!--                    &lt;!&ndash;            <div class="form-group">&ndash;&gt;-->
+        <!--                    &lt;!&ndash;                <label for="send_date">Send Date:</label>&ndash;&gt;-->
+        <!--                    &lt;!&ndash;                <input class="form-control" id="send_date" name="send_date" type="date">&ndash;&gt;-->
+        <!--                    &lt;!&ndash;            </div>&ndash;&gt;-->
+        <!--                    <div class="form-group">-->
+        <!--                        <input class="form-control" id="send_datetime_UTC" name="send_datetime" style="display: none"-->
+        <!--                               type="text">-->
+        <!--                        <label for="send_datetime">Send Date and Time (Hourly Precision):</label>-->
+        <!--                        <input class="form-control" id="send_datetime" name="send_datetime2" required="required" type="text">-->
+        <!--                    </div>-->
+        <!--                    <div class="form-group">-->
+        <!--                        <label for="tag_id">Tag:</label>-->
+        <!--                        <select class="form-control" id="tag_id" name="tag_id">-->
+        <!--                            &lt;!&ndash; Populate with available tags &ndash;&gt;-->
+        <!--                        </select>-->
+        <!--                    </div>-->
+        <!--                    &lt;!&ndash;            <button class="btn btn-primary&ndash;&gt;-->
+        <!--                    &lt;!&ndash;            <button class="btn btn-success"&ndash;&gt;-->
+        <!--                    <button class="btn btn-draft" onclick="saveDraft()" type="button">Save Draft</button>-->
+        <!--                    <button class="btn btn-success" onclick="saveComplete()" type="button">Save Complete</button>-->
+        <!--                </form>-->
+    </div>
+</div>
+<br><br>
+<!--&lt;!&ndash; Template Container &ndash;&gt;-->
+<!--<div class="container">-->
+<!--    <h2>Template List</h2>-->
+<!--    <div id="templateContainer"></div>-->
+<!--</div>-->
+<!--<div class="d-flex justify-content-center mt-4" id="template-pagination">-->
+<!--    <button onclick="previousPage()"> <<</button>-->
+<!--    <span id="template-currentPage">1</span>-->
+<!--    <button onclick="nextPage()"> >></button>-->
+<!--</div>-->
+
+<!--<div class="container">-->
+<!--    <button class="btn btn-primary mt-3" onclick="navigateToAddTemplate()">Add New Template</button>-->
+<!--</div>-->
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!--flatpickr script import-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr("#send_datetime", {
+        dateFormat: "Y-m-d H:00", // 設置日期和時間的顯示格式，僅顯示到小時
+        enableTime: true, // 啟用時間選擇功能
+        minDate: "today", // 只允許選擇當天之後的日期
+        maxDate: new Date().fp_incr(365), // 只允許選擇一年之內的日期
+        utc: true,//將選擇時間轉換為UTC+0時間
+        onClose: function (selectedDates, dataStr, instance) {
+            const selectedDate = selectedDates[0];
+            selectedDate.setMinutes(0);
+            selectedDate.setSeconds(0);
+            console.log(selectedDates[0]);
+            console.log(selectedDate);
+            console.log(selectedDates[0].toISOString());
+            console.log(selectedDates[0].getTime());
+            const utcDate = selectedDates[0].toISOString().slice(0, 16).replace("T", " ");
+            document.getElementById('send_datetime_UTC').value = utcDate;
+
+        }
+    });
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    // Load all template after windows loading completed
+    let currentPage = 0;
+
+
+    loadTemplates();
+    loadTags();
+    loadCampaignsWihPage(currentPage);
+
+
+    async function loadCampaigns() {
+        try {
+            const response = await fetch('/api/1.0/campaign/all', {
+                method: 'GET',
+                headers: headers
+            });
+            const campaigns = await response.json();
+            displayCampaigns(campaigns);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function loadCampaignsWihPage(pageNumber) {
+        try {
+            const response = await fetch(`/api/1.0/campaign/paging?number=${pageNumber}`, {
+                method: 'GET',
+                headers: headers
+            });
+            const campaignData = await response.json();
+            const campaigns = campaignData.data;
+            const totalPages = campaignData.total_paging;
+            console.log(totalPages);
+            displayCampaigns(campaigns);
+            createPagination(totalPages, pageNumber);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // function createPagination(totalPages) {
+    //     const paginationContainer = document.getElementById('pagination');
+    //     paginationContainer.innerHTML = ''; // Clear existing pagination
+    //
+    //     for (let i = 0; i < totalPages; i++) {
+    //         const pageLink = document.createElement('a');
+    //         pageLink.href = '#';
+    //         pageLink.innerText = i + 1;
+    //         pageLink.onclick = function () {
+    //             loadCampaignsWihPage(i);
+    //             currentPage = i;
+    //         };
+    //         paginationContainer.appendChild(pageLink);
+    //     }
+    // }
+
+    // function createPagination(totalPages) {
+    //     const paginationContainer = document.getElementById('pagination');
+    //     paginationContainer.innerHTML = ''; // Clear existing pagination
+    //
+    //     for (let i = 0; i < totalPages; i++) {
+    //         const pageLink = document.createElement('a');
+    //         pageLink.href = '#';
+    //         pageLink.innerText = i + 1;
+    //         pageLink.onclick = function () {
+    //             // Remove 'active' class from all page links
+    //             const allPageLinks = paginationContainer.getElementsByTagName('a');
+    //             for (let j = 0; j < allPageLinks.length; j++) {
+    //                 allPageLinks[j].classList.remove('is-active');
+    //             }
+    //             // Add 'active' class to the clicked page link
+    //             pageLink.classList.add('is-active');
+    //             // Load campaigns for the clicked page
+    //             loadCampaignsWihPage(i);
+    //             currentPage = i;
+    //         };
+    //         paginationContainer.appendChild(pageLink);
+    //     }
+    // }
+
+    function createPagination(totalPages, currentPageNumber) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = ''; // Clear existing pagination
+
+        for (let i = 0; i < totalPages; i++) {
+            const pageLink = document.createElement('a');
+            pageLink.href = '#';
+            pageLink.innerText = i + 1;
+            pageLink.classList.add('page-btn');
+            // Check if the current page is the active page
+            if (i === currentPageNumber) {
+                pageLink.classList.add('is-active');
+            }
+
+            pageLink.addEventListener('click', function () {
+                handlePageClick(i);
+            });
+
+            paginationContainer.appendChild(pageLink);
+        }
+    }
+
+    function handlePageClick(pageNumber) {
+        // Remove 'is-active' class from all page links
+        const allPageLinks = document.querySelectorAll('#pagination a');
+        allPageLinks.forEach(link => link.classList.remove('is-active'));
+
+        // Add 'is-active' class to the clicked page link
+        allPageLinks[pageNumber].classList.add('is-active');
+
+        // Load campaigns for the clicked page
+        loadCampaignsWihPage(pageNumber);
+        currentPage = pageNumber;
+    }
+
+    // Display campaigns
+    function displayCampaigns(campaigns) {
+        const campaignList = document.getElementById('campaignList');
+        campaignList.innerHTML = ''; // Clear existing list
+
+        campaigns.forEach(function (campaign) {
+            const row = document.createElement('tr');
+            console.log(campaign);
+            let statusColorClass = '';
+            switch (campaign.status) {
+                case 'COMPLETED':
+                    statusColorClass = 'badge-success';
+                    break;
+                case 'DRAFT':
+                    statusColorClass = 'badge-info';
+                    break;
+                default:
+                    statusColorClass = '';
+            }
+
+            let executeColorClass = '';
+            switch (campaign.execute_status) {
+                case 'COMPLETE':
+                    executeColorClass = 'badge-success';
+                    break;
+                case 'PENDING':
+                    executeColorClass = 'badge-warning';
+                    break;
+                default:
+                    executeColorClass = '';
+            }
+
+            // Convert UTC time to local time
+            const sendDatetimeUTC = new Date(campaign.send_datetime);
+            const sendDatetimeLocal = new Date(sendDatetimeUTC.getTime() - sendDatetimeUTC.getTimezoneOffset() * 60000);
+            const sendDatetimeString = sendDatetimeLocal.toLocaleString([], {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }); // Convert to local string format
+
+            row.innerHTML = `
+                <td><span class="badge-large">${campaign.subject}</span></td>
+                <td><span class="badge">${sendDatetimeString}</span></td>
+                <td><span class="badge badge-normal">${campaign.tag}</span></td>
+                <td ><span class="badge ${statusColorClass}">${campaign.status}</span></td>
+                <td><span class="badge ${executeColorClass}">${campaign.execute_status}</span></td>
+                <td><button class="btn btn-action btn-success" onclick="sendCampaign(${campaign.id})"><img class="delete-image" src="/images/takeoff.png" alt="send image"></button>
+                <button class="btn btn-action btn-danger" onclick="deleteCampaign(${campaign.id})"><img class="delete-image" src="/images/trash_can.png" alt="delete image"></button></td>
+            `;
+            campaignList.appendChild(row);
+        });
+    }
+
+
+    async function sendCampaign(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/campaign/send?id=${campaignId}`, {
+                method: 'POST',
+                headers: headers
+            });
+            if (response.ok) {
+                alert('Campaign sent successfully');
+            } else {
+                throw new Error('Failed to send campaign');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send campaign');
+        }
+    }
+
+    async function deleteCampaign(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/campaign/delete?id=${campaignId}`, {
+                method: 'DELETE',
+                headers: headers
+            })
+            if (response.ok) {
+                alert('Campaign deleted successfully');
+                // await loadCampaigns();
+                await loadCampaignsWihPage(currentPage)
+            } else {
+                alert('Failed to delete campaign')
+            }
+        } catch (error) {
+            console.log(error);
+            alert('Failed to delete campaign');
+        }
+    }
+
+
+    async function loadTemplates() {
+        try {
+            const response = await fetch(`/api/1.0/template/all`, {
+                method: 'GET',
+                headers: headers
+            });
+            const templates = await response.json();
+            populateTemplateDropdown(templates);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // async function loadTemplatesWithPage(paging) {
+    //     try {
+    //         const response = await fetch(`api/1.0/template/paging?number=${paging}`, {
+    //             method: 'GET',
+    //             headers: headers
+    //         });
+    //         const templatesData = await response.json();
+    //         const templates = templatesData.data;
+    //         console.log(templates);
+    //         displayTemplates(templates)
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+    //
+    // let currentPage = 0;
+    //
+    // function nextPage() {
+    //     currentPage++;
+    //     document.getElementById('template-currentPage').innerText = currentPage + 1;
+    //     loadTemplatesWithPage(currentPage);
+    // }
+    //
+    // function previousPage() {
+    //     if (currentPage >= 1) {
+    //         currentPage--;
+    //         document.getElementById('template-currentPage').innerText = currentPage + 1;
+    //         loadTemplatesWithPage(currentPage);
+    //     }
+    // }
+
+
+    // Populate template dropdown
+    function populateTemplateDropdown(templates) {
+        const templateDropdown = document.getElementById('templateId');
+        templateDropdown.innerHTML = ''; // Clear existing options
+
+        templates.forEach(function (template) {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.innerText = template.subject;
+            templateDropdown.appendChild(option);
+        });
+    }
+
+    function showNewCampaignModal() {
+        $('#newCampaignModal').modal('show');
+    }
+
+    // Save draft
+    async function saveDraft() {
+        const formData = new FormData(document.getElementById('newCampaignForm'));
+        const requestData = Object.fromEntries(formData.entries());
+        delete requestData.send_datetime2;
+        // console.log(requestData);
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
+        try {
+            const response = await fetch('/api/1.0/campaign/draft', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestData)
+            });
+            if (response.ok) {
+                alert('Draft saved successfully');
+                // await loadCampaigns(); // Reload campaigns
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
+                await loadCampaignsWihPage(currentPage)
+            } else {
+                // throw new Error('Failed to save draft');
+                alert('Failed to save draft campaign, please fill in all content correctly.');
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save draft');
+            throw new Error('Failed to save draft campaign');
+        }
+    }
+
+    // Save complete
+    async function saveComplete() {
+        const formData = new FormData(document.getElementById('newCampaignForm'));
+        const requestData = Object.fromEntries(formData.entries());
+        delete requestData.send_datetime2;
+        if (Object.values(requestData).includes(null)) {
+            alert('Please fill out all fields');
+            return;
+        }
+        console.log(JSON.stringify(requestData));
+        try {
+            const response = await fetch('/api/1.0/campaign/complete', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestData)
+            });
+            if (response.ok) {
+                alert('Complete campaign saved successfully');
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
+                await loadCampaignsWihPage(currentPage)
+            } else {
+                alert('Failed to save complete campaign, please fill in all content correctly.');
+                $('#newCampaignModal').modal('hide');
+                document.getElementById('newCampaignForm').reset();
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save complete campaign');
+            // throw new Error('Failed to save complete campaign');
+        }
+    }
+
+
+    async function loadTags() {
+        try {
+            const response = await fetch('/api/1.0/tag/get', {
+                method: 'GET',
+                headers: headers
+            });
+            const tags = await response.json();
+            // displayTags(tags);
+            populateTagOptions(tags);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function populateTagOptions(tags) {
+        const tagSelect = document.getElementById('tag_id');
+        tagSelect.innerHTML = '';
+
+        tags.forEach(function (tag) {
+            const option = document.createElement('option');
+            option.value = tag.id;
+            option.innerText = tag.name;
+            tagSelect.appendChild(option);
+        });
+    }
+
+    function displayTags(tags) {
+        const tagsContainer = document.getElementById('tagList');
+        tagsContainer.innerHTML = '';
+
+        tags.forEach(function (tag) {
+            const tagItem = document.createElement('div');
+            tagItem.classList.add('tag-item');
+
+            const tagName = document.createElement('span');
+            tagName.innerText = tag.name;
+
+            tagItem.appendChild(tagName);
+            tagsContainer.appendChild(tagItem);
+        });
+    }
+</script>
+</body>
+</html>

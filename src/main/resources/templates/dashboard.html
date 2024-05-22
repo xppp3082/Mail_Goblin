@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Dashboard</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <link href="/_css/highchart.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/dashboard.css" rel="stylesheet">
+    <link href="/_css/navbar.css" rel="stylesheet">
+    <!--    flatpickr test-->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+    <!--    font import-->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20+Charted&family=Jersey+25&family=Noto+Sans+TC:wght@100..900&family=Poetsen+One&display=swap"
+          rel="stylesheet">
+
+</head>
+<body>
+<div th:insert="_components/navbar.html"></div>
+<!--<div class="container mt-5">-->
+<div class="container">
+    <div id="dashboard-title">
+        <img alt="dashboard icon" id="dashboard-picture" src="/images/dashboard.png">
+        <h1>Dashboard</h1>
+    </div>
+    <hr>
+    <label for="timeRange">Date range</label>
+    <div class="time-picker-container">
+        <input class="time-picker" id="timeRange" placeholder="點擊選擇時間區間" type="text">
+        <button class="apply-btn" id="applyBtn" style="display: none;">Apply</button>
+    </div>
+    <div class="dashboard-card-container">
+        <figure class="dashboard-card">
+            <div id="event-container"></div>
+        </figure>
+        <div class="conversion-graph-container">
+            <figure class="dashboard-card conversion-graph">
+                <div id="conversion-container"></div>
+                <div id="daily-delivery-container"></div>
+            </figure>
+            <div class="conversion-card-container"></div>
+        </div>
+        <!--        <figure class="dashboard-card">-->
+        <!--            &lt;!&ndash;            <div id="daily-delivery-container"></div>&ndash;&gt;-->
+        <!--        </figure>-->
+        <hr>
+        <div class="age-container">
+            <label for="campaignId">Campaign</label>
+            <select class="form-control" id="campaignId" name="campaign_id">
+            </select>
+            <br><br>
+
+            <div class="campaign-graph-container">
+                <div class="dashboard-card age-graph" id="campaign-age"></div>
+                <div class="age-cards-container" id="age-cards"></div>
+                </div>
+            </div>
+            <div class="fail-list-container">
+                <div class="search-container">
+                    <h3>Event List</h3>
+                    <div class="search-bar-container">
+                        <input class="search-bar" type="text" id="searchKeyword" placeholder="Search...">
+                        <button class="search-bar" id="searchButton">Go</button>
+                    </div>
+                </div>
+                <table id="failListTable" class="table">
+                    <thead>
+                    <tr>
+                        <th>Recipient Mail</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Timestamp</th>
+                    </tr>
+                    </thead>
+                    <tbody id="failListBody"></tbody>
+                </table>
+                <!--            <div class="d-flex justify-content-center mt-4" id="failList-pagination">-->
+                <div id="failList-pagination" class="p8">
+                    <button id="prevFailListButton" onclick="previousPage()">❮ Prev</button>
+                    <span id="failList-currentPage" style="display: none">1</span>
+                    <button id="nextFailListButton" onclick="nextPage()">Next ❯</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script charset="utf-8" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<!--high chart import test-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<!--flatpickr script import-->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let currentPage = 0;
+    let startTime = new Date();
+    startTime.setDate(startTime.getDate() - 7);
+    let endTime = new Date();
+    flatpickr("#timeRange", {
+        mode: "range",
+        // minDate: "today",
+        dateFormat: "Y-m-d",
+        defaultDate: [startTime, endTime],
+        onClose: function (selectedDates, dateStr, instance) {
+            let selectedTimes = dateStr.split(" to ");
+            startTime = selectedTimes[0];
+            endTime = selectedTimes[1];
+            document.getElementById("applyBtn").style.display = "block";
+        }
+    });
+
+    document.getElementById("applyBtn").addEventListener("click", function () {
+        if (startTime && endTime) {
+            console.log(endTime);
+            console.log(typeof endTime);
+            fetchDataAndDrawChart();
+            fetchAndDrawConversionChart();
+            fetchAndDrawDeliveryChart();
+        } else {
+            alert("請選擇有效的時間區間。");
+        }
+    });
+
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/sign-in'
+    }
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    loadCampaigns();
+    fetchDataAndDrawChart();
+    fetchAndDrawConversionChart();
+    fetchAndDrawDeliveryChart();
+
+    async function fetchEventCountData(days) {
+        try {
+            const response = await fetch('api/1.0/track/daily-event?days=' + days, {
+                method: 'GET',
+                headers: headers
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error)
+        }
+    }
+
+    async function fetchEventCountDataByDate(start, end) {
+        try {
+            const response = await fetch(`api/1.0/track/date-event?start=${start}&end=${end}`, {
+                method: 'GET',
+                headers: headers
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error)
+        }
+    }
+
+
+    function drawLineChart(data, elementID) {
+        // 整理數據
+        const categories = Object.keys(data["RECEIVE"]);
+        const receiveData = Object.values(data["RECEIVE"]);
+        const failedData = Object.values(data["FAILED"]);
+        const openData = Object.values(data["OPEN"]);
+        const clickData = Object.values(data["CLICK"]);
+        // 使用Highcharts繪製圖表
+        Highcharts.chart(elementID, {
+            title: {
+                text: 'Event Types Over Time',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'By Date',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories, // X軸日期
+                accessibility: {
+                    rangeDescription: 'Range: 2024-03-25 to 2024-04-24'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Events'
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+            plotOptions: {
+                series: {
+                    label: {
+                        connectorAllowed: false
+                    }
+                }
+            },
+            series: [{
+                name: 'RECEIVE',
+                data: receiveData,// 接收事件數據
+                color:'#10B981'
+            }, {
+                name: 'FAILED',
+                data: failedData, // 失敗事件數據
+                color: '#96E6B3'
+            }, {
+                name: 'OPEN',
+                data: openData, // 打開事件數據
+                color: '#568259'
+            }, {
+                name: 'CLICK',
+                data: clickData,// 點擊事件數據
+                color: '#464E47'
+            }],
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+    }
+
+    async function fetchDataAndDrawChart() {
+        try {
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchEventCountDataByDate(startDate, endDate);
+            console.log(data);
+            drawLineChart(data, 'event-container');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function transTimeToDateString(time) {
+        let date;
+        if (typeof time === 'string') {
+            date = time;
+        } else if (typeof time === 'object') {
+            date = time.toISOString().slice(0, 10);
+        } else {
+            throw new Error('Invalid startTime or endTime type.');
+        }
+        return date;
+    }
+
+    async function fetchConversionData() {
+        try {
+            const response = await fetch('api/1.0/track/conversion', {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    async function fetchConversionDataByDate(start, end) {
+        try {
+            const response = await fetch(`api/1.0/track/date-conversion?start=${start}&end=${end}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    //function for drawing column chart
+    function drawConversionChart(data, elementID) {
+        const expectedOrder = ["ALL", "RECEIVE", "OPEN", "CLICK", "FAILED"];
+        const sortedData = expectedOrder.map(key => [key, data[key]]);
+
+        const categories = sortedData.map(pair => pair[0]);
+        const eventData = sortedData.map(pair => pair[1]);
+        Highcharts.chart(elementID, {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Event Type Conversion',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Source: History Event Conversion',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories,
+                crosshair: true,
+                accessibility: {
+                    description: 'Event Types'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Count'
+                }
+            },
+            tooltip: {
+                valueSuffix: ''
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0,
+                    // colorByPoint: true,
+                    // colors: ['#10B981']
+                }
+            },
+            series: [{
+                name: 'Events',
+                data: eventData,
+                color: '#10B981'
+            }]
+        });
+    }
+
+    function drawConversionCard(data) {
+        // 計算轉換率
+        const allToReceiveRate = ((data.RECEIVE - data.ALL) / data.ALL) * 100;
+        // const receiveToOpenRate = ((data.OPEN - data.RECEIVE) / data.RECEIVE) * 100;
+        // const openToClickRate = ((data.CLICK - data.OPEN) / data.OPEN) * 100;
+        const receiveToOpenRate = ((data.OPEN - data.ALL) / data.ALL) * 100;
+        const openToClickRate = ((data.CLICK - data.ALL) / data.ALL) * 100;
+        const container = document.querySelector('.conversion-card-container');
+        container.innerHTML = '';
+        container.appendChild(createConversionCard('ALL', data.ALL, '100%')); // 這裡沒有percent，所以傳入空字串
+        container.appendChild(createConversionCard('RECEIVE', data.RECEIVE, allToReceiveRate.toFixed(2) + '%'));
+        container.appendChild(createConversionCard('OPEN', data.OPEN, receiveToOpenRate.toFixed(2) + '%'));
+        container.appendChild(createConversionCard('CLICK', data.CLICK, openToClickRate.toFixed(2) + '%'));
+    }
+
+    function createConversionCard(title, value, percent) {
+        const card = document.createElement('div');
+        card.classList.add('conversion-card');
+
+        const titleDiv = document.createElement('div');
+        titleDiv.classList.add('title');
+        const titleText = document.createElement('p');
+        titleText.classList.add('title-text');
+        titleText.textContent = title;
+        const percentText = document.createElement('p');
+        const newPercent = percent !== '' ? `Drop-off ${percent}` : '';
+        percentText.classList.add('percent');
+        percentText.innerHTML = `
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+<!--            <path d="M1408 1216q0 26-19 45t-45 19h-896q-26 0-45-19t-19-45 19-45l448-448q19-19 45-19t45 19l448 448q19 19 19 45z">-->
+            <path d="M384 576q0-26 19-45t45-19h896q26 0 45 19t19 45-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45z">
+            </path>
+        </svg> ${newPercent}
+    `;
+        titleDiv.appendChild(titleText);
+        titleDiv.appendChild(percentText);
+
+        const dataDiv = document.createElement('div');
+        dataDiv.classList.add('data');
+        const dataValue = document.createElement('p');
+        dataValue.textContent = value.toLocaleString();
+        const rangeDiv = document.createElement('div');
+        rangeDiv.classList.add('range');
+        const fillDiv = document.createElement('div');
+        fillDiv.classList.add('fill');
+        fillDiv.style.width = `calc(min(100%,100% + ${percent}))`;
+        rangeDiv.appendChild(fillDiv);
+        dataDiv.appendChild(dataValue);
+        dataDiv.appendChild(rangeDiv);
+
+        card.appendChild(titleDiv);
+        card.appendChild(dataDiv);
+
+        return card;
+    }
+
+    async function fetchAndDrawConversionChart() {
+        try {
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchConversionDataByDate(startDate, endDate);
+            console.log(data);
+            drawConversionChart(data, 'conversion-container');
+            drawConversionCard(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function fetchDeliveryData() {
+        try {
+            const response = await fetch('/api/1.0/track/daily-delivery', {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    async function fetchDeliveryDataByDate(start, end) {
+        try {
+            const response = await fetch(`/api/1.0/track/date-delivery?start=${start}&end=${end}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    function drawDailyDeliveryChart(data, elementID) {
+        const categories = Object.keys(data);
+        const deliveryData = Object.values(data).map(value => parseFloat((value * 100).toFixed(2)));
+
+        Highcharts.chart(elementID, {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Daily Delivery Success Rate',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Source: Daily Success Rate',
+                align: 'left'
+            },
+            xAxis: {
+                categories: categories,
+                accessibility: {
+                    description: 'Dates'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Success Rate (%)'
+                }
+            },
+            tooltip: {
+                valueSuffix: '%'
+            },
+            series: [{
+                name: 'Success Rate',
+                data: deliveryData,
+                color: '#10B981'
+            }]
+        });
+    }
+
+    async function fetchAndDrawDeliveryChart() {
+        try {
+            // const data = await fetchDeliveryData();
+            const startDate = transTimeToDateString(startTime);
+            const endDate = transTimeToDateString(endTime);
+            const data = await fetchDeliveryDataByDate(startDate, endDate);
+            drawDailyDeliveryChart(data, 'daily-delivery-container')
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function fetchCampaignAgeById(campaignId) {
+        try {
+            const response = await fetch(`/api/1.0/track/campaign-age?id=${campaignId}`, {
+                method: 'GET',
+                headers: headers
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            throw new Error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    function reorganizeDataForPieChart(data) {
+        const pieData = [];
+        data.forEach(item => {
+            const age = item.age;
+            const openRatio = item.type.OPEN;
+            const clickRatio = item.type.CLICK;
+            pieData.push({
+                name: age,
+                y: openRatio + clickRatio,
+                drilldown: {
+                    name: age,
+                    categories: ['Open', 'Click'],
+                    data: [openRatio, clickRatio]
+                }
+            });
+        });
+        return pieData;
+    }
+
+    async function fetchAndDrawPieChart(campaignId) {
+        const data = await fetchCampaignAgeById(campaignId);
+        drawCampaignPieChart(data, 'campaign-age');
+        generateAgeCards(data);
+    }
+
+    function generateAgeCards(data) {
+        const ageCardsContainer = document.getElementById('age-cards');
+        ageCardsContainer.innerHTML = "";
+        data.forEach(ageData => {
+            console.log(ageData);
+            const imagePath = getImagePathByAge(ageData.age);
+            const card = createAgeCard(ageData.age, 'Open Rate', ageData.open_rate, 'Click Rate', ageData.click_rate, imagePath);
+            ageCardsContainer.appendChild(card);
+        });
+    }
+
+    function getImagePathByAge(age) {
+        //根據不同年齡使用不同圖片
+        switch (age) {
+            case '60+':
+                return '/images/elder_green.png';
+            case '40-59':
+                return '/images/adult.png';
+            case '20-39':
+                return '/images/young_adult_green.png';
+            case '0-19':
+                return '/images/teenager.png';
+            default:
+                return '';
+        }
+    }
+
+    function createAgeCard(title, key1, value1, key2, value2, imagePath) {
+        const card = document.createElement('div');
+        card.classList.add('conversion-card');
+
+        const mainBody = document.createElement('div')
+        mainBody.classList.add('card-main-body')
+        const leftBody = document.createElement('div')
+        leftBody.classList.add('card-content-body');
+        const rightBody = document.createElement('div')
+
+        const titleDiv = document.createElement('div');
+        titleDiv.classList.add('title');
+        const titleText = document.createElement('p');
+        titleText.classList.add('title-text');
+        titleText.textContent = "Age: " + title;
+        titleDiv.appendChild(titleText);
+
+        const openDiv = document.createElement('div');
+        openDiv.classList.add('age-card-content');
+        const openKey = document.createElement('p');
+        openKey.classList.add('age-card-key');
+        openKey.textContent = key1;
+        const openValue = document.createElement('p');
+        openValue.classList.add('age-card-value');
+        openValue.textContent = (value1 * 100).toFixed(1) + '%';
+        openDiv.appendChild(openKey);
+        openDiv.appendChild(openValue);
+
+        const clickDiv = document.createElement('div');
+        clickDiv.classList.add('age-card-content');
+        const clickKey = document.createElement('p');
+        clickKey.classList.add('age-card-key');
+        clickKey.textContent = key2;
+        const clickValue = document.createElement('p');
+        clickValue.classList.add('age-card-value');
+        clickValue.textContent = (value2 * 100).toFixed(1) + '%'
+        clickDiv.appendChild(clickKey);
+        clickDiv.appendChild(clickValue);
+
+        const conversionDiv = document.createElement('div');
+        conversionDiv.appendChild(openDiv);
+        conversionDiv.appendChild(clickDiv);
+
+        //目前年紀分成0-19,20-39,40-59,60+
+        // const ageImgae = document.createElement('div');
+        const ageImgae = document.createElement('img');
+        ageImgae.classList.add('age-image')
+        ageImgae.src = imagePath;
+        ageImgae.alt = "age-image";
+
+        rightBody.appendChild(titleDiv);
+        leftBody.appendChild(conversionDiv);
+        leftBody.appendChild(ageImgae);
+        mainBody.appendChild(rightBody);
+        mainBody.appendChild(leftBody);
+        card.appendChild(mainBody);
+        return card;
+    }
+
+        // async function drawCampaignPieChart(data,elementId)
+        function drawCampaignPieChart(data, elementId) {
+        try {
+            const ageCategories = data.map(item => item.age);
+            const seriesData = data.map(item => {
+                return {
+                    name: item.age,
+                    y: item.ratio,
+                    drilldown: item.age
+                };
+            });
+
+            const drilldownData = data.map(item => {
+                return {
+                    name: item.age,
+                    id: item.age,
+                    data: [
+                        ['OPEN', item.type.OPEN],
+                        ['CLICK', item.type.CLICK]
+                    ]
+                };
+            });
+
+            Highcharts.chart(elementId, {
+                chart: {
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Campaign Age Distribution',
+                    align: 'left'
+                },
+                subtitle: {
+                    text: 'Click the slices to view event types.',
+                    align: 'left'
+                },
+                plotOptions: {
+                    series: {
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}: {point.percentage:.1f}%'
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                },
+                series: [{
+                    name: 'Age',
+                    colorByPoint: true,
+                    data: seriesData,
+                    colors: ['#10B981', '#96e6b3', '#ccfccb']
+                }],
+                drilldown: {
+                    // series: drilldownData
+                    series: drilldownData.map((drilldownItem) => {
+                        return {
+                            ...drilldownItem,
+                            colorByPoint: true,
+                            colors: ['#10B981', '#96e6b3', '#ccfccb']
+                        };
+                    })
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    let selectedCampaignId = null;
+
+    async function loadCampaigns() {
+        try {
+            const response = await fetch(`/api/1.0/campaign/all`, {
+                method: 'GET',
+                headers: headers
+            });
+            const campaigns = await response.json();
+            populateCampaignDropdown(campaigns);
+
+            const firstCampaignId = campaigns[0].id;
+            selectedCampaignId = firstCampaignId;
+            await fetchAndDrawPieChart(firstCampaignId);
+            await renderFailedTable(firstCampaignId, currentPage)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function populateCampaignDropdown(campaigns) {
+        const campaignDropdown = document.getElementById('campaignId');
+        campaignDropdown.innerHTML = ''; // Clear existing options
+
+        campaigns.forEach(function (campaign) {
+            const option = document.createElement('option');
+            option.value = campaign.id;
+            option.innerText = campaign.subject;
+            campaignDropdown.appendChild(option);
+        });
+        campaignDropdown.addEventListener('change', function () {
+            currentPage = 0; //將current Page歸0
+            document.getElementById('failList-currentPage').innerText = currentPage + 1;
+            selectedCampaignId = parseInt(this.value); // Get the selected campaignId
+            fetchAndDrawPieChart(selectedCampaignId); // Fetch data and draw pie chart for the selected campaign
+            renderFailedTable(selectedCampaignId, currentPage)
+        });
+    }
+
+    async function fetchCampaignFailData(campaignId, currentPage) {
+        try {
+            const response = await fetch(`api/1.0/track/failed-paging?id=${campaignId}&number=${currentPage}`);
+            const data = await response.json();
+            const nextPage = data.next_paging;
+            //enable or disable the next page button base on next_paging key is exist or not
+            const prevButton = document.getElementById('prevFailListButton');
+            const nextButton = document.getElementById('nextFailListButton');
+            if (currentPage <= 0) {
+                prevButton.disabled = true;
+                prevButton.classList.add("is-active")
+            } else {
+                prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+                nextButton.classList.add("is-active")
+            } else {
+                nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
+            }
+            return data.data;
+        } catch (error) {
+            console.log(`Error fetching data :`, error);
+            return [];
+        }
+    }
+
+    // async function renderFailedTable(campaignId, currentPage) {
+    //     const failListBody = document.getElementById('failListBody');
+    //     const data = await fetchCampaignFailData(campaignId, currentPage);
+    //
+    //     failListBody.innerHTML = data.map(entry => `
+    //         <tr>
+    //             <td>${entry.recipient_mail}</td>
+    //             <td>${entry.subject}</td>
+    //             <td>${entry.status}</td>
+    //             <td>${entry.send_date}</td>
+    //         </tr>
+    //     `).join('');
+    // }
+    async function renderFailedTable(campaignId, currentPage) {
+        const failListBody = document.getElementById('failListBody');
+        const data = await fetchCampaignFailData(campaignId, currentPage);
+
+        failListBody.innerHTML = data.map(entry => {
+
+            const timestamp = new Date(entry.timestamp);
+            // const userTimezoneOffset = timestamp.getTimezoneOffset() * 60000;
+            // const localTimestamp = new Date(timestamp.getTime() - userTimezoneOffset);
+            // const formattedTimestamp = localTimestamp.toLocaleString([], {
+            //     year: 'numeric', month: 'numeric', day: 'numeric',
+            //     hour: '2-digit',
+            //     minute: '2-digit',
+            //     second:'2-digit',
+            //     hour12: false
+            // });
+            //因為後端來的資料已是TimeStamp，可以直接轉換
+            const formattedTimestamp = timestamp.toLocaleString([], {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second:'2-digit',
+                hour12: false
+            });
+
+            let statusColorClass = '';
+            switch (entry.status) {
+                case 'RECEIVE':
+                    statusColorClass = 'badge-success';
+                    break;
+                case 'FAILED':
+                    statusColorClass = 'badge-danger';
+                    break;
+                case 'OPEN':
+                    statusColorClass = 'badge-info';
+                    break;
+                case 'CLICK':
+                    statusColorClass = 'badge-warning';
+                    break;
+                default:
+                    statusColorClass = 'badge-warning';
+            }
+            return `
+            <tr>
+                <td>${entry.recipient_mail}</td>
+                <td>${entry.subject}</td>
+                <td><span class="badge ${statusColorClass}">${entry.status}</span></td>
+                <td>${formattedTimestamp}</td>
+            </tr>
+        `;
+        }).join('');
+    }
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        if (keyword !== '') {
+            console.log(selectedCampaignId);
+            fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+        } else {
+            alert('Please type in the valid keyword');
+        }
+    });
+
+    document.getElementById('searchKeyword').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const keyword = this.value.trim();
+            if (keyword !== '') {
+                fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+            } else {
+                alert('Please type in the valid keyword');
+            }
+        }
+    });
+
+    // document.getElementById('searchKeyword').addEventListener('input', function() {
+    //     const keyword = this.value.trim();
+    //     setTimeout(function() {
+    //         if (keyword !== '') {
+    //             fetchCampaignEventDataWithKeyword(selectedCampaignId, currentPage, keyword);
+    //         } else {
+    //             renderFailedTable(selectedCampaignId, currentPage)
+    //         }
+    //     }, 1000); // Debund for 1 second
+    // });
+
+    async function fetchCampaignEventDataWithKeyword(campaignID,currentPage,keyword){
+        try{
+            const response = await fetch(`api/1.0/track/search?keyword=${keyword}&id=${campaignID}&number=${currentPage}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            const nextPage = data.next_paging;
+            const keywordResult = data.data;
+            const prevButton = document.getElementById('prevFailListButton');
+            const nextButton = document.getElementById('nextFailListButton');
+            if (currentPage <= 0) {
+                prevButton.disabled = true;
+                prevButton.classList.add("is-active")
+            } else {
+                prevButton.disabled = false;
+                prevButton.classList.remove("is-active")
+            }
+            if (typeof nextPage === 'undefined') {
+                nextButton.disabled = true;
+                nextButton.classList.add("is-active")
+            } else {
+                nextButton.disabled = false;
+                nextButton.classList.remove("is-active")
+            }
+            const failListBody = document.getElementById('failListBody');
+
+            failListBody.innerHTML = keywordResult.map(entry => {
+                const timestamp = new Date(entry.timestamp);
+                // const userTimezoneOffset = timestamp.getTimezoneOffset() * 60000;
+                // const localTimestamp = new Date(timestamp.getTime() - userTimezoneOffset);
+                // const formattedTimestamp = localTimestamp.toLocaleString([], {
+                //     year: 'numeric', month: 'numeric', day: 'numeric',
+                //     hour: '2-digit',
+                //     minute: '2-digit',
+                //     second:'2-digit',
+                //     hour12: false
+                // });
+                const formattedTimestamp = timestamp.toLocaleString([], {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second:'2-digit',
+                    hour12: false
+                });
+
+                let statusColorClass = '';
+                switch (entry.status) {
+                    case 'RECEIVE':
+                        statusColorClass = 'badge-success';
+                        break;
+                    case 'FAILED':
+                        statusColorClass = 'badge-danger';
+                        break;
+                    case 'OPEN':
+                        statusColorClass = 'badge-info';
+                        break;
+                    case 'CLICK':
+                        statusColorClass = 'badge-warning';
+                        break;
+                    default:
+                        statusColorClass = 'badge-warning';
+                }
+                return `
+            <tr>
+                <td>${entry.recipient_mail}</td>
+                <td>${entry.subject}</td>
+                <td><span class="badge ${statusColorClass}">${entry.status}</span></td>
+                <td>${formattedTimestamp}</td>
+            </tr>
+        `;
+            }).join('');
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+            alert('error, plz try it later.');
+        }
+    }
+
+    function nextPage() {
+        currentPage++;
+        document.getElementById('failList-currentPage').innerText = currentPage + 1;
+        renderFailedTable(selectedCampaignId, currentPage);
+    }
+
+    function previousPage() {
+        if (currentPage >= 1) {
+            currentPage--;
+            document.getElementById('failList-currentPage').innerText = currentPage + 1;
+            renderFailedTable(selectedCampaignId, currentPage);
+        }
+    }
+
+</script>
+</body>
+</html>

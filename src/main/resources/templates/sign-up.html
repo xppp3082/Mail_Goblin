@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Design by foolishdeveloper.com -->
+    <title>Sign-Up</title>
+    <link href="/images/goblin.png" rel="icon" type="image/x-icon">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <!--Stylesheet-->
+    <!--    <style media="screen">-->
+    <!--    <style </style>-->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/_css/sign-up.css" rel="stylesheet">
+    <!--    <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">-->
+
+    <!--    flatpickr test-->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="background">
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+<form id="signupForm">
+    <h3>SignUp Here</h3>
+
+    <label for="title">Company Title</label>
+    <input id="title" placeholder="Company Title" required="required" type="text">
+
+    <label for="username">Username</label>
+    <input id="username" placeholder="Email" required="required" type="text">
+
+    <label for="password">Password</label>
+    <input id="password" placeholder="Password" required="required" type="password">
+    <input id="password-confirm" placeholder="Confirm Password" required="required" type="password">
+
+    <label for="description">Description</label>
+    <input id="description" placeholder="Description" type="text">
+
+    <label for="industry">Industry</label>
+    <select id="industry">
+        <option value="software development">Software Development</option>
+        <option value="finance">Finance</option>
+        <option value="healthcare">Healthcare</option>
+        <option value="education">Education</option>
+        <option value="design">Design</option>
+        <option value="engineering">Engineering</option>
+        <option value="retail">Retail</option>
+        <option value="others">Others</option>
+    </select>
+
+    <label for="anniversary">Anniversary</label>
+    <input id="anniversary" name="anniversary" placeholder="Anniversary" required="required" type="text">
+
+    <button type="submit">Sign Up</button>
+    <div class="social">
+        <!--        <div class="go"><i class="fab fa-google"></i> Google</div>-->
+        <!--        <div class="fb"><i class="fab fa-facebook"></i> Facebook</div>-->
+        <span class="txt1">Already have account? </span>
+        <br>
+        <a class="txt2" href="/sign-in">Click Here</a>
+    </div>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr("#anniversary");
+    // flatpickr("#anniversary", {
+    //     dateFormat: "Y-m-d",
+    //     enable: true
+    // });
+    $('#signupForm').submit(async function (e) {
+        e.preventDefault();
+
+
+        const account = $('#username').val();
+        if (!validateEmail(account)) {
+            alert('invalid email address')
+            return
+        }
+
+        let password = $('#password').val();
+        let confirmPassword = $('#password-confirm').val();
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        let companyData = {
+            title: $('#title').val(),
+            description: $('#description').val(),
+            industry: $('#industry').val(),
+            anniversary: $('#anniversary').val(),
+            account: $('#username').val(),
+            password: $('#password').val()
+        };
+
+        try {
+            const response = await fetch('/api/1.0/company/sign-up', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(companyData)
+            });
+
+            if (response.ok) {
+                // 儲存token在localstorage之後重新導向
+                const responseData = await response.json();
+                const {access_token, companyDto} = responseData;
+                const {id} = companyDto;
+
+                localStorage.setItem('token', access_token);
+                localStorage.setItem('companyId', id);
+                alert('Registration successful!');
+                //重新跳轉到"/template"
+                window.location.href = '/template';
+            } else {
+                throw new Error('Registration failed');
+            }
+        } catch (error) {
+            alert('Registration failed: ' + error.message);
+        }
+    });
+
+    function validateEmail(email) {
+        const re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    }
+</script>
+</body>
+</html>

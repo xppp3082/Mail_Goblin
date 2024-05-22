@@ -14,7 +14,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleJSONProcessingException(JsonProcessingException e){
-        return new ResponseEntity<>("Json processing fail, plz check your format",HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> handleJSONProcessingException(JsonProcessingException e) {
+        return new ResponseEntity<>("Json processing fail, plz check your format : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleJSONProcessingException(IllegalArgumentException e) {
+        return new ResponseEntity<>("Illegal argument from your function call : " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
