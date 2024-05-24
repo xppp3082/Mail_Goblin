@@ -7,10 +7,6 @@
   ![Static Badge](https://img.shields.io/badge/SpringBoot-3.2.4-brightgreen?style=flat&logo=SpringBoot&logoColor=green&logoSize=%20auto&color=green)
   ![Static Badge](https://img.shields.io/badge/Java-17-orange?style=flat&logo=Java&logoColor=orange&logoSize=%20auto&color=orange)
   ![Static Badge](https://img.shields.io/badge/AWS-service-pink?style=flat&logo=amazonaws&logoColor=orange&logoSize=%20auto&color=%23FF007F)
-  ![Static Badge](https://img.shields.io/badge/RDS-service-%23527FFF?style=flat&logo=amazonrds&logoColor=%23527FFF&logoSize=%20auto&color=%23527FFF)
-  ![Static Badge](https://img.shields.io/badge/ElastiCache-service-%23C925D1?style=flat&logo=amazonelasticache&logoColor=%23C925D1&logoSize=%20auto&color=%23C925D1)
-  ![Static Badge](https://img.shields.io/badge/SQS-service-%23FF4F8B?style=flat&logo=amazonsqs&logoColor=%23FF4F8B&logoSize=%20auto&color=%23FF4F8B)
-  ![Static Badge](https://img.shields.io/badge/CloudWatch-service-%23FF4F8B?style=flat&logo=amazoncloudwatch&logoColor=%23FF4F8B&logoSize=%20auto&color=%23FF4F8B)
 
 
 
@@ -51,10 +47,14 @@ Mail Goblin is a platform that assists marketers in tracking the performance of 
 ### Create Tag for Labeling Audience
 ![Add_Tag](https://github.com/xppp3082/Mail_Goblin/assets/64196497/840308f9-aff5-4530-93a7-af6196336526)
 
-### Target Audience By Tag
+### Target Audience by Tag
 ![Audience](https://github.com/xppp3082/Mail_Goblin/assets/64196497/dee75ef4-1ceb-4e8a-a9c4-296034193680)
 
 ### Create Campaign Base on Template
+![Campaign](https://github.com/xppp3082/Mail_Goblin/assets/64196497/9c9487d1-ffca-48a2-963b-ea756affaed4)
+
+### Tracking Mails by Dashboard
+![Dashboard](https://github.com/xppp3082/Mail_Goblin/assets/64196497/c915ee4f-079c-46bc-be1a-aca2ffa18140)
 
 
 ## Architecture
