@@ -51,11 +51,10 @@ Mail Goblin is a platform that assists marketers in tracking the performance of 
 ![Audience](https://github.com/xppp3082/Mail_Goblin/assets/64196497/dee75ef4-1ceb-4e8a-a9c4-296034193680)
 
 ### Create Campaign Base on Template
-![Campaign](https://github.com/xppp3082/Mail_Goblin/assets/64196497/9c9487d1-ffca-48a2-963b-ea756affaed4)
+![Campaign](https://github.com/xppp3082/Mail_Goblin/assets/64196497/1e3a0e61-eb14-4b47-88eb-91695a5af458)
 
 ### Tracking Mails by Dashboard
-![Dashboard](https://github.com/xppp3082/Mail_Goblin/assets/64196497/c915ee4f-079c-46bc-be1a-aca2ffa18140)
-
+![Dashboard](https://github.com/xppp3082/Mail_Goblin/assets/64196497/7b28dbbd-f9cd-41a5-bc42-fdf4b687af20)
 
 ## Architecture
 ![image](https://github.com/xppp3082/Mail_Goblin/assets/64196497/0feab6a1-1d41-4640-95a0-7172b15ff4da)
