@@ -60,7 +60,7 @@ Mail Goblin is a platform that assists marketers in tracking the performance of 
 ![image](https://github.com/xppp3082/Mail_Goblin/assets/64196497/0feab6a1-1d41-4640-95a0-7172b15ff4da)
 
 ## Table Schema
-![Table Schema](https://github.com/xppp3082/Mail_Goblin/assets/64196497/e6855e23-7521-4151-9c90-7a94be688b2f)
+![db_schema](https://github.com/xppp3082/Mail_Goblin/assets/64196497/4bf6aaa0-c06d-4d48-91da-7bb6834e0ded)
 
 ## Technique
 ### Framework
